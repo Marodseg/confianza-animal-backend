@@ -1,0 +1,5 @@
+FastAPI
+pyrebase
+uvicorn
+firebase-admin
+black
