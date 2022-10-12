@@ -1,6 +1,7 @@
+import datetime
+
 from pydantic import BaseModel
 from typing import Optional, List
-from datetime import datetime
 
 from app.schemas.animal import Dog, Cat
 from app.schemas.enums.activity import Activity
@@ -17,7 +18,7 @@ class Organization(BaseModel):
     password: str
     phone: str
     active: bool
-    deleted_at: Optional[datetime.date]
+    deleted_at: Optional[datetime.datetime]
     photo: Optional[str]
     dogs: Optional[List[Dog]]
     cats: Optional[List[Cat]]
@@ -47,7 +48,7 @@ class Organization(BaseModel):
                         "healthy": True,
                         "wormed": True,
                         "vaccinated": True,
-                        "birth_date": "2021-05-01",
+                        "birth_date": datetime.datetime(2021, 5, 1),
                         "activity_level": Activity.low,
                         "microchip": True,
                         "is_urgent": True,
@@ -70,14 +71,14 @@ class Organization(BaseModel):
                         "healthy": True,
                         "wormed": True,
                         "vaccinated": True,
-                        "birth_date": "2021-05-01",
+                        "birth_date": datetime.datetime(2021, 5, 1),
                         "activity_level": Activity.low,
                         "microchip": True,
                         "is_urgent": True,
                         "raze": CatRaze.persa,
                     }
                 ],
-                "deleted_at": "2021-05-01",
+                "deleted_at": datetime.datetime(2021, 5, 1),
                 "photo": "https://www.image.com/image.jpg",
                 "zone": Province.alava,
             }

@@ -1,6 +1,7 @@
+import datetime
+
 from pydantic import BaseModel
 from typing import Optional, List
-from datetime import datetime
 
 from app.schemas.enums.activity import Activity
 from app.schemas.enums.cat_raze import CatRaze
@@ -21,7 +22,7 @@ class Animal(BaseModel):
     healthy: bool
     wormed: bool
     vaccinated: bool
-    birth_date: Optional[datetime.date]
+    birth_date: Optional[datetime.datetime]
     activity_level: Activity
     microchip: bool
     is_urgent: bool
@@ -43,7 +44,7 @@ class Animal(BaseModel):
                 "healthy": True,
                 "wormed": True,
                 "vaccinated": True,
-                "birth_date": "2021-05-01",
+                "birth_date": datetime.datetime(2021, 5, 1),
                 "activity_level": Activity.low,
                 "microchip": True,
                 "is_urgent": True,
@@ -71,7 +72,7 @@ class Dog(Animal):
                 "healthy": True,
                 "wormed": True,
                 "vaccinated": True,
-                "birth_date": "2021-05-01",
+                "birth_date": datetime.datetime(2021, 5, 1),
                 "activity_level": Activity.low,
                 "microchip": True,
                 "is_urgent": True,
@@ -100,7 +101,7 @@ class Cat(Animal):
                 "healthy": True,
                 "wormed": True,
                 "vaccinated": True,
-                "birth_date": "2021-05-01",
+                "birth_date": datetime.datetime(2021, 5, 1),
                 "activity_level": Activity.low,
                 "microchip": True,
                 "is_urgent": True,
