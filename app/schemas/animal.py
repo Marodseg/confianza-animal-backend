@@ -21,7 +21,7 @@ class Animal(BaseModel):
     healthy: bool
     wormed: bool
     vaccinated: bool
-    birth_date: Optional[datetime]
+    birth_date: Optional[datetime.date]
     activity_level: Activity
     microchip: bool
     is_urgent: bool
@@ -43,7 +43,7 @@ class Animal(BaseModel):
                 "healthy": True,
                 "wormed": True,
                 "vaccinated": True,
-                "birth_date": "2021-05-01T00:00:00",
+                "birth_date": "2021-05-01",
                 "activity_level": Activity.low,
                 "microchip": True,
                 "is_urgent": True,
@@ -71,7 +71,7 @@ class Dog(Animal):
                 "healthy": True,
                 "wormed": True,
                 "vaccinated": True,
-                "birth_date": "2021-05-01T00:00:00",
+                "birth_date": "2021-05-01",
                 "activity_level": Activity.low,
                 "microchip": True,
                 "is_urgent": True,
@@ -100,7 +100,7 @@ class Cat(Animal):
                 "healthy": True,
                 "wormed": True,
                 "vaccinated": True,
-                "birth_date": "2021-05-01T00:00:00",
+                "birth_date": "2021-05-01",
                 "activity_level": Activity.low,
                 "microchip": True,
                 "is_urgent": True,

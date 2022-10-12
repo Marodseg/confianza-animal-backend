@@ -22,3 +22,9 @@ Navigate to `http://localhost:8000/docs` to open the Swagger UI with the API end
 To check the code format, run `black --check .` or a specific file with `black --check "app/file.py"`.
 
 In order to format all the files, run `black .` or a specific file with `black "app/file.py"`.
+
+## Environment
+
+In order to create the environment, run `conda env create -f environment.yml`.
+
+After that, activate the environment with `conda activate confianza_animal`.

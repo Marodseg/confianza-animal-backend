@@ -7,6 +7,7 @@ from app.schemas.animal import Animal
 
 router = APIRouter()
 
+
 # post animal to cloud database
 @router.post("/animal", status_code=201)
 async def post_animal(animal: Animal):

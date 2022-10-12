@@ -17,7 +17,7 @@ class Organization(BaseModel):
     password: str
     phone: str
     active: bool
-    deleted_at: Optional[datetime]
+    deleted_at: Optional[datetime.date]
     photo: Optional[str]
     dogs: Optional[List[Dog]]
     cats: Optional[List[Cat]]
@@ -47,7 +47,7 @@ class Organization(BaseModel):
                         "healthy": True,
                         "wormed": True,
                         "vaccinated": True,
-                        "birth_date": "2021-05-01T00:00:00",
+                        "birth_date": "2021-05-01",
                         "activity_level": Activity.low,
                         "microchip": True,
                         "is_urgent": True,
@@ -70,14 +70,14 @@ class Organization(BaseModel):
                         "healthy": True,
                         "wormed": True,
                         "vaccinated": True,
-                        "birth_date": "2021-05-01T00:00:00",
+                        "birth_date": "2021-05-01",
                         "activity_level": Activity.low,
                         "microchip": True,
                         "is_urgent": True,
                         "raze": CatRaze.persa,
                     }
                 ],
-                "deleted_at": "2021-05-01T00:00:00",
+                "deleted_at": "2021-05-01",
                 "photo": "https://www.image.com/image.jpg",
                 "zone": Province.alava,
             }

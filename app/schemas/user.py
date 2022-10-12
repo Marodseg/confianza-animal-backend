@@ -6,7 +6,7 @@ from datetime import datetime
 class User(BaseModel):
     email: str
     name: str
-    deleted_at: Optional[datetime]
+    deleted_at: Optional[datetime.date]
     password: str
     photo: Optional[str]
     active: bool
@@ -16,7 +16,7 @@ class User(BaseModel):
             "example": {
                 "email": "prueba@prueba.com",
                 "name": "Prueba",
-                "deleted_at": "2021-05-01T00:00:00",
+                "deleted_at": "2021-05-01",
                 "password": "123456",
                 "photo": "https://www.image.com/image.jpg",
                 "active": True,
