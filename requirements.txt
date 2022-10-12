@@ -1,5 +1,6 @@
-FastAPI
-pyrebase
-uvicorn
+FastAPI~=0.79.0
+pyrebase~=3.0.27
+uvicorn~=0.18.2
 firebase-admin
 black
+pydantic~=1.9.1
