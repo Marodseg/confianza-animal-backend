@@ -1,4 +1,5 @@
 import datetime
+from uuid import uuid4
 
 from pydantic import BaseModel
 from typing import Optional, List
@@ -13,6 +14,7 @@ from app.schemas.enums.size import Size
 
 
 class Organization(BaseModel):
+    id: str
     name: str
     email: str
     password: str
@@ -27,6 +29,7 @@ class Organization(BaseModel):
     class Config:
         schema_extra = {
             "example": {
+                "id": str(uuid4()),
                 "name": "Prueba",
                 "email": "prueba@prueba.com",
                 "password": "123456",
@@ -34,6 +37,7 @@ class Organization(BaseModel):
                 "active": True,
                 "dogs": [
                     {
+                        "id": str(uuid4()),
                         "name": "Perro1",
                         "age": 1,
                         "gender": Gender.male,
@@ -57,6 +61,7 @@ class Organization(BaseModel):
                 ],
                 "cats": [
                     {
+                        "id": str(uuid4()),
                         "name": "Gato1",
                         "age": 1,
                         "gender": Gender.male,

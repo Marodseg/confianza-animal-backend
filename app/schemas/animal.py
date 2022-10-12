@@ -1,4 +1,5 @@
 import datetime
+from uuid import uuid4
 
 from pydantic import BaseModel
 from typing import Optional, List
@@ -11,6 +12,7 @@ from app.schemas.enums.size import Size
 
 
 class Animal(BaseModel):
+    id: str
     name: str
     age: Optional[int]
     gender: Gender
@@ -30,6 +32,7 @@ class Animal(BaseModel):
     class Config:
         schema_extra = {
             "example": {
+                "id": str(uuid4()),
                 "name": "Prueba",
                 "age": 1,
                 "gender": Gender.male,
@@ -58,6 +61,7 @@ class Dog(Animal):
     class Config:
         schema_extra = {
             "example": {
+                "id": str(uuid4()),
                 "name": "Prueba",
                 "age": 1,
                 "gender": Gender.male,
@@ -87,6 +91,7 @@ class Cat(Animal):
     class Config:
         schema_extra = {
             "example": {
+                "id": str(uuid4()),
                 "name": "Prueba",
                 "age": 1,
                 "gender": Gender.male,
