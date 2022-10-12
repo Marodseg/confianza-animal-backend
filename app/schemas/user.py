@@ -6,23 +6,29 @@ from typing import Optional
 
 
 class User(BaseModel):
-    id: str
+    id: str = str(uuid4())
     email: str
     name: str
     deleted_at: Optional[datetime.datetime]
     password: str
     photo: Optional[str]
-    active: bool
+    active: bool = True
 
     class Config:
+        orm_mode = True
         schema_extra = {
             "example": {
-                "id": str(uuid4()),
-                "email": "prueba@prueba.com",
+                "email": "user@prueba.com",
                 "name": "Prueba",
-                "deleted_at": datetime.datetime(2021, 5, 1),
                 "password": "123456",
-                "photo": "https://www.image.com/image.jpg",
-                "active": True,
             }
         }
+
+
+class UserCreate(BaseModel):
+    id: str
+    email: str
+    name: str
+
+    class Config:
+        orm_mode = True

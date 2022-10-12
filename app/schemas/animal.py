@@ -12,9 +12,9 @@ from app.schemas.enums.size import Size
 
 
 class Animal(BaseModel):
-    id: str
+    id: str = str(uuid4())
     name: str
-    age: Optional[int]
+    age: int
     gender: Gender
     photos: List[str]
     weight: float
@@ -30,9 +30,9 @@ class Animal(BaseModel):
     is_urgent: bool
 
     class Config:
+        orm_mode = True
         schema_extra = {
             "example": {
-                "id": str(uuid4()),
                 "name": "Prueba",
                 "age": 1,
                 "gender": Gender.male,
@@ -47,7 +47,6 @@ class Animal(BaseModel):
                 "healthy": True,
                 "wormed": True,
                 "vaccinated": True,
-                "birth_date": datetime.datetime(2021, 5, 1),
                 "activity_level": Activity.low,
                 "microchip": True,
                 "is_urgent": True,
@@ -59,9 +58,9 @@ class Dog(Animal):
     raze: DogRaze
 
     class Config:
+        orm_mode = True
         schema_extra = {
             "example": {
-                "id": str(uuid4()),
                 "name": "Prueba",
                 "age": 1,
                 "gender": Gender.male,
@@ -76,7 +75,6 @@ class Dog(Animal):
                 "healthy": True,
                 "wormed": True,
                 "vaccinated": True,
-                "birth_date": datetime.datetime(2021, 5, 1),
                 "activity_level": Activity.low,
                 "microchip": True,
                 "is_urgent": True,
@@ -89,9 +87,9 @@ class Cat(Animal):
     raze: CatRaze
 
     class Config:
+        orm_mode = True
         schema_extra = {
             "example": {
-                "id": str(uuid4()),
                 "name": "Prueba",
                 "age": 1,
                 "gender": Gender.male,
@@ -106,7 +104,6 @@ class Cat(Animal):
                 "healthy": True,
                 "wormed": True,
                 "vaccinated": True,
-                "birth_date": datetime.datetime(2021, 5, 1),
                 "activity_level": Activity.low,
                 "microchip": True,
                 "is_urgent": True,

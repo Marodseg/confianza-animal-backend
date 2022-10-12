@@ -1,7 +1,7 @@
 import datetime
-from uuid import uuid4
+import re
 
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 from typing import Optional, List
 
 from app.schemas.animal import Dog, Cat
@@ -14,30 +14,47 @@ from app.schemas.enums.size import Size
 
 
 class Organization(BaseModel):
-    id: str
     name: str
     email: str
     password: str
     phone: str
-    active: bool
+    active: bool = True
     deleted_at: Optional[datetime.datetime]
     photo: Optional[str]
     dogs: Optional[List[Dog]]
     cats: Optional[List[Cat]]
     zone: Province
 
+    @validator("phone")
+    def phone_must_be_valid(cls, v) -> str:
+        if not re.match(r"^[0-9]{9}$", v):
+            raise ValueError("Phone number must have 9 digits")
+        return v
+
+    @validator("email")
+    def email_must_be_valid(cls, v) -> str:
+        if not re.match(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$", v):
+            raise ValueError("Email is not valid")
+        return v
+
+    @validator("password")
+    def password_must_be_valid(cls, v) -> str:
+        if not re.match(r"^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{4,}$", v):
+            raise ValueError(
+                "Password must have at least 4 characters, 1 number and 1 letter"
+            )
+        return v
+
     class Config:
+        orm_mode = True
         schema_extra = {
             "example": {
-                "id": str(uuid4()),
                 "name": "Prueba",
                 "email": "prueba@prueba.com",
                 "password": "123456",
                 "phone": "123456789",
-                "active": True,
                 "dogs": [
                     {
-                        "id": str(uuid4()),
                         "name": "Perro1",
                         "age": 1,
                         "gender": Gender.male,
@@ -61,7 +78,6 @@ class Organization(BaseModel):
                 ],
                 "cats": [
                     {
-                        "id": str(uuid4()),
                         "name": "Gato1",
                         "age": 1,
                         "gender": Gender.male,
@@ -83,8 +99,18 @@ class Organization(BaseModel):
                         "raze": CatRaze.persa,
                     }
                 ],
-                "deleted_at": datetime.datetime(2021, 5, 1),
-                "photo": "https://www.image.com/image.jpg",
                 "zone": Province.alava,
             }
         }
+
+
+class OrganizationCreate(BaseModel):
+    name: str
+    email: str
+    phone: str
+    zone: Province
+    dogs: Optional[List[Dog]]
+    cats: Optional[List[Cat]]
+
+    class Config:
+        orm_mode = True
