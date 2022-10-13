@@ -1,5 +1,5 @@
 import firebase_admin
-from firebase_admin import firestore
+from firebase_admin import firestore, auth
 import pyrebase
 from app.config.firebase_config import firebase_config
 
@@ -10,7 +10,9 @@ from app.config.firebase_config import firebase_config
 # Windows: $env:GOOGLE_APPLICATION_CREDENTIALS="C:\Users\username\Downloads\service-account-file.json"
 firebase = firebase_admin.initialize_app()
 db = firestore.client()
+auth = auth
 
 # REALTIME DATABASE CONFIGURATION
 realtime_firebase = pyrebase.initialize_app(firebase_config)
 realtime_db = realtime_firebase.database()
+auth2 = realtime_firebase.auth()
