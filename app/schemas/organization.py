@@ -23,8 +23,8 @@ class Organization(BaseModel):
     @validator("phone")
     def phone_must_be_valid(cls, v) -> str:
         # phone number with prefix and 9 digits
-        if not re.match(r"^\+?(\d{9,15})$", v):
-            raise ValueError("Invalid phone number")
+        if not re.match(r"^\+34\d{9}$", v):
+            raise ValueError("Invalid phone number. Must be +34XXXXXXXXX")
         return v
 
     @validator("email")
@@ -35,9 +35,9 @@ class Organization(BaseModel):
 
     @validator("password")
     def password_must_be_valid(cls, v) -> str:
-        if not re.match(r"^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$", v):
+        if not re.match(r"^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$", v):
             raise ValueError(
-                "Password must have at least 8 characters, 1 number and 1 letter"
+                "Password must have at least 6 characters, 1 number and 1 letter"
             )
         return v
 
@@ -47,7 +47,7 @@ class Organization(BaseModel):
             "example": {
                 "name": "Prueba",
                 "email": "prueba@prueba.com",
-                "password": "123456",
+                "password": "aAbBcCdD1",
                 "phone": "+34123456789",
                 "zone": Province.alava,
             }
