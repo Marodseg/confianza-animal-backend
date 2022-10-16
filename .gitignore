@@ -127,7 +127,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
-/app/config/firebase_config.py
 
 .idea
 .mypy_cache

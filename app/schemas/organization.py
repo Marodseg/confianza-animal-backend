@@ -11,7 +11,7 @@ from app.schemas.enums.provinces import Province
 class Organization(BaseModel):
     name: str
     email: str
-    password: str
+    password: str = None
     phone: str
     active: bool = True
     deleted_at: Optional[datetime.datetime]

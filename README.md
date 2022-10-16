@@ -5,7 +5,7 @@
 Run `pip install -r requirements.txt` to install the dependencies and being able to run the application.
 
 Don't forget to set the environment variable `GOOGLE_APPLICATION_CREDENTIALS` as expected in `database.py` and
-complete the `template_firebase_config.py` and rename it to `firebase_config.py`.
+complete the `.env_template.py` and rename it to `.env`.
 
 ## Development server
 
