@@ -21,8 +21,8 @@ router = APIRouter()
 # Get all organizations
 @router.get("/", status_code=200, response_model=list[OrganizationCreate])
 async def get_organizations():
-    organizations = db.collection("organizations").stream()
-    return [Organization(**organization.to_dict()) for organization in organizations]
+    organizations = db.collection("organizations").get()
+    return [OrganizationCreate(**org.to_dict()) for org in organizations]
 
 
 # Register an organization
