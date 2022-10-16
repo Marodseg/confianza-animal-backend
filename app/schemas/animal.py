@@ -1,5 +1,4 @@
 import datetime
-from uuid import uuid4
 
 from pydantic import BaseModel
 from typing import Optional, List
@@ -12,7 +11,8 @@ from app.schemas.enums.size import Size
 
 
 class Animal(BaseModel):
-    id: str = str(uuid4())
+    # The id will be set automatically by the database (setting it here will generate always the same id)
+    id: str = ""
     name: str
     age: int
     gender: Gender

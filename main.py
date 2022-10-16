@@ -1,7 +1,7 @@
 import uvicorn
 
 from fastapi.middleware.cors import CORSMiddleware
-from app.routes import organizations
+from app.routes import organizations, auth
 from fastapi import FastAPI
 
 app = FastAPI()
@@ -22,7 +22,10 @@ app.add_middleware(
 )
 
 # Blueprints registration
-app.include_router(organizations.router, prefix="/organization", tags=["Organizations"])
+app.include_router(
+    organizations.router, prefix="/organizations", tags=["Organizations"]
+)
+app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
 
 if __name__ == "__main__":
     uvicorn.run("main:app")

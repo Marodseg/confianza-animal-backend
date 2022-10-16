@@ -33,14 +33,6 @@ class Organization(BaseModel):
             raise ValueError("Email is not valid")
         return v
 
-    @validator("password")
-    def password_must_be_valid(cls, v) -> str:
-        if not re.match(r"^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$", v):
-            raise ValueError(
-                "Password must have at least 6 characters, 1 number and 1 letter"
-            )
-        return v
-
     class Config:
         orm_mode = True
         schema_extra = {
