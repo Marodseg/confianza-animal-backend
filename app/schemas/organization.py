@@ -33,13 +33,19 @@ class Organization(BaseModel):
             raise ValueError("Email is not valid")
         return v
 
+    @validator("password")
+    def password_must_be_valid(cls, v) -> str:
+        if not v:
+            raise ValueError("Password can not be empty")
+        return v
+
     class Config:
         orm_mode = True
         schema_extra = {
             "example": {
                 "name": "Prueba",
                 "email": "prueba@prueba.com",
-                "password": "aAbBcCdD1",
+                "password": "",
                 "phone": "+34123456789",
                 "zone": Province.alava,
             }
@@ -51,6 +57,18 @@ class OrganizationCreate(BaseModel):
     email: str
     phone: str
     zone: Province
+
+    class Config:
+        orm_mode = True
+
+
+class OrganizationAnimals(BaseModel):
+    name: str
+    email: str
+    phone: str
+    zone: Province
+    dogs: Optional[List[Dog]]
+    cats: Optional[List[Cat]]
 
     class Config:
         orm_mode = True

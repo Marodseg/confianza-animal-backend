@@ -1,18 +1,35 @@
 import datetime
+import re
 from uuid import uuid4
 
-from pydantic import BaseModel
-from typing import Optional
+from pydantic import BaseModel, validator
+from typing import Optional, List
+
+from app.schemas.animal import Dog, Cat
 
 
 class User(BaseModel):
-    id: str = str(uuid4())
-    email: str
+    id: str = None
+    email: str = None
     name: str
     deleted_at: Optional[datetime.datetime]
-    password: str
+    password: str = None
     photo: Optional[str]
     active: bool = True
+    dogs: Optional[List[Dog]]
+    cats: Optional[List[Cat]]
+
+    @validator("email")
+    def email_must_be_valid(cls, v) -> str:
+        if not re.match(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$", v):
+            raise ValueError("Email is not valid")
+        return v
+
+    @validator("password")
+    def password_must_be_valid(cls, v) -> str:
+        if not v:
+            raise ValueError("Password can not be empty")
+        return v
 
     class Config:
         orm_mode = True
@@ -20,7 +37,7 @@ class User(BaseModel):
             "example": {
                 "email": "user@prueba.com",
                 "name": "Prueba",
-                "password": "123456",
+                "password": "",
             }
         }
 
@@ -29,6 +46,36 @@ class UserCreate(BaseModel):
     id: str
     email: str
     name: str
+
+    class Config:
+        orm_mode = True
+
+
+class UserView(BaseModel):
+    id: str
+    email: str
+    name: str
+    photo: Optional[str]
+
+    class Config:
+        orm_mode = True
+
+
+class UserUpdateIn(BaseModel):
+    name: str
+    photo: Optional[str]
+
+    class Config:
+        orm_mode = True
+
+
+class UserUpdateOut(BaseModel):
+    id: str = None
+    email: str = None
+    name: str
+    photo: Optional[str]
+    dogs: Optional[List[Dog]]
+    cats: Optional[List[Cat]]
 
     class Config:
         orm_mode = True
