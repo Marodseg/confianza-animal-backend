@@ -1,5 +1,3 @@
-import uuid
-
 from google.cloud.firestore_v1 import DELETE_FIELD
 from starlette.responses import JSONResponse
 
@@ -7,6 +5,7 @@ from app.config.database import db, firebase_admin_auth, pyrebase_auth
 from fastapi import APIRouter, HTTPException, Depends
 
 from app.routes.auth import firebase_authentication
+from app.schemas.animal import AnimalsInDB
 from app.schemas.user import User, UserCreate, UserView, UserUpdateIn, UserUpdateOut
 from app.utils import (
     exists_email_in_user,
@@ -28,11 +27,17 @@ async def get_user_by_id(user_id: str):
 
 
 # Get animals by user id
-@router.get("/animals/{user_id}", status_code=200)
+@router.get("/animals/{user_id}", status_code=200, response_model=AnimalsInDB)
 async def get_animals_by_user_id(user_id: str):
     if exists_id_in_user(user_id):
-        animals = db.collection("animals").where("user_id", "==", user_id).get()
-        return [animal.to_dict() for animal in animals]
+        animals = db.collection("animals").document(user_id).get().to_dict()
+        if not animals:
+            dogs = []
+            cats = []
+        else:
+            dogs = animals["dogs"]
+            cats = animals["cats"]
+        return AnimalsInDB(dogs=dogs, cats=cats)
     else:
         raise HTTPException(status_code=404, detail="User not found")
 

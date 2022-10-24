@@ -1,7 +1,7 @@
 import uvicorn
 
 from fastapi.middleware.cors import CORSMiddleware
-from app.routes import organizations, auth, animals, users
+from app.routes import organizations, auth, animals, users, petitions
 from fastapi import FastAPI
 
 app = FastAPI()
@@ -28,6 +28,7 @@ app.include_router(
 app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
 app.include_router(animals.router, prefix="/animals", tags=["Animals"])
 app.include_router(users.router, prefix="/users", tags=["Users"])
+app.include_router(petitions.router, prefix="/petitions", tags=["Petitions"])
 
 if __name__ == "__main__":
     uvicorn.run("main:app")

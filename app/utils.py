@@ -35,25 +35,17 @@ def exists_id_in_user(user_id: str) -> bool:
 
 
 def exists_dog_in_animals(dog_id: str) -> bool:
-    return (
-        db.collection("animals")
-        .document("animals")
-        .get()
-        .to_dict()["dogs"]
-        .where("id", "==", dog_id)
-        .get()
-    )
+    dogs = db.collection("animals").document("animals").get().to_dict()["dogs"]
+    for dog in dogs:
+        if dog["id"] == dog_id:
+            return True
 
 
 def exists_cat_in_animals(cat_id: str) -> bool:
-    return (
-        db.collection("animals")
-        .document("animals")
-        .get()
-        .to_dict()["cats"]
-        .where("id", "==", cat_id)
-        .get()
-    )
+    cats = db.collection("animals").document("animals").get().to_dict()["cats"]
+    for cat in cats:
+        if cat["id"] == cat_id:
+            return True
 
 
 def get_dog_or_cat_by_filters(
