@@ -1,3 +1,4 @@
+from fastapi.security import OAuth2PasswordRequestForm
 from google.cloud.firestore_v1 import DELETE_FIELD
 from starlette.responses import JSONResponse
 
@@ -69,12 +70,12 @@ async def register_user(user: User):
 
 
 @router.post("/login", status_code=200)
-async def login_user(email: str, password: str):
+async def login_user(form_data: OAuth2PasswordRequestForm = Depends()):
     try:
-        user_py = pyrebase_auth.sign_in_with_email_and_password(email, password)
-        user = firebase_admin_auth.get_user_by_email(email)
+        user_py = pyrebase_auth.sign_in_with_email_and_password(form_data.username, form_data.password)
+        user = firebase_admin_auth.get_user_by_email(form_data.username)
         if user.email_verified:
-            if not exists_email_in_user(email):
+            if not exists_email_in_user(form_data.username):
                 return JSONResponse(
                     status_code=403, content={"message": "You are not a user"}
                 )

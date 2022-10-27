@@ -1,3 +1,4 @@
+from fastapi.security import OAuth2PasswordRequestForm
 from google.cloud.firestore_v1 import ArrayUnion, DELETE_FIELD, ArrayRemove
 from starlette.responses import JSONResponse
 
@@ -159,21 +160,21 @@ async def register_organization(organization: Organization):
 
 
 @router.post("/login", status_code=200)
-async def login_organization(email: str, password: str):
+async def login_organization(form_data: OAuth2PasswordRequestForm = Depends()):
     try:
-        org = pyrebase_auth.sign_in_with_email_and_password(email, password)
-        organization = firebase_admin_auth.get_user_by_email(email)
+        org = pyrebase_auth.sign_in_with_email_and_password(form_data.username, form_data.password)
+        organization = firebase_admin_auth.get_user_by_email(form_data.username)
 
         # Search an organization by email in the database
         my_org = (
             db.collection("organizations")
-            .where("email", "==", email)
+            .where("email", "==", form_data.username)
             .get()[0]
             .to_dict()
         )
 
         if organization.email_verified:
-            if not exists_email_in_organization(email):
+            if not exists_email_in_organization(form_data.username):
                 return JSONResponse(
                     status_code=403, content={"message": "You are not an organization"}
                 )
