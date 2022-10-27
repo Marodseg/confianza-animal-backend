@@ -7,6 +7,7 @@ from app.schemas.enums.petition_status import PetitionStatus
 
 
 class Petition(BaseModel):
+    id: str = None
     user_id: str
     dog_id: Optional[str]
     cat_id: Optional[str]

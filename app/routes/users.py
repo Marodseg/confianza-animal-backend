@@ -1,8 +1,8 @@
 from google.cloud.firestore_v1 import DELETE_FIELD
 from starlette.responses import JSONResponse
 
-from app.config.database import db, firebase_admin_auth, pyrebase_auth
-from fastapi import APIRouter, HTTPException, Depends
+from app.config.database import db, firebase_admin_auth, pyrebase_auth, storage
+from fastapi import APIRouter, HTTPException, Depends, UploadFile, File
 
 from app.routes.auth import firebase_authentication
 from app.schemas.animal import AnimalsInDB
@@ -93,7 +93,7 @@ async def update_user(
 ):
     user_logged = db.collection("users").document(user_id).get().to_dict()
     if exists_id_in_user(user_id):
-        if user_logged.email != email:
+        if user_logged["email"] != email:
             raise HTTPException(
                 status_code=401, detail="You are not allowed to edit the user"
             )
@@ -113,7 +113,7 @@ async def update_user(
 async def enable_user(user_id: str, email: str = Depends(firebase_authentication)):
     user_logged = db.collection("users").document(user_id).get().to_dict()
     if exists_id_in_user(user_id):
-        if user_logged.email != email:
+        if user_logged["email"] != email:
             raise HTTPException(
                 status_code=401, detail="You are not allowed to enable the user"
             )
@@ -132,7 +132,7 @@ async def enable_user(user_id: str, email: str = Depends(firebase_authentication
 async def delete_user(user_id: str, email: str = Depends(firebase_authentication)):
     user_logged = db.collection("users").document(user_id).get().to_dict()
     if exists_id_in_user(user_id):
-        if user_logged.email != email:
+        if user_logged["email"] != email:
             raise HTTPException(
                 status_code=401, detail="You are not allowed to delete the user"
             )
@@ -142,5 +142,25 @@ async def delete_user(user_id: str, email: str = Depends(firebase_authentication
     try:
         db.collection("users").document(user_id).update({"active": False})
         return JSONResponse(status_code=200, content={"message": "User deleted"})
+    except Exception as e:
+        raise HTTPException(status_code=401, detail=str(e))
+
+
+# Upload photo profile
+@router.post("/upload-photo", status_code=200)
+async def upload_photo_profile(
+    file: UploadFile, email: str = Depends(firebase_authentication)
+):
+    user_logged = db.collection("users").where("email", "==", email).get()
+    user = user_logged[0]
+
+    try:
+        # Upload photo to Firebase Storage
+        storage.child(f"users/{user.id}/profile.jpg").put(file.file)
+        # Get photo url
+        url = storage.child(f"users/{user.id}/profile.jpg").get_url(None)
+        # Update photo url in database
+        db.collection("users").document(user.id).update({"photo": url})
+        return JSONResponse(status_code=200, content={"message": "Photo uploaded"})
     except Exception as e:
         raise HTTPException(status_code=401, detail=str(e))

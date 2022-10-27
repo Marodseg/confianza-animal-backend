@@ -21,3 +21,6 @@ firebase_admin_auth = auth
 realtime_firebase = pyrebase.initialize_app(firebase_config)
 realtime_db = realtime_firebase.database()
 pyrebase_auth = realtime_firebase.auth()
+
+# STORAGE
+storage = realtime_firebase.storage()

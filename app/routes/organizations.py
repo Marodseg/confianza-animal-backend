@@ -31,7 +31,12 @@ async def get_organizations():
 # Get organization by name
 @router.get("/{org_name}", status_code=200, response_model=OrganizationAnimals)
 async def get_organization_by_name(org_name: str):
-    organization = db.collection("organizations").where("name", "==", org_name).get()
+    organization = (
+        db.collection("organizations")
+        .where("name", "==", org_name)
+        .where("active", "==", True)
+        .get()
+    )
     if not organization:
         raise HTTPException(status_code=404, detail="Organization not found")
     return OrganizationAnimals(**organization[0].to_dict())
@@ -158,10 +163,24 @@ async def login_organization(email: str, password: str):
     try:
         org = pyrebase_auth.sign_in_with_email_and_password(email, password)
         organization = firebase_admin_auth.get_user_by_email(email)
+
+        # Search an organization by email in the database
+        my_org = (
+            db.collection("organizations")
+            .where("email", "==", email)
+            .get()[0]
+            .to_dict()
+        )
+
         if organization.email_verified:
             if not exists_email_in_organization(email):
                 return JSONResponse(
                     status_code=403, content={"message": "You are not an organization"}
+                )
+            if not my_org["active"]:
+                return JSONResponse(
+                    status_code=401,
+                    content={"message": "This organization is inactive"},
                 )
             return JSONResponse(status_code=200, content={"token": org["idToken"]})
         else:
