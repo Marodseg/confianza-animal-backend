@@ -144,6 +144,7 @@ async def register_organization(organization: Organization):
         raise HTTPException(status_code=400, detail="Error creating user")
 
     try:
+        organization.id = org["localId"]
         db.collection("organizations").document(organization.name).set(
             organization.dict()
         )

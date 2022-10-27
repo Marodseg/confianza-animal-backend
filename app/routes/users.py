@@ -11,7 +11,6 @@ from app.schemas.user import User, UserCreate, UserView, UserUpdateIn, UserUpdat
 from app.utils import (
     exists_email_in_user,
     exists_id_in_user,
-    generate_uuid,
 )
 
 router = APIRouter()
@@ -57,7 +56,7 @@ async def register_user(user: User):
         raise HTTPException(status_code=400, detail="Error creating user")
 
     try:
-        user.id = generate_uuid()
+        user.id = create_user["localId"]
         db.collection("users").document(user.id).set(user.dict())
         # For security, we don't save the password in the database
         # as is handled by Firebase Authentication

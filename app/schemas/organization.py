@@ -9,6 +9,7 @@ from app.schemas.enums.provinces import Province
 
 
 class Organization(BaseModel):
+    id: str = None
     name: str
     email: str
     password: str = None
