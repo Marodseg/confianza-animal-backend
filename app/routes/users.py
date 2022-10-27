@@ -5,7 +5,7 @@ from starlette.responses import JSONResponse
 from app.config.database import db, firebase_admin_auth, pyrebase_auth, storage
 from fastapi import APIRouter, HTTPException, Depends, UploadFile, File
 
-from app.routes.auth import firebase_authentication
+from app.routes.auth import firebase_email_authentication, firebase_uid_authentication
 from app.schemas.animal import AnimalsInDB
 from app.schemas.user import User, UserCreate, UserView, UserUpdateIn, UserUpdateOut
 from app.utils import (
@@ -14,6 +14,16 @@ from app.utils import (
 )
 
 router = APIRouter()
+
+
+# Get user with token
+@router.get("/me", status_code=200, response_model=UserView)
+async def get_user_profile(uid: str = Depends(firebase_uid_authentication)):
+    user = db.collection("users").where("id", "==", uid).get()
+    if user:
+        return UserView(**user[0].to_dict())
+    else:
+        raise HTTPException(status_code=404, detail="User not found")
 
 
 # Get user by id
@@ -71,7 +81,9 @@ async def register_user(user: User):
 @router.post("/login", status_code=200)
 async def login_user(form_data: OAuth2PasswordRequestForm = Depends()):
     try:
-        user_py = pyrebase_auth.sign_in_with_email_and_password(form_data.username, form_data.password)
+        user_py = pyrebase_auth.sign_in_with_email_and_password(
+            form_data.username, form_data.password
+        )
         user = firebase_admin_auth.get_user_by_email(form_data.username)
         if user.email_verified:
             if not exists_email_in_user(form_data.username):
@@ -89,7 +101,9 @@ async def login_user(form_data: OAuth2PasswordRequestForm = Depends()):
 
 @router.put("/{user_id}", status_code=200, response_model=UserUpdateOut)
 async def update_user(
-    user_id: str, user: UserUpdateIn, email: str = Depends(firebase_authentication)
+    user_id: str,
+    user: UserUpdateIn,
+    email: str = Depends(firebase_email_authentication),
 ):
     user_logged = db.collection("users").document(user_id).get().to_dict()
     if exists_id_in_user(user_id):
@@ -110,7 +124,9 @@ async def update_user(
 
 # Enable user
 @router.put("/enable/{user_id}", status_code=200)
-async def enable_user(user_id: str, email: str = Depends(firebase_authentication)):
+async def enable_user(
+    user_id: str, email: str = Depends(firebase_email_authentication)
+):
     user_logged = db.collection("users").document(user_id).get().to_dict()
     if exists_id_in_user(user_id):
         if user_logged["email"] != email:
@@ -129,7 +145,9 @@ async def enable_user(user_id: str, email: str = Depends(firebase_authentication
 
 # Delete user
 @router.delete("/delete/{user_id}", status_code=200)
-async def delete_user(user_id: str, email: str = Depends(firebase_authentication)):
+async def delete_user(
+    user_id: str, email: str = Depends(firebase_email_authentication)
+):
     user_logged = db.collection("users").document(user_id).get().to_dict()
     if exists_id_in_user(user_id):
         if user_logged["email"] != email:
@@ -149,7 +167,7 @@ async def delete_user(user_id: str, email: str = Depends(firebase_authentication
 # Upload photo profile
 @router.post("/upload-photo", status_code=200)
 async def upload_photo_profile(
-    file: UploadFile, email: str = Depends(firebase_authentication)
+    file: UploadFile, email: str = Depends(firebase_email_authentication)
 ):
     user_logged = db.collection("users").where("email", "==", email).get()
     user = user_logged[0]

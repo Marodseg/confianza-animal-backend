@@ -10,11 +10,19 @@ security = HTTPBearer()
 
 
 # Verify token and return user email
-async def firebase_authentication(
+async def firebase_email_authentication(
     token: HTTPAuthorizationCredentials = Depends(security),
 ) -> str:
     user = firebase_admin_auth.verify_id_token(token.credentials)
     return user["email"]
+
+
+# Verify token and return user uid
+async def firebase_uid_authentication(
+    token: HTTPAuthorizationCredentials = Depends(security),
+) -> str:
+    user = firebase_admin_auth.verify_id_token(token.credentials)
+    return user["uid"]
 
 
 # Reset password endpoint

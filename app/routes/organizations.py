@@ -5,7 +5,7 @@ from starlette.responses import JSONResponse
 from app.config.database import db, firebase_admin_auth, pyrebase_auth
 from fastapi import APIRouter, HTTPException, Depends
 
-from app.routes.auth import firebase_authentication
+from app.routes.auth import firebase_email_authentication
 from app.schemas.animal import Dog, Cat, DogUpdate, CatUpdate
 from app.schemas.organization import (
     Organization,
@@ -46,7 +46,7 @@ async def get_organization_by_name(org_name: str):
 # Post a dog to an organization
 @router.post("/dog/{org_name}", status_code=200, response_model=Dog)
 async def post_dog(
-    org_name: str, dog: Dog, email: str = Depends(firebase_authentication)
+    org_name: str, dog: Dog, email: str = Depends(firebase_email_authentication)
 ):
     if exists_name_in_organization(org_name):
         if (
@@ -88,7 +88,7 @@ async def post_dog(
 # Post a cat to an organization
 @router.post("/cat/{org_name}", status_code=200, response_model=Cat)
 async def post_cat(
-    org_name: str, cat: Cat, email: str = Depends(firebase_authentication)
+    org_name: str, cat: Cat, email: str = Depends(firebase_email_authentication)
 ):
     if db.collection("organizations").document(org_name).get().exists:
         if (
@@ -163,7 +163,9 @@ async def register_organization(organization: Organization):
 @router.post("/login", status_code=200)
 async def login_organization(form_data: OAuth2PasswordRequestForm = Depends()):
     try:
-        org = pyrebase_auth.sign_in_with_email_and_password(form_data.username, form_data.password)
+        org = pyrebase_auth.sign_in_with_email_and_password(
+            form_data.username, form_data.password
+        )
         organization = firebase_admin_auth.get_user_by_email(form_data.username)
 
         # Search an organization by email in the database
@@ -199,7 +201,7 @@ async def modify_dog(
     org_name: str,
     dog_id: str,
     new_dog: DogUpdate,
-    email: str = Depends(firebase_authentication),
+    email: str = Depends(firebase_email_authentication),
 ):
     if exists_name_in_organization(org_name):
 
@@ -262,7 +264,7 @@ async def modify_cat(
     org_name: str,
     cat_id: str,
     new_cat: CatUpdate,
-    email: str = Depends(firebase_authentication),
+    email: str = Depends(firebase_email_authentication),
 ):
     if exists_name_in_organization(org_name):
 
@@ -323,7 +325,7 @@ async def modify_cat(
 # enable organization
 @router.put("/enable/{org_name}", status_code=200)
 async def enable_organization(
-    org_name: str, email: str = Depends(firebase_authentication)
+    org_name: str, email: str = Depends(firebase_email_authentication)
 ):
     if exists_name_in_organization(org_name):
         if (
@@ -343,7 +345,7 @@ async def enable_organization(
 # delete organization
 @router.delete("/delete/{org_name}", status_code=200)
 async def delete_organization(
-    org_name: str, email: str = Depends(firebase_authentication)
+    org_name: str, email: str = Depends(firebase_email_authentication)
 ):
     if exists_name_in_organization(org_name):
         if (
