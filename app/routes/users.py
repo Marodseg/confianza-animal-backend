@@ -1,5 +1,3 @@
-import uuid
-
 from fastapi.security import OAuth2PasswordRequestForm
 from google.cloud.firestore_v1 import DELETE_FIELD
 from starlette.responses import JSONResponse
