@@ -44,11 +44,11 @@ async def get_organizations():
 
 
 # Get organization by name
-@router.get("/{org_name}", status_code=200, response_model=OrganizationAnimals)
-async def get_organization_by_name(org_name: str):
+@router.get("/{organization_name}", status_code=200, response_model=OrganizationAnimals)
+async def get_organization_by_name(organization_name: str):
     organization = (
         db.collection("organizations")
-        .where("name", "==", org_name)
+        .where("name", "==", organization_name)
         .where("active", "==", True)
         .get()
     )
@@ -58,33 +58,38 @@ async def get_organization_by_name(org_name: str):
 
 
 # Post a dog to an organization
-@router.post("/dog/{org_name}", status_code=200, response_model=Dog)
+@router.post("/dog/{organization_name}", status_code=200, response_model=Dog)
 async def post_dog(
-    org_name: str, dog: Dog, email: str = Depends(firebase_email_authentication)
+    organization_name: str,
+    dog: Dog,
+    email: str = Depends(firebase_email_authentication),
 ):
-    if exists_name_in_organization(org_name):
+    if exists_name_in_organization(organization_name):
         if (
-            db.collection("organizations").document(org_name).get().to_dict()["email"]
+            db.collection("organizations")
+            .document(organization_name)
+            .get()
+            .to_dict()["email"]
             == email
         ):
             # Generate a random id for the dog
             dog.id = generate_uuid()
             # Include the organization data in the dog
-            dog.organization_name = org_name
+            dog.organization_name = organization_name
             dog.organization_phone = (
                 db.collection("organizations")
-                .document(org_name)
+                .document(organization_name)
                 .get()
                 .to_dict()["phone"]
             )
             dog.organization_photo = (
                 db.collection("organizations")
-                .document(org_name)
+                .document(organization_name)
                 .get()
                 .to_dict()["photo"]
             )
 
-            db.collection("organizations").document(org_name).update(
+            db.collection("organizations").document(organization_name).update(
                 {"dogs": ArrayUnion([dog.dict()])}
             )
             db.collection("animals").document("animals").set(
@@ -100,32 +105,37 @@ async def post_dog(
 
 
 # Post a cat to an organization
-@router.post("/cat/{org_name}", status_code=200, response_model=Cat)
+@router.post("/cat/{organization_name}", status_code=200, response_model=Cat)
 async def post_cat(
-    org_name: str, cat: Cat, email: str = Depends(firebase_email_authentication)
+    organization_name: str,
+    cat: Cat,
+    email: str = Depends(firebase_email_authentication),
 ):
-    if db.collection("organizations").document(org_name).get().exists:
+    if db.collection("organizations").document(organization_name).get().exists:
         if (
-            db.collection("organizations").document(org_name).get().to_dict()["email"]
+            db.collection("organizations")
+            .document(organization_name)
+            .get()
+            .to_dict()["email"]
             == email
         ):
             # Generate a unique id for the cat
             cat.id = generate_uuid()
             # Include the organization data in the cat
-            cat.organization_name = org_name
+            cat.organization_name = organization_name
             cat.organization_phone = (
                 db.collection("organizations")
-                .document(org_name)
+                .document(organization_name)
                 .get()
                 .to_dict()["phone"]
             )
             cat.organization_photo = (
                 db.collection("organizations")
-                .document(org_name)
+                .document(organization_name)
                 .get()
                 .to_dict()["photo"]
             )
-            db.collection("organizations").document(org_name).update(
+            db.collection("organizations").document(organization_name).update(
                 {"cats": ArrayUnion([cat.dict()])}
             )
             db.collection("animals").document("animals").set(
@@ -212,22 +222,25 @@ async def login_organization(form_data: OAuth2PasswordRequestForm = Depends()):
 # Modify a dog from an organization
 @router.put("/dog/{dog_id}", status_code=200, response_model=Dog)
 async def modify_dog(
-    org_name: str,
+    organization_name: str,
     dog_id: str,
     new_dog: DogUpdate,
     email: str = Depends(firebase_email_authentication),
 ):
-    if exists_name_in_organization(org_name):
+    if exists_name_in_organization(organization_name):
 
         # check if the email is the same as the organization email
         if (
-            db.collection("organizations").document(org_name).get().to_dict()["email"]
+            db.collection("organizations")
+            .document(organization_name)
+            .get()
+            .to_dict()["email"]
             == email
         ):
 
             dogs = (
                 db.collection("organizations")
-                .document(org_name)
+                .document(organization_name)
                 .get()
                 .to_dict()["dogs"]
             )
@@ -246,10 +259,10 @@ async def modify_dog(
                     new_dog = dog.copy()
 
                     # We update the dog in the organization
-                    db.collection("organizations").document(org_name).update(
+                    db.collection("organizations").document(organization_name).update(
                         {"dogs": ArrayRemove([old_dog])}
                     )
-                    db.collection("organizations").document(org_name).update(
+                    db.collection("organizations").document(organization_name).update(
                         {"dogs": ArrayUnion([new_dog])}
                     )
                     # We update the dog in the global animals
@@ -275,22 +288,25 @@ async def modify_dog(
 # Modify a cat from an organization
 @router.put("/cat/{cat_id}", status_code=200, response_model=Cat)
 async def modify_cat(
-    org_name: str,
+    organization_name: str,
     cat_id: str,
     new_cat: CatUpdate,
     email: str = Depends(firebase_email_authentication),
 ):
-    if exists_name_in_organization(org_name):
+    if exists_name_in_organization(organization_name):
 
         # check if the email is the same as the organization email
         if (
-            db.collection("organizations").document(org_name).get().to_dict()["email"]
+            db.collection("organizations")
+            .document(organization_name)
+            .get()
+            .to_dict()["email"]
             == email
         ):
 
             cats = (
                 db.collection("organizations")
-                .document(org_name)
+                .document(organization_name)
                 .get()
                 .to_dict()["cats"]
             )
@@ -309,10 +325,10 @@ async def modify_cat(
                     new_cat = cat.copy()
 
                     # We update the cat in the organization
-                    db.collection("organizations").document(org_name).update(
+                    db.collection("organizations").document(organization_name).update(
                         {"cats": ArrayRemove([old_cat])}
                     )
-                    db.collection("organizations").document(org_name).update(
+                    db.collection("organizations").document(organization_name).update(
                         {"cats": ArrayUnion([new_cat])}
                     )
 
@@ -337,16 +353,21 @@ async def modify_cat(
 
 
 # enable organization
-@router.put("/enable/{org_name}", status_code=200)
+@router.put("/enable/{organization_name}", status_code=200)
 async def enable_organization(
-    org_name: str, email: str = Depends(firebase_email_authentication)
+    organization_name: str, email: str = Depends(firebase_email_authentication)
 ):
-    if exists_name_in_organization(org_name):
+    if exists_name_in_organization(organization_name):
         if (
-            db.collection("organizations").document(org_name).get().to_dict()["email"]
+            db.collection("organizations")
+            .document(organization_name)
+            .get()
+            .to_dict()["email"]
             == email
         ):
-            db.collection("organizations").document(org_name).update({"active": True})
+            db.collection("organizations").document(organization_name).update(
+                {"active": True}
+            )
             return {"message": "Organization enabled"}
         else:
             raise HTTPException(
@@ -357,16 +378,21 @@ async def enable_organization(
 
 
 # delete organization
-@router.delete("/delete/{org_name}", status_code=200)
+@router.delete("/delete/{organization_name}", status_code=200)
 async def delete_organization(
-    org_name: str, email: str = Depends(firebase_email_authentication)
+    organization_name: str, email: str = Depends(firebase_email_authentication)
 ):
-    if exists_name_in_organization(org_name):
+    if exists_name_in_organization(organization_name):
         if (
-            db.collection("organizations").document(org_name).get().to_dict()["email"]
+            db.collection("organizations")
+            .document(organization_name)
+            .get()
+            .to_dict()["email"]
             == email
         ):
-            db.collection("organizations").document(org_name).update({"active": False})
+            db.collection("organizations").document(organization_name).update(
+                {"active": False}
+            )
             return {"message": "Organization deleted"}
         else:
             raise HTTPException(

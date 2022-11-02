@@ -169,8 +169,8 @@ async def delete_user(
 
 
 # Upload photo profile
-@router.post("/upload-photo", status_code=200)
-async def upload_photo_profile(
+@router.post("/upload/photo", status_code=200)
+async def upload_profile_photo(
     file: UploadFile, email: str = Depends(firebase_email_authentication)
 ):
     user_logged = db.collection("users").where("email", "==", email).get()
