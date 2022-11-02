@@ -1,3 +1,5 @@
+import uuid
+
 from fastapi.security import OAuth2PasswordRequestForm
 from google.cloud.firestore_v1 import DELETE_FIELD
 from starlette.responses import JSONResponse
@@ -177,12 +179,23 @@ async def upload_profile_photo(
     user = user_logged[0]
 
     try:
-        # Upload photo to Firebase Storage
-        storage.child(f"users/{user.id}/profile.jpg").put(file.file)
-        # Get photo url
-        url = storage.child(f"users/{user.id}/profile.jpg").get_url(None)
-        # Update photo url in database
-        db.collection("users").document(user.id).update({"photo": url})
-        return JSONResponse(status_code=200, content={"message": "Photo uploaded"})
+        # Upload a photo to Firebase Storage ensuring that the file is an image
+        if file.content_type.startswith("image/"):
+            # Get the file extension
+            extension = file.filename.split(".")[-1]
+
+            # Generate a random name for the file
+            filename = "profile_photo"  # Here we can add the extension
+            # But we want to overwrite the previous photo
+
+            # Upload the file and delete the previous one
+            storage.child(f"users/{user.id}/{filename}").put(file.file)
+            # Get the url of the uploaded file
+            url = storage.child(f"users/{user.id}/{filename}").get_url(None)
+            # Update the user's photo
+            db.collection("users").document(user.id).update({"photo": url})
+            return JSONResponse(status_code=200, content={"message": "Photo uploaded"})
+        else:
+            raise HTTPException(status_code=401, detail="File is not an image")
     except Exception as e:
-        raise HTTPException(status_code=401, detail=str(e))
+        raise HTTPException(status_code=401, detail="File is not an image")
