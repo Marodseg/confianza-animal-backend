@@ -5,7 +5,11 @@ from starlette.responses import JSONResponse
 from app.config.database import db, firebase_admin_auth, pyrebase_auth
 from fastapi import APIRouter, HTTPException, Depends
 
-from app.routes.auth import firebase_email_authentication
+from app.routes.auth import (
+    firebase_email_authentication,
+    Token,
+    firebase_uid_authentication,
+)
 from app.schemas.animal import Dog, Cat, DogUpdate, CatUpdate
 from app.schemas.organization import (
     Organization,
@@ -20,6 +24,16 @@ from app.utils import (
 )
 
 router = APIRouter()
+
+
+# Get organization with token
+@router.get("/me", status_code=200, response_model=OrganizationAnimals)
+async def get_user_profile(uid: str = Depends(firebase_uid_authentication)):
+    org = db.collection("organizations").where("id", "==", uid).get()
+    if org:
+        return OrganizationAnimals(**org[0].to_dict())
+    else:
+        raise HTTPException(status_code=404, detail="Organization not found")
 
 
 # Get all organizations
@@ -160,7 +174,7 @@ async def register_organization(organization: Organization):
         raise HTTPException(status_code=401, detail=str(e))
 
 
-@router.post("/login", status_code=200)
+@router.post("/login", status_code=200, response_model=Token)
 async def login_organization(form_data: OAuth2PasswordRequestForm = Depends()):
     try:
         org = pyrebase_auth.sign_in_with_email_and_password(

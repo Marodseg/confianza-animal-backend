@@ -5,7 +5,11 @@ from starlette.responses import JSONResponse
 from app.config.database import db, firebase_admin_auth, pyrebase_auth, storage
 from fastapi import APIRouter, HTTPException, Depends, UploadFile, File
 
-from app.routes.auth import firebase_email_authentication, firebase_uid_authentication
+from app.routes.auth import (
+    firebase_email_authentication,
+    firebase_uid_authentication,
+    Token,
+)
 from app.schemas.animal import AnimalsInDB
 from app.schemas.user import User, UserCreate, UserView, UserUpdateIn, UserUpdateOut
 from app.utils import (
@@ -78,7 +82,7 @@ async def register_user(user: User):
         raise HTTPException(status_code=401, detail=str(e))
 
 
-@router.post("/login", status_code=200)
+@router.post("/login", status_code=200, response_model=Token)
 async def login_user(form_data: OAuth2PasswordRequestForm = Depends()):
     try:
         user_py = pyrebase_auth.sign_in_with_email_and_password(

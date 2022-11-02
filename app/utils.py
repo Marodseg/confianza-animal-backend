@@ -50,7 +50,6 @@ def exists_cat_in_animals(cat_id: str) -> bool:
 
 def get_dog_or_cat_by_filters(
     animals: [],
-    zone: Province = None,
     size: Size = None,
     raze: Union[CatRaze, DogRaze] = None,
     age: int = None,
@@ -60,8 +59,6 @@ def get_dog_or_cat_by_filters(
     is_urgent: bool = None,
 ):
     if animals:
-        if zone:
-            animals = [animal for animal in animals if animal["zone"] == zone]
         if size:
             animals = [animal for animal in animals if animal["size"] == size]
         if raze:
@@ -82,4 +79,4 @@ def get_dog_or_cat_by_filters(
 
 
 def generate_uuid() -> str:
-    return str(uuid.uuid4())
+    return str(uuid.uuid4().hex)

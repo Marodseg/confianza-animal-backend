@@ -51,7 +51,6 @@ async def get_cat_by_id(cat_id: str):
 # Get dog by all filters
 @router.get("/dog", status_code=200, response_model=Optional[List[Dog]])
 async def get_dog_by_filters(
-    zone: Province = None,
     size: Size = None,
     raze: DogRaze = None,
     age: int = None,
@@ -68,14 +67,13 @@ async def get_dog_by_filters(
     animals = db.collection("animals").document("animals").get().to_dict()
     dogs = animals["dogs"]
     return get_dog_or_cat_by_filters(
-        dogs, zone, size, raze, age, greater_or_equal, gender, activity, is_urgent
+        dogs, size, raze, age, greater_or_equal, gender, activity, is_urgent
     )
 
 
 # Get cat by all filters
 @router.get("/cat", status_code=200, response_model=Optional[List[Cat]])
 async def get_cat_by_filters(
-    zone: Province = None,
     size: Size = None,
     raze: CatRaze = None,
     age: int = None,
@@ -93,5 +91,5 @@ async def get_cat_by_filters(
     cats = animals["cats"]
 
     return get_dog_or_cat_by_filters(
-        cats, zone, size, raze, age, greater_or_equal, gender, activity, is_urgent
+        cats, size, raze, age, greater_or_equal, gender, activity, is_urgent
     )

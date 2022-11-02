@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from pydantic import BaseModel
 
 from app.config.database import firebase_admin_auth, pyrebase_auth
 
@@ -35,3 +36,7 @@ async def reset_password(email: str):
         # In order to avoid hack attempts, we don't return any error message
         # if the email doesn't exist that way we don't give any information to the attacker
         raise HTTPException(status_code=401, detail="Error sending email")
+
+
+class Token(BaseModel):
+    token: str
