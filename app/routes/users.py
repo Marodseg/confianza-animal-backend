@@ -89,10 +89,24 @@ async def login_user(form_data: OAuth2PasswordRequestForm = Depends()):
             form_data.username, form_data.password
         )
         user = firebase_admin_auth.get_user_by_email(form_data.username)
+
+        # Search a user by email in the database
+        my_user = (
+            db.collection("users")
+            .where("email", "==", form_data.username)
+            .get()[0]
+            .to_dict()
+        )
+
         if user.email_verified:
             if not exists_email_in_user(form_data.username):
                 return JSONResponse(
                     status_code=403, content={"message": "You are not a user"}
+                )
+            if not my_user["active"]:
+                return JSONResponse(
+                    status_code=401,
+                    content={"message": "This user is inactive"},
                 )
             return JSONResponse(status_code=200, content={"token": user_py["idToken"]})
         else:
