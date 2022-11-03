@@ -3,7 +3,7 @@ from google.cloud.firestore_v1 import DELETE_FIELD
 from starlette.responses import JSONResponse
 
 from app.config.database import db, firebase_admin_auth, pyrebase_auth, storage
-from fastapi import APIRouter, HTTPException, Depends, UploadFile, File
+from fastapi import APIRouter, HTTPException, Depends, UploadFile
 
 from app.routes.auth import (
     firebase_email_authentication,
