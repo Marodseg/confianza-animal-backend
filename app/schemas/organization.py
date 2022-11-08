@@ -76,7 +76,6 @@ class OrganizationAnimals(BaseModel):
 
 
 class OrganizationUpdateIn(BaseModel):
-    name: Optional[str]
     phone: Optional[str]
     zone: Optional[Province]
 

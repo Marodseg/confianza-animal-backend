@@ -5,7 +5,7 @@ from starlette.responses import JSONResponse
 from app.config.database import db, storage
 from fastapi import APIRouter, HTTPException, UploadFile, Depends
 
-from app.routes.auth import firebase_email_authentication
+from app.routes.auth import firebase_email_authentication, firebase_uid_authentication
 from app.schemas.animal import Dog, Cat, AnimalsInDB
 from app.schemas.enums.activity import Activity
 from app.schemas.enums.cat_raze import CatRaze
@@ -101,11 +101,9 @@ async def get_cat_by_filters(
 async def upload_dog_photos(
     dog_id: str,
     photos: List[UploadFile],
-    email: str = Depends(firebase_email_authentication),
+    uid: str = Depends(firebase_uid_authentication),
 ):
-    my_org = (
-        db.collection("organizations").where("email", "==", email).get()[0].to_dict()
-    )
+    my_org = db.collection("organizations").where("id", "==", uid).get()[0].to_dict()
 
     if not my_org:
         raise HTTPException(status_code=404, detail="You are not an organization")
@@ -127,9 +125,55 @@ async def upload_dog_photos(
                     photo.file
                 )
                 url = storage.child(filename["name"]).get_url(None)
-                dog["photos"].append(url)
 
-            db.collection("animals").document("animals").update({"dogs": dogs})
+                if url not in dog["photos"]:
+                    dog["photos"].append(url)
+
+            db.collection("animals").document("animals").set({"dogs": dogs}, merge=True)
+            db.collection("organizations").document(my_org["name"]).set(
+                {"dogs": dogs},
+                merge=True,
+            )
+            return JSONResponse(
+                status_code=200, content={"message": "Photos uploaded successfully"}
+            )
+
+    raise HTTPException(status_code=404, detail="Error uploading photos")
+
+
+@router.post("/cat/{cat_id}/photos", status_code=200)
+async def upload_cat_photos(
+    cat_id: str,
+    photos: List[UploadFile],
+    uid: str = Depends(firebase_uid_authentication),
+):
+    my_org = db.collection("organizations").where("id", "==", uid).get()[0].to_dict()
+
+    animals = db.collection("animals").document("animals").get().to_dict()
+    cats = animals["cats"]
+
+    for cat in cats:
+        if cat["id"] == cat_id:
+            if cat["organization_name"] != my_org["name"]:
+                raise HTTPException(
+                    status_code=403, detail="You are not the owner of this cat"
+                )
+
+            for photo in photos:
+                if not photo.content_type.startswith("image/"):
+                    raise HTTPException(status_code=400, detail="Not an image")
+                filename = storage.child(f"cats/{cat_id}/{photo.filename}").put(
+                    photo.file
+                )
+                url = storage.child(filename["name"]).get_url(None)
+
+                if url not in cat["photos"]:
+                    cat["photos"].append(url)
+
+            db.collection("animals").document("animals").update({"cats": cats})
+            db.collection("organizations").document(my_org["name"]).update(
+                {"cats": cats}
+            )
             return JSONResponse(
                 status_code=200, content={"message": "Photos uploaded successfully"}
             )

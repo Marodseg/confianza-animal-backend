@@ -34,10 +34,30 @@ router = APIRouter()
 @router.get("/me", status_code=200, response_model=OrganizationAnimals)
 async def get_user_profile(uid: str = Depends(firebase_uid_authentication)):
     org = db.collection("organizations").where("id", "==", uid).get()
-    if org:
-        return OrganizationAnimals(**org[0].to_dict())
-    else:
+    if not org:
         raise HTTPException(status_code=404, detail="Organization not found")
+
+    return OrganizationAnimals(**org[0].to_dict())
+
+
+# Get dogs from organization
+@router.get("/dogs", status_code=200, response_model=List[Dog])
+async def get_dogs_from_organization(uid: str = Depends(firebase_uid_authentication)):
+    org = db.collection("organizations").where("id", "==", uid).get()
+    if not org:
+        raise HTTPException(status_code=404, detail="Organization not found")
+
+    return org[0].to_dict()["dogs"] if org[0].to_dict()["dogs"] else []
+
+
+# Get cats from organization
+@router.get("/cats", status_code=200, response_model=List[Cat])
+async def get_cats_from_organization(uid: str = Depends(firebase_uid_authentication)):
+    org = db.collection("organizations").where("id", "==", uid).get()
+    if not org:
+        raise HTTPException(status_code=404, detail="Organization not found")
+
+    return org[0].to_dict()["cats"] if org[0].to_dict()["cats"] else []
 
 
 # Get all organizations
@@ -334,15 +354,9 @@ async def update_organization(
         if db.collection("organizations").where("phone", "==", org_update.phone).get():
             raise HTTPException(status_code=409, detail="Phone already exists")
 
-    if org_update.name:
-        if db.collection("organizations").where("name", "==", org_update.name).get():
-            raise HTTPException(status_code=409, detail="Name already exists")
-
     # We keep a copy of the old organization
     old_org = org.copy()
 
-    if org_update.name:
-        old_org["name"] = org_update.name
     if org_update.phone:
         old_org["phone"] = org_update.phone
     if org_update.zone:
