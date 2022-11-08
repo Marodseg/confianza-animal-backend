@@ -130,24 +130,25 @@ async def enable_user(uid: str = Depends(firebase_uid_authentication)):
     return JSONResponse(status_code=200, content={"message": "User enabled"})
 
 
-@router.put("/update/{user_id}", status_code=200, response_model=UserUpdateOut)
+@router.put("/update", status_code=200, response_model=UserUpdateOut)
 async def update_user(
-    user_id: str,
     user: UserUpdateIn,
     email: str = Depends(firebase_email_authentication),
 ):
-    user_logged = db.collection("users").document(user_id).get().to_dict()
-    if exists_id_in_user(user_id):
-        if user_logged["email"] != email:
-            raise HTTPException(
-                status_code=401, detail="You are not allowed to edit the user"
-            )
-    else:
+    my_user = db.collection("users").where("email", "==", email).get()[0].to_dict()
+
+    if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
+    # We keep a copy of the old user
+    old_user = my_user.copy()
+
+    if user.name:
+        old_user["name"] = user.name
+
     try:
-        db.collection("users").document(user_id).update(user.dict())
-        user = db.collection("users").document(user_id).get().to_dict()
+        db.collection("users").document(old_user["id"]).update(old_user)
+        user = db.collection("users").document(old_user["id"]).get().to_dict()
         return user
     except Exception as e:
         raise HTTPException(status_code=401, detail=str(e))

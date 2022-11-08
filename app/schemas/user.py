@@ -12,7 +12,6 @@ class User(BaseModel):
     id: str = None
     email: str = None
     name: str
-    deleted_at: Optional[datetime.datetime]
     password: str = None
     photo: Optional[str]
     active: bool = True

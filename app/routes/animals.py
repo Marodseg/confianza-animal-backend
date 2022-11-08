@@ -1,5 +1,7 @@
 from typing import List, Optional
 
+from starlette.responses import JSONResponse
+
 from app.config.database import db, storage
 from fastapi import APIRouter, HTTPException, UploadFile, Depends
 
@@ -16,7 +18,7 @@ router = APIRouter()
 
 
 # Get all animals
-@router.get("/", status_code=200, response_model=AnimalsInDB)
+@router.get("/", status_code=200, response_model=Optional[AnimalsInDB])
 async def get_all_animals():
     animals = db.collection("animals").document("animals").get().to_dict()
     dogs = animals["dogs"]
@@ -128,6 +130,8 @@ async def upload_dog_photos(
                 dog["photos"].append(url)
 
             db.collection("animals").document("animals").update({"dogs": dogs})
-            return {"message": "Photos uploaded successfully"}
+            return JSONResponse(
+                status_code=200, content={"message": "Photos uploaded successfully"}
+            )
 
     raise HTTPException(status_code=404, detail="Error uploading photos")

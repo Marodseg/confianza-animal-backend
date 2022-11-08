@@ -15,7 +15,6 @@ class Organization(BaseModel):
     password: str = None
     phone: str
     active: bool = True
-    deleted_at: Optional[datetime.datetime]
     photo: Optional[str]
     dogs: Optional[List[Dog]]
     cats: Optional[List[Cat]]
@@ -64,6 +63,29 @@ class OrganizationCreate(BaseModel):
 
 
 class OrganizationAnimals(BaseModel):
+    name: str
+    email: str
+    phone: str
+    photo: Optional[str]
+    zone: Province
+    dogs: Optional[List[Dog]]
+    cats: Optional[List[Cat]]
+
+    class Config:
+        orm_mode = True
+
+
+class OrganizationUpdateIn(BaseModel):
+    name: Optional[str]
+    phone: Optional[str]
+    zone: Optional[Province]
+
+    class Config:
+        orm_mode = True
+
+
+class OrganizationUpdateOut(BaseModel):
+    id: str
     name: str
     email: str
     phone: str

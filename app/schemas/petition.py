@@ -10,6 +10,7 @@ class Petition(BaseModel):
     id: str = None
     user_id: str
     dog_id: Optional[str]
+    cat_id: Optional[str]
     date: datetime.datetime
     status: PetitionStatus = PetitionStatus.pending
     message: Optional[str]

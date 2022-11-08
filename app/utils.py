@@ -39,6 +39,7 @@ def exists_dog_in_animals(dog_id: str) -> bool:
     for dog in dogs:
         if dog["id"] == dog_id:
             return True
+    return False
 
 
 def exists_cat_in_animals(cat_id: str) -> bool:
@@ -46,6 +47,7 @@ def exists_cat_in_animals(cat_id: str) -> bool:
     for cat in cats:
         if cat["id"] == cat_id:
             return True
+    return False
 
 
 def get_dog_or_cat_by_filters(

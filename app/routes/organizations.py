@@ -1,3 +1,5 @@
+from typing import List
+
 from fastapi.security import OAuth2PasswordRequestForm
 from google.cloud.firestore_v1 import ArrayUnion, DELETE_FIELD, ArrayRemove
 from starlette.responses import JSONResponse
@@ -15,6 +17,8 @@ from app.schemas.organization import (
     Organization,
     OrganizationCreate,
     OrganizationAnimals,
+    OrganizationUpdateIn,
+    OrganizationUpdateOut,
 )
 from app.utils import (
     exists_email_in_organization,
@@ -37,7 +41,7 @@ async def get_user_profile(uid: str = Depends(firebase_uid_authentication)):
 
 
 # Get all organizations
-@router.get("/", status_code=200, response_model=list[OrganizationCreate])
+@router.get("/", status_code=200, response_model=List[OrganizationCreate])
 async def get_organizations():
     organizations = db.collection("organizations").get()
     return [OrganizationCreate(**org.to_dict()) for org in organizations]
@@ -58,96 +62,53 @@ async def get_organization_by_name(organization_name: str):
 
 
 # Post a dog to an organization
-@router.post("/dog/{organization_name}", status_code=200, response_model=Dog)
+@router.post("/dog", status_code=200, response_model=Dog)
 async def post_dog(
-    organization_name: str,
     dog: Dog,
-    email: str = Depends(firebase_email_authentication),
+    uid: str = Depends(firebase_uid_authentication),
 ):
-    if exists_name_in_organization(organization_name):
-        if (
-            db.collection("organizations")
-            .document(organization_name)
-            .get()
-            .to_dict()["email"]
-            == email
-        ):
-            # Generate a random id for the dog
-            dog.id = generate_uuid()
-            # Include the organization data in the dog
-            dog.organization_name = organization_name
-            dog.organization_phone = (
-                db.collection("organizations")
-                .document(organization_name)
-                .get()
-                .to_dict()["phone"]
-            )
-            dog.organization_photo = (
-                db.collection("organizations")
-                .document(organization_name)
-                .get()
-                .to_dict()["photo"]
-            )
+    org = db.collection("organizations").where("id", "==", uid).get()[0].to_dict()
 
-            db.collection("organizations").document(organization_name).update(
-                {"dogs": ArrayUnion([dog.dict()])}
-            )
-            db.collection("animals").document("animals").set(
-                {"dogs": ArrayUnion([dog.dict()])}, merge=True
-            )
-            return dog
-        else:
-            raise HTTPException(
-                status_code=401, detail="You are not authorized to do this"
-            )
-    else:
+    if not org:
         raise HTTPException(status_code=404, detail="Organization not found")
+
+    dog.id = generate_uuid()
+    dog.organization_name = org["name"]
+    dog.organization_phone = org["phone"]
+    dog.organization_photo = org["photo"]
+
+    db.collection("organizations").document(org["name"]).update(
+        {"dogs": ArrayUnion([dog.dict()])}
+    )
+    db.collection("animals").document("animals").set(
+        {"dogs": ArrayUnion([dog.dict()])}, merge=True
+    )
+    return dog
 
 
 # Post a cat to an organization
-@router.post("/cat/{organization_name}", status_code=200, response_model=Cat)
+@router.post("/cat", status_code=200, response_model=Cat)
 async def post_cat(
-    organization_name: str,
     cat: Cat,
-    email: str = Depends(firebase_email_authentication),
+    uid: str = Depends(firebase_uid_authentication),
 ):
-    if db.collection("organizations").document(organization_name).get().exists:
-        if (
-            db.collection("organizations")
-            .document(organization_name)
-            .get()
-            .to_dict()["email"]
-            == email
-        ):
-            # Generate a unique id for the cat
-            cat.id = generate_uuid()
-            # Include the organization data in the cat
-            cat.organization_name = organization_name
-            cat.organization_phone = (
-                db.collection("organizations")
-                .document(organization_name)
-                .get()
-                .to_dict()["phone"]
-            )
-            cat.organization_photo = (
-                db.collection("organizations")
-                .document(organization_name)
-                .get()
-                .to_dict()["photo"]
-            )
-            db.collection("organizations").document(organization_name).update(
-                {"cats": ArrayUnion([cat.dict()])}
-            )
-            db.collection("animals").document("animals").set(
-                {"cats": ArrayUnion([cat.dict()])}, merge=True
-            )
-            return cat
-        else:
-            raise HTTPException(
-                status_code=401, detail="You are not authorized to do this"
-            )
-    else:
+    org = db.collection("organizations").where("id", "==", uid).get()[0].to_dict()
+
+    if not org:
         raise HTTPException(status_code=404, detail="Organization not found")
+
+    cat.id = generate_uuid()
+    cat.organization_name = org["name"]
+    cat.organization_phone = org["phone"]
+    cat.organization_photo = org["photo"]
+
+    db.collection("organizations").document(org["name"]).update(
+        {"cats": ArrayUnion([cat.dict()])}
+    )
+    db.collection("animals").document("animals").set(
+        {"cats": ArrayUnion([cat.dict()])}, merge=True
+    )
+    return cat
 
 
 # Register an organization
@@ -252,137 +213,101 @@ async def upload_profile_photo_organization(
 # Modify a dog from an organization
 @router.put("/dog/{dog_id}", status_code=200, response_model=Dog)
 async def modify_dog(
-    organization_name: str,
     dog_id: str,
     new_dog: DogUpdate,
-    email: str = Depends(firebase_email_authentication),
+    uid: str = Depends(firebase_uid_authentication),
 ):
-    if exists_name_in_organization(organization_name):
+    org = db.collection("organizations").where("id", "==", uid).get()[0].to_dict()
 
-        # check if the email is the same as the organization email
-        if (
-            db.collection("organizations")
-            .document(organization_name)
-            .get()
-            .to_dict()["email"]
-            == email
-        ):
-
-            dogs = (
-                db.collection("organizations")
-                .document(organization_name)
-                .get()
-                .to_dict()["dogs"]
-            )
-
-            for (count, dog) in enumerate(dogs, start=1):
-                if dog["id"] == dog_id:
-                    # We keep a copy of the old dog
-                    old_dog = dog.copy()
-
-                    # We keep the same id as it was
-                    new_dog.id = dog_id
-                    for key, value in new_dog.dict().items():
-                        if value is not None:  # Only the fields that are updated
-                            dog[key] = value
-
-                    new_dog = dog.copy()
-
-                    # We update the dog in the organization
-                    db.collection("organizations").document(organization_name).update(
-                        {"dogs": ArrayRemove([old_dog])}
-                    )
-                    db.collection("organizations").document(organization_name).update(
-                        {"dogs": ArrayUnion([new_dog])}
-                    )
-                    # We update the dog in the global animals
-                    db.collection("animals").document("animals").update(
-                        {"dogs": ArrayRemove([old_dog])}
-                    )
-                    db.collection("animals").document("animals").update(
-                        {"dogs": ArrayUnion([new_dog])}
-                    )
-                    return new_dog
-                else:
-                    # In case there are no more
-                    if len(dogs) == count:
-                        raise HTTPException(status_code=404, detail="Dog not found")
-        else:
-            raise HTTPException(
-                status_code=401, detail="You are not authorized to do this"
-            )
-    else:
+    if not org:
         raise HTTPException(status_code=404, detail="Organization not found")
+
+    dogs = db.collection("organizations").document(org["name"]).get().to_dict()["dogs"]
+
+    for (count, dog) in enumerate(dogs, start=1):
+        if dog["id"] == dog_id:
+            # We keep a copy of the old dog
+            old_dog = dog.copy()
+
+            # We keep the same id as it was
+            new_dog.id = dog_id
+            for key, value in new_dog.dict().items():
+                if value is not None:  # Only the fields that are updated
+                    dog[key] = value
+
+            new_dog = dog.copy()
+
+            # We update the dog in the organization
+            db.collection("organizations").document(org["name"]).update(
+                {"dogs": ArrayRemove([old_dog])}
+            )
+            db.collection("organizations").document(org["name"]).update(
+                {"dogs": ArrayUnion([new_dog])}
+            )
+            # We update the dog in the global animals
+            db.collection("animals").document("animals").update(
+                {"dogs": ArrayRemove([old_dog])}
+            )
+            db.collection("animals").document("animals").update(
+                {"dogs": ArrayUnion([new_dog])}
+            )
+            return new_dog
+        else:
+            # In case there are no more
+            if len(dogs) == count:
+                raise HTTPException(status_code=404, detail="Dog not found")
 
 
 # Modify a cat from an organization
 @router.put("/cat/{cat_id}", status_code=200, response_model=Cat)
 async def modify_cat(
-    organization_name: str,
     cat_id: str,
     new_cat: CatUpdate,
-    email: str = Depends(firebase_email_authentication),
+    uid: str = Depends(firebase_uid_authentication),
 ):
-    if exists_name_in_organization(organization_name):
+    org = db.collection("organizations").where("id", "==", uid).get()[0].to_dict()
 
-        # check if the email is the same as the organization email
-        if (
-            db.collection("organizations")
-            .document(organization_name)
-            .get()
-            .to_dict()["email"]
-            == email
-        ):
-
-            cats = (
-                db.collection("organizations")
-                .document(organization_name)
-                .get()
-                .to_dict()["cats"]
-            )
-
-            for (count, cat) in enumerate(cats, start=1):
-                if cat["id"] == cat_id:
-                    # We keep a copy of the old cat
-                    old_cat = cat.copy()
-
-                    # We keep the same id as it was
-                    new_cat.id = cat_id
-                    for key, value in new_cat.dict().items():
-                        if value is not None:  # Only the fields that are updated
-                            cat[key] = value
-
-                    new_cat = cat.copy()
-
-                    # We update the cat in the organization
-                    db.collection("organizations").document(organization_name).update(
-                        {"cats": ArrayRemove([old_cat])}
-                    )
-                    db.collection("organizations").document(organization_name).update(
-                        {"cats": ArrayUnion([new_cat])}
-                    )
-
-                    # We update the cat in the global animals
-                    db.collection("animals").document("animals").update(
-                        {"cats": ArrayRemove([old_cat])}
-                    )
-                    db.collection("animals").document("animals").update(
-                        {"cats": ArrayUnion([new_cat])}
-                    )
-                    return new_cat
-                else:
-                    # In case there are no more
-                    if len(cats) == count:
-                        raise HTTPException(status_code=404, detail="Cat not found")
-        else:
-            raise HTTPException(
-                status_code=401, detail="You are not authorized to do this"
-            )
-    else:
+    if not org:
         raise HTTPException(status_code=404, detail="Organization not found")
 
+    cats = db.collection("organizations").document(org["name"]).get().to_dict()["cats"]
 
-# enable organization
+    for (count, cat) in enumerate(cats, start=1):
+        if cat["id"] == cat_id:
+            # We keep a copy of the old cat
+            old_cat = cat.copy()
+
+            # We keep the same id as it was
+            new_cat.id = cat_id
+            for key, value in new_cat.dict().items():
+                if value is not None:  # Only the fields that are updated
+                    cat[key] = value
+
+            new_cat = cat.copy()
+
+            # We update the cat in the organization
+            db.collection("organizations").document(org["name"]).update(
+                {"cats": ArrayRemove([old_cat])}
+            )
+            db.collection("organizations").document(org["name"]).update(
+                {"cats": ArrayUnion([new_cat])}
+            )
+
+            # We update the cat in the global animals
+            db.collection("animals").document("animals").update(
+                {"cats": ArrayRemove([old_cat])}
+            )
+            db.collection("animals").document("animals").update(
+                {"cats": ArrayUnion([new_cat])}
+            )
+            return new_cat
+        else:
+            # In case there are no more
+            if len(cats) == count:
+                raise HTTPException(status_code=404, detail="Cat not found")
+
+
+# Enable organization
 @router.put("/enable", status_code=200)
 async def enable_organization(uid: str = Depends(firebase_uid_authentication)):
     org = db.collection("organizations").where("id", "==", uid).get()[0].to_dict()
@@ -392,6 +317,45 @@ async def enable_organization(uid: str = Depends(firebase_uid_authentication)):
 
     db.collection("organizations").document(org["name"]).update({"active": True})
     return JSONResponse(status_code=200, content={"message": "Organization enabled"})
+
+
+# Update organization
+@router.put("/update", status_code=200, response_model=OrganizationUpdateOut)
+async def update_organization(
+    org_update: OrganizationUpdateIn, uid: str = Depends(firebase_uid_authentication)
+):
+    org = db.collection("organizations").where("id", "==", uid).get()[0].to_dict()
+
+    if not org:
+        raise HTTPException(status_code=404, detail="Organization not found")
+
+    # Check if the changes exists in the database
+    if org_update.phone:
+        if db.collection("organizations").where("phone", "==", org_update.phone).get():
+            raise HTTPException(status_code=409, detail="Phone already exists")
+
+    if org_update.name:
+        if db.collection("organizations").where("name", "==", org_update.name).get():
+            raise HTTPException(status_code=409, detail="Name already exists")
+
+    # We keep a copy of the old organization
+    old_org = org.copy()
+
+    if org_update.name:
+        old_org["name"] = org_update.name
+    if org_update.phone:
+        old_org["phone"] = org_update.phone
+    if org_update.zone:
+        old_org["zone"] = org_update.zone
+
+    try:
+        db.collection("organizations").document(old_org["name"]).update(old_org)
+        new_org = (
+            db.collection("organizations").document(old_org["name"]).get().to_dict()
+        )
+        return new_org
+    except Exception as e:
+        raise HTTPException(status_code=401, detail=str(e))
 
 
 # delete organization
