@@ -2,8 +2,8 @@ from fastapi.security import OAuth2PasswordRequestForm
 from google.cloud.firestore_v1 import ArrayUnion, DELETE_FIELD, ArrayRemove
 from starlette.responses import JSONResponse
 
-from app.config.database import db, firebase_admin_auth, pyrebase_auth
-from fastapi import APIRouter, HTTPException, Depends
+from app.config.database import db, firebase_admin_auth, pyrebase_auth, storage
+from fastapi import APIRouter, HTTPException, Depends, UploadFile
 
 from app.routes.auth import (
     firebase_email_authentication,
@@ -219,6 +219,36 @@ async def login_organization(form_data: OAuth2PasswordRequestForm = Depends()):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
 
+# Upload photo profile
+@router.post("/upload/photo", status_code=200)
+async def upload_profile_photo_organization(
+    file: UploadFile, email: str = Depends(firebase_email_authentication)
+):
+    org = db.collection("organizations").where("email", "==", email).get()[0].to_dict()
+
+    try:
+        # Upload a photo to Firebase Storage ensuring that the file is an image
+        if file.content_type.startswith("image/"):
+            # Get the file extension
+            extension = file.filename.split(".")[-1]
+
+            # Generate a random name for the file
+            filename = "profile_photo"  # Here we can add the extension
+            # But we want to overwrite the previous photo
+
+            # Upload the file and delete the previous one
+            storage.child(f"organizations/{org['name']}/{filename}").put(file.file)
+            # Get the url of the uploaded file
+            url = storage.child(f"organizations/{org['name']}/{filename}").get_url(None)
+            # Update the user's photo
+            db.collection("organizations").document(org["name"]).update({"photo": url})
+            return JSONResponse(status_code=200, content={"message": "Photo uploaded"})
+        else:
+            raise HTTPException(status_code=401, detail="File is not an image")
+    except Exception as e:
+        raise HTTPException(status_code=401, detail="File is not an image")
+
+
 # Modify a dog from an organization
 @router.put("/dog/{dog_id}", status_code=200, response_model=Dog)
 async def modify_dog(
@@ -353,50 +383,24 @@ async def modify_cat(
 
 
 # enable organization
-@router.put("/enable/{organization_name}", status_code=200)
-async def enable_organization(
-    organization_name: str, email: str = Depends(firebase_email_authentication)
-):
-    if exists_name_in_organization(organization_name):
-        if (
-            db.collection("organizations")
-            .document(organization_name)
-            .get()
-            .to_dict()["email"]
-            == email
-        ):
-            db.collection("organizations").document(organization_name).update(
-                {"active": True}
-            )
-            return {"message": "Organization enabled"}
-        else:
-            raise HTTPException(
-                status_code=401, detail="You are not authorized to do this"
-            )
-    else:
-        raise HTTPException(status_code=404, detail="Organization not found")
+@router.put("/enable", status_code=200)
+async def enable_organization(uid: str = Depends(firebase_uid_authentication)):
+    org = db.collection("organizations").where("id", "==", uid).get()[0].to_dict()
+
+    if org["active"]:
+        raise HTTPException(status_code=400, detail="Organization already enabled")
+
+    db.collection("organizations").document(org["name"]).update({"active": True})
+    return JSONResponse(status_code=200, content={"message": "Organization enabled"})
 
 
 # delete organization
-@router.delete("/delete/{organization_name}", status_code=200)
-async def delete_organization(
-    organization_name: str, email: str = Depends(firebase_email_authentication)
-):
-    if exists_name_in_organization(organization_name):
-        if (
-            db.collection("organizations")
-            .document(organization_name)
-            .get()
-            .to_dict()["email"]
-            == email
-        ):
-            db.collection("organizations").document(organization_name).update(
-                {"active": False}
-            )
-            return {"message": "Organization deleted"}
-        else:
-            raise HTTPException(
-                status_code=401, detail="You are not authorized to do this"
-            )
-    else:
-        raise HTTPException(status_code=404, detail="Organization not found")
+@router.delete("/disable", status_code=200)
+async def delete_organization(uid: str = Depends(firebase_uid_authentication)):
+    org = db.collection("organizations").where("id", "==", uid).get()[0].to_dict()
+
+    if not org["active"]:
+        raise HTTPException(status_code=401, detail="Organization already disabled")
+
+    db.collection("organizations").document(org["name"]).update({"active": False})
+    return JSONResponse(status_code=200, content={"message": "Organization disabled"})

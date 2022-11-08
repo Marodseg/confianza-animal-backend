@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
+from starlette.responses import JSONResponse
 
 from app.config.database import firebase_admin_auth, pyrebase_auth
 
@@ -31,7 +32,9 @@ async def firebase_uid_authentication(
 async def reset_password(email: str):
     try:
         pyrebase_auth.send_password_reset_email(email)
-        return {"message": "Email sent to " + email}
+        return JSONResponse(
+            status_code=200, content={"message": "Email sent to " + email}
+        )
     except:
         # In order to avoid hack attempts, we don't return any error message
         # if the email doesn't exist that way we don't give any information to the attacker

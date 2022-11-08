@@ -16,4 +16,3 @@ class CatRaze(str, Enum):
     egyptian_mau = "egyptian_mau"
     european_shorthair = "european_shorthair"
     other = "other"
-    # add more cat raze here

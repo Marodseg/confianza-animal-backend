@@ -1,5 +1,5 @@
 import datetime
-from typing import List
+from typing import List, Optional
 
 from app.config.database import db
 from fastapi import APIRouter, HTTPException, Depends
@@ -13,7 +13,11 @@ router = APIRouter()
 
 # Create a petition for a dog
 @router.post("/{dog_id}", status_code=200, response_model=Petition)
-async def ask_for_dog(dog_id: str, email: str = Depends(firebase_email_authentication)):
+async def ask_for_dog(
+    dog_id: str,
+    message: Optional[str],
+    email: str = Depends(firebase_email_authentication),
+):
     user = db.collection("users").where("email", "==", email).get()[0].to_dict()
     try:
         if exists_dog_in_animals(dog_id):
@@ -22,6 +26,7 @@ async def ask_for_dog(dog_id: str, email: str = Depends(firebase_email_authentic
                 user_id=user["id"],
                 dog_id=dog_id,
                 date=datetime.datetime.now(),
+                message=message,
             )
             db.collection("petitions").document(petition.id).set(petition.dict())
             return petition
@@ -31,7 +36,11 @@ async def ask_for_dog(dog_id: str, email: str = Depends(firebase_email_authentic
 
 # Create a petition for a cat
 @router.post("/{cat_id}", status_code=200, response_model=Petition)
-async def ask_for_cat(cat_id: str, email: str = Depends(firebase_email_authentication)):
+async def ask_for_cat(
+    cat_id: str,
+    message: Optional[str],
+    email: str = Depends(firebase_email_authentication),
+):
     user = db.collection("users").where("email", "==", email).get()[0].to_dict()
     try:
         if exists_cat_in_animals(cat_id):
@@ -40,6 +49,7 @@ async def ask_for_cat(cat_id: str, email: str = Depends(firebase_email_authentic
                 user_id=user["id"],
                 cat_id=cat_id,
                 date=datetime.datetime.now(),
+                message=message,
             )
             db.collection("petitions").document(petition.id).set(petition.dict())
             return petition

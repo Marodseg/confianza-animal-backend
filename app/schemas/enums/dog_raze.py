@@ -50,4 +50,3 @@ class DogRaze(str, Enum):
     boston_terrier = "boston terrier"
     bouvier_des_flandres = "bouvier des flandres"
     other = "other"
-    # ... add more dog raze here

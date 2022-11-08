@@ -36,8 +36,8 @@ class Organization(BaseModel):
 
     @validator("password")
     def password_must_be_valid(cls, v) -> str:
-        if not v:
-            raise ValueError("Password can not be empty")
+        if len(v) < 6:
+            raise ValueError("Password must have 6 characters at least")
         return v
 
     class Config:
@@ -67,6 +67,7 @@ class OrganizationAnimals(BaseModel):
     name: str
     email: str
     phone: str
+    photo: Optional[str]
     zone: Province
     dogs: Optional[List[Dog]]
     cats: Optional[List[Cat]]

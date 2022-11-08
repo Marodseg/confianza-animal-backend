@@ -117,7 +117,20 @@ async def login_user(form_data: OAuth2PasswordRequestForm = Depends()):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
 
-@router.put("/{user_id}", status_code=200, response_model=UserUpdateOut)
+# Enable user
+@router.put("/enable", status_code=200)
+async def enable_user(uid: str = Depends(firebase_uid_authentication)):
+    user = db.collection("users").where("id", "==", uid).get()[0].to_dict()
+
+    if user["active"]:
+        raise HTTPException(status_code=400, detail="User already active")
+
+    db.collection("users").document(uid).update({"active": True})
+
+    return JSONResponse(status_code=200, content={"message": "User enabled"})
+
+
+@router.put("/update/{user_id}", status_code=200, response_model=UserUpdateOut)
 async def update_user(
     user_id: str,
     user: UserUpdateIn,
@@ -140,46 +153,16 @@ async def update_user(
         raise HTTPException(status_code=401, detail=str(e))
 
 
-# Enable user
-@router.put("/enable/{user_id}", status_code=200)
-async def enable_user(
-    user_id: str, email: str = Depends(firebase_email_authentication)
-):
-    user_logged = db.collection("users").document(user_id).get().to_dict()
-    if exists_id_in_user(user_id):
-        if user_logged["email"] != email:
-            raise HTTPException(
-                status_code=401, detail="You are not allowed to enable the user"
-            )
-    else:
-        raise HTTPException(status_code=404, detail="User not found")
+# Disable user
+@router.put("/disable", status_code=200)
+async def disable_user(uid: str = Depends(firebase_uid_authentication)):
+    user = db.collection("users").where("id", "==", uid).get()[0].to_dict()
 
-    try:
-        db.collection("users").document(user_id).update({"active": True})
-        return JSONResponse(status_code=200, content={"message": "User enabled"})
-    except Exception as e:
-        raise HTTPException(status_code=401, detail=str(e))
+    if not user["active"]:
+        raise HTTPException(status_code=400, detail="User already disabled")
 
-
-# Delete user
-@router.delete("/delete/{user_id}", status_code=200)
-async def delete_user(
-    user_id: str, email: str = Depends(firebase_email_authentication)
-):
-    user_logged = db.collection("users").document(user_id).get().to_dict()
-    if exists_id_in_user(user_id):
-        if user_logged["email"] != email:
-            raise HTTPException(
-                status_code=401, detail="You are not allowed to delete the user"
-            )
-    else:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    try:
-        db.collection("users").document(user_id).update({"active": False})
-        return JSONResponse(status_code=200, content={"message": "User deleted"})
-    except Exception as e:
-        raise HTTPException(status_code=401, detail=str(e))
+    db.collection("users").document(uid).update({"active": False})
+    return JSONResponse(status_code=200, content={"message": "User disabled"})
 
 
 # Upload photo profile
