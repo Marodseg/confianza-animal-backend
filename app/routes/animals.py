@@ -5,7 +5,7 @@ from starlette.responses import JSONResponse
 from app.config.database import db, storage
 from fastapi import APIRouter, HTTPException, UploadFile, Depends
 
-from app.routes.auth import firebase_email_authentication, firebase_uid_authentication
+from app.routes.auth import firebase_uid_authentication
 from app.schemas.animal import Dog, Cat, AnimalsInDB
 from app.schemas.enums.activity import Activity
 from app.schemas.enums.cat_raze import CatRaze
@@ -179,3 +179,75 @@ async def upload_cat_photos(
             )
 
     raise HTTPException(status_code=404, detail="Error uploading photos")
+
+
+# Delete photo from dog
+@router.delete("/dog/{dog_id}/photo", status_code=200)
+async def delete_dog_photo(
+    dog_id: str,
+    photo_url: str,
+    uid: str = Depends(firebase_uid_authentication),
+):
+    my_org = db.collection("organizations").where("id", "==", uid).get()[0].to_dict()
+
+    if not my_org:
+        raise HTTPException(status_code=404, detail="You are not an organization")
+
+    animals = db.collection("animals").document("animals").get().to_dict()
+    dogs = animals["dogs"]
+
+    for dog in dogs:
+        if dog["id"] == dog_id:
+            if dog["organization_name"] != my_org["name"]:
+                raise HTTPException(
+                    status_code=403, detail="You are not the owner of this dog"
+                )
+
+            if photo_url not in dog["photos"]:
+                raise HTTPException(status_code=404, detail="Photo not found")
+
+            dog["photos"].remove(photo_url)
+            db.collection("animals").document("animals").set({"dogs": dogs}, merge=True)
+            db.collection("organizations").document(my_org["name"]).set(
+                {"dogs": dogs},
+                merge=True,
+            )
+            return JSONResponse(
+                status_code=200, content={"message": "Photo deleted successfully"}
+            )
+
+    raise HTTPException(status_code=404, detail="Error deleting photo")
+
+
+# Delete photo from cat
+@router.delete("/cat/{cat_id}/photo", status_code=200)
+async def delete_cat_photo(
+    cat_id: str,
+    photo_url: str,
+    uid: str = Depends(firebase_uid_authentication),
+):
+    my_org = db.collection("organizations").where("id", "==", uid).get()[0].to_dict()
+
+    animals = db.collection("animals").document("animals").get().to_dict()
+    cats = animals["cats"]
+
+    for cat in cats:
+        if cat["id"] == cat_id:
+            if cat["organization_name"] != my_org["name"]:
+                raise HTTPException(
+                    status_code=403, detail="You are not the owner of this cat"
+                )
+
+            if photo_url not in cat["photos"]:
+                raise HTTPException(status_code=404, detail="Photo not found")
+
+            cat["photos"].remove(photo_url)
+            db.collection("animals").document("animals").update({"cats": cats})
+            db.collection("organizations").document(my_org["name"]).update(
+                {"cats": cats}
+            )
+            return JSONResponse(
+                status_code=200, content={"message": "Photo deleted successfully"}
+            )
+
+    raise HTTPException(status_code=404, detail="Error deleting photo")
