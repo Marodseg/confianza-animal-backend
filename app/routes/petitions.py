@@ -22,21 +22,30 @@ async def ask_for_dog(
     email: str = Depends(firebase_email_authentication),
 ):
     user = db.collection("users").where("email", "==", email).get()[0].to_dict()
-    try:
-        if exists_dog_in_animals(dog_id):
-            petition = Petition(
-                id=generate_uuid(),
-                user_id=user["id"],
-                dog_id=dog_id,
-                date=datetime.datetime.now(),
-                message=message,
-            )
-            db.collection("petitions").document(petition.id).set(
-                petition.dict(), merge=True
-            )
-            return petition
-    except HTTPException:
-        raise HTTPException(status_code=400, detail="Error creating petition")
+    animals = AnimalsInDB(
+        **db.collection("animals").document("animals").get().to_dict()
+    )
+    dogs = animals.dogs
+    dog = next((dog for dog in dogs if dog.id == dog_id), None)
+
+    if dog:
+        try:
+            if exists_dog_in_animals(dog_id):
+                petition = Petition(
+                    id=generate_uuid(),
+                    user_id=user["id"],
+                    dog=dog,
+                    date=datetime.datetime.now(),
+                    message=message,
+                )
+                db.collection("petitions").document(petition.id).set(
+                    petition.dict(), merge=True
+                )
+                return petition
+        except HTTPException:
+            raise HTTPException(status_code=400, detail="Error creating petition")
+    else:
+        raise HTTPException(status_code=404, detail="Dog not found")
 
 
 # Create a petition for a cat
@@ -47,27 +56,38 @@ async def ask_for_cat(
     email: str = Depends(firebase_email_authentication),
 ):
     user = db.collection("users").where("email", "==", email).get()[0].to_dict()
-    try:
-        if exists_cat_in_animals(cat_id):
-            petition = Petition(
-                id=generate_uuid(),
-                user_id=user["id"],
-                cat_id=cat_id,
-                date=datetime.datetime.now(),
-                message=message,
-            )
-            db.collection("petitions").document(petition.id).set(
-                petition.dict(), merge=True
-            )
-            return petition
-    except HTTPException:
-        raise HTTPException(status_code=400, detail="Error creating petition")
+    animals = AnimalsInDB(
+        **db.collection("animals").document("animals").get().to_dict()
+    )
+    cats = animals.cats
+    cat = next((cat for cat in cats if cat.id == cat_id), None)
+
+    if cat:
+        try:
+            if exists_cat_in_animals(cat_id):
+                petition = Petition(
+                    id=generate_uuid(),
+                    user_id=user["id"],
+                    cat=cat,
+                    date=datetime.datetime.now(),
+                    message=message,
+                )
+                db.collection("petitions").document(petition.id).set(
+                    petition.dict(), merge=True
+                )
+                return petition
+        except HTTPException:
+            raise HTTPException(status_code=400, detail="Error creating petition")
+    else:
+        raise HTTPException(status_code=404, detail="Cat not found")
 
 
 # Get petition by user id
-@router.get("/{user_id}", status_code=200, response_model=List[Petition])
-async def get_petition_by_user_id(user_id: str):
-    petitions = db.collection("petitions").where("user_id", "==", user_id).get()
+@router.get("/user", status_code=200, response_model=List[Petition])
+async def get_petition_by_user_id(email: str = Depends(firebase_email_authentication)):
+    user = db.collection("users").where("email", "==", email).get()[0].to_dict()
+
+    petitions = db.collection("petitions").where("user_id", "==", user["id"]).get()
     if not petitions:
         raise HTTPException(status_code=404, detail="Petition not found")
 

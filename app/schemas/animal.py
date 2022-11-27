@@ -16,7 +16,7 @@ class Animal(BaseModel):
     name: str
     age: int
     gender: Gender
-    photos: List[str]
+    photos: Optional[List[str]] = []
     weight: float
     size: Size
     neutered: bool

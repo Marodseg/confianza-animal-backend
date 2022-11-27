@@ -3,14 +3,15 @@ from typing import Optional
 
 from pydantic import BaseModel
 
+from app.schemas.animal import Cat, Dog
 from app.schemas.enums.petition_status import PetitionStatus
 
 
 class Petition(BaseModel):
     id: str = None
     user_id: str
-    dog_id: Optional[str]
-    cat_id: Optional[str]
+    dog: Optional[Dog]
+    cat: Optional[Cat]
     date: datetime.datetime
     status: PetitionStatus = PetitionStatus.pending
     message: Optional[str]
@@ -20,8 +21,8 @@ class Petition(BaseModel):
         schema_extra = {
             "example": {
                 "user_id": "1",
-                "dog_id": "1",
-                "cat_id": "1",
+                "dog": "{}",
+                "cat": "{}",
                 "date": datetime.datetime.now(),
                 "status": PetitionStatus.pending,
                 "message": "Prueba",
