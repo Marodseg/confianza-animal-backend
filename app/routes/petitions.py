@@ -37,6 +37,7 @@ async def ask_for_dog(
                     dog=dog,
                     date=datetime.datetime.now(),
                     message=message,
+                    organization_name=dog.organization_name,
                 )
                 db.collection("petitions").document(petition.id).set(
                     petition.dict(), merge=True
@@ -71,6 +72,7 @@ async def ask_for_cat(
                     cat=cat,
                     date=datetime.datetime.now(),
                     message=message,
+                    organization_name=cat.organization_name,
                 )
                 db.collection("petitions").document(petition.id).set(
                     petition.dict(), merge=True
@@ -82,9 +84,9 @@ async def ask_for_cat(
         raise HTTPException(status_code=404, detail="Cat not found")
 
 
-# Get petition by user id
+# Get petition by user logged
 @router.get("/user", status_code=200, response_model=List[Petition])
-async def get_petition_by_user_id(email: str = Depends(firebase_email_authentication)):
+async def get_petition_by_user(email: str = Depends(firebase_email_authentication)):
     user = db.collection("users").where("email", "==", email).get()[0].to_dict()
 
     petitions = db.collection("petitions").where("user_id", "==", user["id"]).get()
@@ -92,6 +94,22 @@ async def get_petition_by_user_id(email: str = Depends(firebase_email_authentica
         raise HTTPException(status_code=404, detail="Petition not found")
 
     return [Petition(**petition.to_dict()) for petition in petitions]
+
+
+# Get petition from organization logged
+@router.get("/organization", status_code=200, response_model=List[Petition])
+async def get_petition_by_organization(
+    uid: str = Depends(firebase_uid_authentication),
+):
+    org = db.collection("organizations").where("id", "==", uid).get()[0].to_dict()
+    petitions = (
+        db.collection("petitions")
+        .where("organization_name", "==", org["name"])
+        .get()[0]
+        .to_dict()
+    )
+
+    return [petitions]
 
 
 # Reject a petition by id by user

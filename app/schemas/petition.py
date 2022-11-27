@@ -15,6 +15,7 @@ class Petition(BaseModel):
     date: datetime.datetime
     status: PetitionStatus = PetitionStatus.pending
     message: Optional[str]
+    organization_name: Optional[str]
 
     class Config:
         orm_mode = True
@@ -26,5 +27,6 @@ class Petition(BaseModel):
                 "date": datetime.datetime.now(),
                 "status": PetitionStatus.pending,
                 "message": "Prueba",
+                "organization_name": "Prueba",
             }
         }
