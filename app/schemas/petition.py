@@ -10,11 +10,13 @@ from app.schemas.enums.petition_status import PetitionStatus
 class Petition(BaseModel):
     id: str = None
     user_id: str
+    user_name: str
+    user_email: str
     dog: Optional[Dog]
     cat: Optional[Cat]
     date: datetime.datetime
     status: PetitionStatus = PetitionStatus.pending
-    message: Optional[str]
+    message: str
     organization_name: Optional[str]
 
     class Config:
@@ -22,6 +24,8 @@ class Petition(BaseModel):
         schema_extra = {
             "example": {
                 "user_id": "1",
+                "user_name": "Prueba",
+                "user_email": "prueba@prueba.com",
                 "dog": "{}",
                 "cat": "{}",
                 "date": datetime.datetime.now(),

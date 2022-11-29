@@ -102,10 +102,6 @@ app = FastAPI(
         "url": "http://linkedin.com/in/marodseg",
         "email": "manuelangelrodriguezsegura@gmail.com",
     },
-    license_info={
-        "name": "License Apache 2.0",
-        "url": "https://www.apache.org/licenses/LICENSE-2.0",
-    },
 )
 
 origins = [

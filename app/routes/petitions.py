@@ -34,6 +34,8 @@ async def ask_for_dog(
                 petition = Petition(
                     id=generate_uuid(),
                     user_id=user["id"],
+                    user_name=user["name"],
+                    user_email=user["email"],
                     dog=dog,
                     date=datetime.datetime.now(),
                     message=message,
@@ -69,6 +71,8 @@ async def ask_for_cat(
                 petition = Petition(
                     id=generate_uuid(),
                     user_id=user["id"],
+                    user_name=user["name"],
+                    user_email=user["email"],
                     cat=cat,
                     date=datetime.datetime.now(),
                     message=message,
@@ -103,13 +107,9 @@ async def get_petition_by_organization(
 ):
     org = db.collection("organizations").where("id", "==", uid).get()[0].to_dict()
     petitions = (
-        db.collection("petitions")
-        .where("organization_name", "==", org["name"])
-        .get()[0]
-        .to_dict()
+        db.collection("petitions").where("organization_name", "==", org["name"]).get()
     )
-
-    return [petitions]
+    return [Petition(**petition.to_dict()) for petition in petitions]
 
 
 # Reject a petition by id by user
@@ -146,39 +146,32 @@ async def reject_petition_by_organization(
 ):
     org = db.collection("organizations").where("id", "==", uid).get()[0].to_dict()
 
-    petitions = db.collection("petitions").get()
-    animals = AnimalsInDB(
-        **db.collection("animals").document("animals").get().to_dict()
-    )
-    dogs = animals.dogs
-    cats = animals.cats
+    petition = db.collection("petitions").document(petition_id).get().to_dict()
 
-    for petition in petitions:
-        if petition.id == petition_id:
-            petition = petition.to_dict()
+    if petition["organization_name"] != org["name"]:
+        raise HTTPException(
+            status_code=404,
+            detail="The organization is not the owner of the animal",
+        )
 
-            if petition["dog_id"]:
-                dog = [dog for dog in dogs if dog.id == petition["dog_id"]][0]
-                if dog.organization_name != org["name"]:
-                    raise HTTPException(
-                        status_code=404,
-                        detail="The organization is not the owner of the dog",
-                    )
+    db.collection("petitions").document(petition_id).update({"status": "rejected"})
+    return JSONResponse(status_code=200, content={"message": "Petition rejected"})
 
-            if petition["cat_id"]:
-                cat = [cat for cat in cats if cat.id == petition["cat_id"]][0]
-                if cat.organization_name != org["name"]:
-                    raise HTTPException(
-                        status_code=404,
-                        detail="The organization is not the owner of the cat",
-                    )
 
-            # update the status of the petition
-            db.collection("petitions").document(petition_id).update(
-                {"status": "rejected"}
-            )
-            return JSONResponse(
-                status_code=200, content={"message": "Petition rejected"}
-            )
+# Accept a petition by id by organization
+@router.put("/{petition_id}/organization", status_code=200)
+async def accept_petition_by_organization(
+    petition_id: str, uid: str = Depends(firebase_uid_authentication)
+):
+    org = db.collection("organizations").where("id", "==", uid).get()[0].to_dict()
 
-    raise HTTPException(status_code=404, detail="Petition not found")
+    petition = db.collection("petitions").document(petition_id).get().to_dict()
+
+    if petition["organization_name"] != org["name"]:
+        raise HTTPException(
+            status_code=404,
+            detail="The organization is not the owner of the animal",
+        )
+
+    db.collection("petitions").document(petition_id).update({"status": "approved"})
+    return JSONResponse(status_code=200, content={"message": "Petition accepted"})
