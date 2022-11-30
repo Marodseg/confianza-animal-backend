@@ -29,6 +29,16 @@ async def ask_for_dog(
     dog = next((dog for dog in dogs if dog.id == dog_id), None)
 
     if dog:
+        petitions = db.collection("petitions").where("user_id", "==", user["id"]).get()
+
+        for petition in petitions:
+            petition = Petition(**petition.to_dict())
+            if petition.dog:
+                if petition.dog.id == dog_id:
+                    raise HTTPException(
+                        status_code=400,
+                        detail="You already have a petition for this dog",
+                    )
         try:
             if exists_dog_in_animals(dog_id):
                 petition = Petition(
@@ -66,6 +76,15 @@ async def ask_for_cat(
     cat = next((cat for cat in cats if cat.id == cat_id), None)
 
     if cat:
+        petitions = db.collection("petitions").where("user_id", "==", user["id"]).get()
+        for petition in petitions:
+            petition = Petition(**petition.to_dict())
+            if petition.cat:
+                if petition.cat.id == cat_id:
+                    raise HTTPException(
+                        status_code=400,
+                        detail="You already have a petition for this cat",
+                    )
         try:
             if exists_cat_in_animals(cat_id):
                 petition = Petition(
