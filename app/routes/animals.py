@@ -251,3 +251,67 @@ async def delete_cat_photo(
             )
 
     raise HTTPException(status_code=404, detail="Error deleting photo")
+
+
+# Delete dog
+@router.delete("/dog/{dog_id}", status_code=200)
+async def delete_dog_by_id(
+    dog_id: str,
+    uid: str = Depends(firebase_uid_authentication),
+):
+    my_org = db.collection("organizations").where("id", "==", uid).get()[0].to_dict()
+
+    if not my_org:
+        raise HTTPException(status_code=404, detail="You are not an organization")
+
+    animals = db.collection("animals").document("animals").get().to_dict()
+    dogs = animals["dogs"]
+
+    for dog in dogs:
+        if dog["id"] == dog_id:
+            if dog["organization_name"] != my_org["name"]:
+                raise HTTPException(
+                    status_code=403, detail="You are not the owner of this dog"
+                )
+
+            dogs.remove(dog)
+            db.collection("animals").document("animals").set({"dogs": dogs}, merge=True)
+            db.collection("organizations").document(my_org["name"]).set(
+                {"dogs": dogs},
+                merge=True,
+            )
+            return JSONResponse(
+                status_code=200, content={"message": "Dog deleted successfully"}
+            )
+
+    raise HTTPException(status_code=404, detail="Error deleting dog")
+
+
+# Delete cat
+@router.delete("/cat/{cat_id}", status_code=200)
+async def delete_cat_by_id(
+    cat_id: str,
+    uid: str = Depends(firebase_uid_authentication),
+):
+    my_org = db.collection("organizations").where("id", "==", uid).get()[0].to_dict()
+
+    animals = db.collection("animals").document("animals").get().to_dict()
+    cats = animals["cats"]
+
+    for cat in cats:
+        if cat["id"] == cat_id:
+            if cat["organization_name"] != my_org["name"]:
+                raise HTTPException(
+                    status_code=403, detail="You are not the owner of this cat"
+                )
+
+            cats.remove(cat)
+            db.collection("animals").document("animals").update({"cats": cats})
+            db.collection("organizations").document(my_org["name"]).update(
+                {"cats": cats}
+            )
+            return JSONResponse(
+                status_code=200, content={"message": "Cat deleted successfully"}
+            )
+
+    raise HTTPException(status_code=404, detail="Error deleting cat")
