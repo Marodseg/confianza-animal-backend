@@ -134,6 +134,15 @@ async def upload_dog_photos(
                 {"dogs": dogs},
                 merge=True,
             )
+
+            petitions = db.collection("petitions").get()
+            for petition in petitions:
+                if petition.to_dict()["dog"]:
+                    if petition.to_dict()["dog"]["id"] == dog_id:
+                        db.collection("petitions").document(petition.id).update(
+                            {"dog": dog}
+                        )
+
             return JSONResponse(
                 status_code=200, content={"message": "Photos uploaded successfully"}
             )
@@ -174,6 +183,15 @@ async def upload_cat_photos(
             db.collection("organizations").document(my_org["name"]).update(
                 {"cats": cats}
             )
+
+            petitions = db.collection("petitions").get()
+            for petition in petitions:
+                if petition.to_dict()["cat"]:
+                    if petition.to_dict()["cat"]["id"] == cat_id:
+                        db.collection("petitions").document(petition.id).update(
+                            {"cat": cat}
+                        )
+
             return JSONResponse(
                 status_code=200, content={"message": "Photos uploaded successfully"}
             )
@@ -212,6 +230,15 @@ async def delete_dog_photo(
                 {"dogs": dogs},
                 merge=True,
             )
+
+            petitions = db.collection("petitions").get()
+            for petition in petitions:
+                if petition.to_dict()["dog"]:
+                    if petition.to_dict()["dog"]["id"] == dog_id:
+                        db.collection("petitions").document(petition.id).update(
+                            {"dog": dog}
+                        )
+
             return JSONResponse(
                 status_code=200, content={"message": "Photo deleted successfully"}
             )
@@ -246,6 +273,15 @@ async def delete_cat_photo(
             db.collection("organizations").document(my_org["name"]).update(
                 {"cats": cats}
             )
+
+            petitions = db.collection("petitions").get()
+            for petition in petitions:
+                if petition.to_dict()["cat"]:
+                    if petition.to_dict()["cat"]["id"] == cat_id:
+                        db.collection("petitions").document(petition.id).update(
+                            {"cat": cat}
+                        )
+
             return JSONResponse(
                 status_code=200, content={"message": "Photo deleted successfully"}
             )

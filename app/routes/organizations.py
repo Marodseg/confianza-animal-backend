@@ -271,6 +271,15 @@ async def modify_dog(
             db.collection("animals").document("animals").update(
                 {"dogs": ArrayUnion([new_dog])}
             )
+
+            petitions = db.collection("petitions").get()
+            for petition in petitions:
+                if petition.to_dict()["dog"]:
+                    if petition.to_dict()["dog"]["id"] == dog_id:
+                        db.collection("petitions").document(petition.id).update(
+                            {"dog": new_dog}
+                        )
+
             return new_dog
         else:
             # In case there are no more
@@ -320,6 +329,15 @@ async def modify_cat(
             db.collection("animals").document("animals").update(
                 {"cats": ArrayUnion([new_cat])}
             )
+
+            petitions = db.collection("petitions").get()
+            for petition in petitions:
+                if petition.to_dict()["cat"]:
+                    if petition.to_dict()["cat"]["id"] == cat_id:
+                        db.collection("petitions").document(petition.id).update(
+                            {"cat": new_cat}
+                        )
+
             return new_cat
         else:
             # In case there are no more
