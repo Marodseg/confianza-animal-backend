@@ -61,23 +61,25 @@ def get_dog_or_cat_by_filters(
     is_urgent: bool = None,
 ):
     if animals:
-        if size:
+        if size is not None:
             animals = [animal for animal in animals if animal["size"] == size]
-        if raze:
+        if raze is not None:
             animals = [animal for animal in animals if animal["raze"] == raze]
-        if age:
+        if age is not None:
             if greater_or_equal:
                 animals = [animal for animal in animals if animal["age"] >= age]
             else:
                 animals = [animal for animal in animals if animal["age"] <= age]
-        if gender:
+        if gender is not None:
             animals = [animal for animal in animals if animal["gender"] == gender]
-        if activity:
-            animals = [animal for animal in animals if animal["activity"] == activity]
-        if is_urgent:
+        if activity is not None:
+            animals = [
+                animal for animal in animals if animal["activity_level"] == activity
+            ]
+        if is_urgent is not None:
             animals = [animal for animal in animals if animal["is_urgent"] == is_urgent]
 
-        return animals
+    return animals
 
 
 def generate_uuid() -> str:

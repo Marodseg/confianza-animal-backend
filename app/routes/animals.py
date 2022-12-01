@@ -68,6 +68,8 @@ async def get_dog_by_filters(
 
     animals = db.collection("animals").document("animals").get().to_dict()
     dogs = animals["dogs"]
+    if not dogs:
+        return []
     return get_dog_or_cat_by_filters(
         dogs, size, raze, age, greater_or_equal, gender, activity, is_urgent
     )
@@ -92,6 +94,9 @@ async def get_cat_by_filters(
     animals = db.collection("animals").document("animals").get().to_dict()
     cats = animals["cats"]
 
+    if not cats:
+        return []
+
     return get_dog_or_cat_by_filters(
         cats, size, raze, age, greater_or_equal, gender, activity, is_urgent
     )
@@ -106,7 +111,7 @@ async def upload_dog_photos(
     my_org = db.collection("organizations").where("id", "==", uid).get()[0].to_dict()
 
     if not my_org:
-        raise HTTPException(status_code=404, detail="You are not an organization")
+        raise HTTPException(status_code=403, detail="You are not an organization")
 
     animals = db.collection("animals").document("animals").get().to_dict()
     dogs = animals["dogs"]
@@ -157,6 +162,9 @@ async def upload_cat_photos(
     uid: str = Depends(firebase_uid_authentication),
 ):
     my_org = db.collection("organizations").where("id", "==", uid).get()[0].to_dict()
+
+    if not my_org:
+        raise HTTPException(status_code=403, detail="You are not an organization")
 
     animals = db.collection("animals").document("animals").get().to_dict()
     cats = animals["cats"]
@@ -209,7 +217,7 @@ async def delete_dog_photo(
     my_org = db.collection("organizations").where("id", "==", uid).get()[0].to_dict()
 
     if not my_org:
-        raise HTTPException(status_code=404, detail="You are not an organization")
+        raise HTTPException(status_code=403, detail="You are not an organization")
 
     animals = db.collection("animals").document("animals").get().to_dict()
     dogs = animals["dogs"]
@@ -255,6 +263,9 @@ async def delete_cat_photo(
 ):
     my_org = db.collection("organizations").where("id", "==", uid).get()[0].to_dict()
 
+    if not my_org:
+        raise HTTPException(status_code=403, detail="You are not an organization")
+
     animals = db.collection("animals").document("animals").get().to_dict()
     cats = animals["cats"]
 
@@ -298,7 +309,7 @@ async def delete_dog_by_id(
     my_org = db.collection("organizations").where("id", "==", uid).get()[0].to_dict()
 
     if not my_org:
-        raise HTTPException(status_code=404, detail="You are not an organization")
+        raise HTTPException(status_code=403, detail="You are not an organization")
 
     animals = db.collection("animals").document("animals").get().to_dict()
     dogs = animals["dogs"]
@@ -330,6 +341,9 @@ async def delete_cat_by_id(
     uid: str = Depends(firebase_uid_authentication),
 ):
     my_org = db.collection("organizations").where("id", "==", uid).get()[0].to_dict()
+
+    if not my_org:
+        raise HTTPException(status_code=403, detail="You are not an organization")
 
     animals = db.collection("animals").document("animals").get().to_dict()
     cats = animals["cats"]

@@ -22,6 +22,10 @@ async def ask_for_dog(
     email: str = Depends(firebase_email_authentication),
 ):
     user = db.collection("users").where("email", "==", email).get()[0].to_dict()
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
     animals = AnimalsInDB(
         **db.collection("animals").document("animals").get().to_dict()
     )
@@ -69,6 +73,10 @@ async def ask_for_cat(
     email: str = Depends(firebase_email_authentication),
 ):
     user = db.collection("users").where("email", "==", email).get()[0].to_dict()
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
     animals = AnimalsInDB(
         **db.collection("animals").document("animals").get().to_dict()
     )
@@ -112,6 +120,9 @@ async def ask_for_cat(
 async def get_petition_by_user(email: str = Depends(firebase_email_authentication)):
     user = db.collection("users").where("email", "==", email).get()[0].to_dict()
 
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
     petitions = db.collection("petitions").where("user_id", "==", user["id"]).get()
     if not petitions:
         raise HTTPException(status_code=404, detail="Petition not found")
@@ -125,6 +136,10 @@ async def get_petition_by_organization(
     uid: str = Depends(firebase_uid_authentication),
 ):
     org = db.collection("organizations").where("id", "==", uid).get()[0].to_dict()
+
+    if not org:
+        raise HTTPException(status_code=404, detail="Organization not found")
+
     petitions = (
         db.collection("petitions").where("organization_name", "==", org["name"]).get()
     )
@@ -137,6 +152,10 @@ async def reject_petition_by_user(
     petition_id: str, email: str = Depends(firebase_email_authentication)
 ):
     user = db.collection("users").where("email", "==", email).get()[0].to_dict()
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
     petitions = db.collection("petitions").where("user_id", "==", user["id"]).get()
 
     for petition in petitions:
@@ -165,6 +184,9 @@ async def reject_petition_by_organization(
 ):
     org = db.collection("organizations").where("id", "==", uid).get()[0].to_dict()
 
+    if not org:
+        raise HTTPException(status_code=404, detail="Organization not found")
+
     petition = db.collection("petitions").document(petition_id).get().to_dict()
 
     if petition["organization_name"] != org["name"]:
@@ -183,6 +205,9 @@ async def accept_petition_by_organization(
     petition_id: str, uid: str = Depends(firebase_uid_authentication)
 ):
     org = db.collection("organizations").where("id", "==", uid).get()[0].to_dict()
+
+    if not org:
+        raise HTTPException(status_code=404, detail="Organization not found")
 
     petition = db.collection("petitions").document(petition_id).get().to_dict()
 

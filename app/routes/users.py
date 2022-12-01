@@ -24,10 +24,9 @@ router = APIRouter()
 @router.get("/me", status_code=200, response_model=UserView)
 async def get_user_profile(uid: str = Depends(firebase_uid_authentication)):
     user = db.collection("users").where("id", "==", uid).get()
-    if user:
-        return UserView(**user[0].to_dict())
-    else:
+    if not user:
         raise HTTPException(status_code=404, detail="User not found")
+    return UserView(**user[0].to_dict())
 
 
 # Get user by id
@@ -100,27 +99,25 @@ async def login_user(form_data: OAuth2PasswordRequestForm = Depends()):
 
         if user.email_verified:
             if not exists_email_in_user(form_data.username):
-                return JSONResponse(
-                    status_code=403, content={"message": "You are not a user"}
-                )
+                raise HTTPException(status_code=404, detail="User not found")
             if not my_user["active"]:
-                return JSONResponse(
-                    status_code=401,
-                    content={"message": "This user is inactive"},
-                )
+                raise HTTPException(status_code=403, detail="User not active")
             return JSONResponse(status_code=200, content={"token": user_py["idToken"]})
         else:
-            raise HTTPException(status_code=401, detail="Email not verified")
+            raise HTTPException(status_code=400, detail="Email not verified")
     except Exception as e:
         if str(e) == "":
-            raise HTTPException(status_code=401, detail="Email not verified")
-        raise HTTPException(status_code=401, detail="Invalid credentials")
+            raise HTTPException(status_code=400, detail="Email not verified")
+        raise HTTPException(status_code=400, detail="Invalid credentials")
 
 
 # Enable user
 @router.put("/enable", status_code=200)
 async def enable_user(uid: str = Depends(firebase_uid_authentication)):
     user = db.collection("users").where("id", "==", uid).get()[0].to_dict()
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
 
     if user["active"]:
         raise HTTPException(status_code=400, detail="User already active")
@@ -137,7 +134,7 @@ async def update_user(
 ):
     my_user = db.collection("users").where("email", "==", email).get()[0].to_dict()
 
-    if not user:
+    if not user or not my_user:
         raise HTTPException(status_code=404, detail="User not found")
 
     # We keep a copy of the old user
@@ -159,6 +156,9 @@ async def update_user(
 async def disable_user(uid: str = Depends(firebase_uid_authentication)):
     user = db.collection("users").where("id", "==", uid).get()[0].to_dict()
 
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
     if not user["active"]:
         raise HTTPException(status_code=400, detail="User already disabled")
 
@@ -172,6 +172,10 @@ async def upload_profile_photo(
     file: UploadFile, email: str = Depends(firebase_email_authentication)
 ):
     user_logged = db.collection("users").where("email", "==", email).get()
+
+    if not user_logged:
+        raise HTTPException(status_code=404, detail="User not found")
+
     user = user_logged[0]
 
     try:

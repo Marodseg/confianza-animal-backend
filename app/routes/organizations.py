@@ -64,6 +64,8 @@ async def get_cats_from_organization(uid: str = Depends(firebase_uid_authenticat
 @router.get("/", status_code=200, response_model=List[OrganizationCreate])
 async def get_organizations():
     organizations = db.collection("organizations").get()
+    if not organizations:
+        return []
     return [OrganizationCreate(**org.to_dict()) for org in organizations]
 
 
@@ -135,11 +137,11 @@ async def post_cat(
 @router.post("/register", status_code=200, response_model=OrganizationCreate)
 async def register_organization(organization: Organization):
     if exists_name_in_organization(organization.name):
-        raise HTTPException(status_code=401, detail="Organization name already exists")
+        raise HTTPException(status_code=400, detail="Organization name already exists")
     if exists_phone_in_organization(organization.phone):
-        raise HTTPException(status_code=401, detail="Phone already exists")
+        raise HTTPException(status_code=400, detail="Phone already exists")
     if exists_email_in_organization(organization.email):
-        raise HTTPException(status_code=401, detail="Email already exists")
+        raise HTTPException(status_code=400, detail="Email already exists")
 
     try:
         org = pyrebase_auth.create_user_with_email_and_password(
@@ -162,7 +164,7 @@ async def register_organization(organization: Organization):
         pyrebase_auth.send_email_verification(org["idToken"])
         return organization
     except Exception as e:
-        raise HTTPException(status_code=401, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.post("/login", status_code=200, response_model=Token)
@@ -183,21 +185,18 @@ async def login_organization(form_data: OAuth2PasswordRequestForm = Depends()):
 
         if organization.email_verified:
             if not exists_email_in_organization(form_data.username):
-                return JSONResponse(
-                    status_code=403, content={"message": "You are not an organization"}
-                )
+                raise HTTPException(status_code=404, detail="Organization not found")
             if not my_org["active"]:
-                return JSONResponse(
-                    status_code=401,
-                    content={"message": "This organization is inactive"},
+                raise HTTPException(
+                    status_code=403, detail="Your account is not active"
                 )
             return JSONResponse(status_code=200, content={"token": org["idToken"]})
         else:
-            raise HTTPException(status_code=401, detail="Email not verified")
+            raise HTTPException(status_code=400, detail="Email not verified")
     except Exception as e:
         if str(e) == "":
-            raise HTTPException(status_code=401, detail="Email not verified")
-        raise HTTPException(status_code=401, detail="Invalid credentials")
+            raise HTTPException(status_code=400, detail="Email not verified")
+        raise HTTPException(status_code=400, detail="Invalid credentials")
 
 
 # Upload photo profile
@@ -206,6 +205,8 @@ async def upload_profile_photo_organization(
     file: UploadFile, email: str = Depends(firebase_email_authentication)
 ):
     org = db.collection("organizations").where("email", "==", email).get()[0].to_dict()
+    if not org:
+        raise HTTPException(status_code=404, detail="Organization not found")
 
     try:
         # Upload a photo to Firebase Storage ensuring that the file is an image
@@ -350,6 +351,9 @@ async def modify_cat(
 async def enable_organization(uid: str = Depends(firebase_uid_authentication)):
     org = db.collection("organizations").where("id", "==", uid).get()[0].to_dict()
 
+    if not org:
+        raise HTTPException(status_code=404, detail="Organization not found")
+
     if org["active"]:
         raise HTTPException(status_code=400, detail="Organization already enabled")
 
@@ -394,6 +398,9 @@ async def update_organization(
 @router.delete("/disable", status_code=200)
 async def delete_organization(uid: str = Depends(firebase_uid_authentication)):
     org = db.collection("organizations").where("id", "==", uid).get()[0].to_dict()
+
+    if not org:
+        raise HTTPException(status_code=404, detail="Organization not found")
 
     if not org["active"]:
         raise HTTPException(status_code=401, detail="Organization already disabled")
