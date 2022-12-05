@@ -11,6 +11,7 @@ from app.schemas.enums.activity import Activity
 from app.schemas.enums.cat_raze import CatRaze
 from app.schemas.enums.dog_raze import DogRaze
 from app.schemas.enums.gender import Gender
+from app.schemas.enums.provinces import Province
 from app.schemas.enums.size import Size
 from app.utils import get_dog_or_cat_by_filters
 
@@ -53,6 +54,7 @@ async def get_cat_by_id(cat_id: str):
 # Get dog by all filters
 @router.get("/dog", status_code=200, response_model=Optional[List[Dog]])
 async def get_dog_by_filters(
+    province: Province = None,
     size: Size = None,
     raze: DogRaze = None,
     age: int = None,
@@ -71,13 +73,14 @@ async def get_dog_by_filters(
     if not dogs:
         return []
     return get_dog_or_cat_by_filters(
-        dogs, size, raze, age, greater_or_equal, gender, activity, is_urgent
+        dogs, province, size, raze, age, greater_or_equal, gender, activity, is_urgent
     )
 
 
 # Get cat by all filters
 @router.get("/cat", status_code=200, response_model=Optional[List[Cat]])
 async def get_cat_by_filters(
+    province: Province = None,
     size: Size = None,
     raze: CatRaze = None,
     age: int = None,
@@ -98,7 +101,7 @@ async def get_cat_by_filters(
         return []
 
     return get_dog_or_cat_by_filters(
-        cats, size, raze, age, greater_or_equal, gender, activity, is_urgent
+        cats, province, size, raze, age, greater_or_equal, gender, activity, is_urgent
     )
 
 

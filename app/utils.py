@@ -52,6 +52,7 @@ def exists_cat_in_animals(cat_id: str) -> bool:
 
 def get_dog_or_cat_by_filters(
     animals: [],
+    province: Province = None,
     size: Size = None,
     raze: Union[CatRaze, DogRaze] = None,
     age: int = None,
@@ -61,6 +62,8 @@ def get_dog_or_cat_by_filters(
     is_urgent: bool = None,
 ):
     if animals:
+        if province is not None:
+            animals = [animal for animal in animals if animal["zone"] == province]
         if size is not None:
             animals = [animal for animal in animals if animal["size"] == size]
         if raze is not None:

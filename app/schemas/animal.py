@@ -7,6 +7,7 @@ from app.schemas.enums.activity import Activity
 from app.schemas.enums.cat_raze import CatRaze
 from app.schemas.enums.dog_raze import DogRaze
 from app.schemas.enums.gender import Gender
+from app.schemas.enums.provinces import Province
 from app.schemas.enums.size import Size
 
 
@@ -19,6 +20,7 @@ class Animal(BaseModel):
     photos: Optional[List[str]] = []
     weight: float
     size: Size
+    zone: Province
     neutered: bool
     description: str
     healthy: bool
@@ -45,6 +47,7 @@ class Animal(BaseModel):
                 ],
                 "weight": 1.0,
                 "size": Size.small,
+                "zone": Province.alava,
                 "neutered": True,
                 "description": "Prueba",
                 "healthy": True,
@@ -73,6 +76,7 @@ class Dog(Animal):
                 ],
                 "weight": 1.0,
                 "size": Size.small,
+                "zone": Province.alava,
                 "neutered": True,
                 "description": "Prueba",
                 "healthy": True,
@@ -93,6 +97,7 @@ class DogUpdate(Animal):
     photos: Optional[List[str]]
     weight: Optional[float]
     size: Optional[Size]
+    zone: Optional[Province]
     neutered: Optional[bool]
     description: Optional[str]
     healthy: Optional[bool]
@@ -117,6 +122,7 @@ class DogUpdate(Animal):
                 ],
                 "weight": 1.0,
                 "size": Size.small,
+                "zone": Province.alava,
                 "neutered": True,
                 "description": "Prueba",
                 "healthy": True,
@@ -146,6 +152,7 @@ class Cat(Animal):
                 ],
                 "weight": 1.0,
                 "size": Size.small,
+                "zone": Province.alava,
                 "neutered": True,
                 "description": "Prueba",
                 "healthy": True,
@@ -166,6 +173,7 @@ class CatUpdate(Animal):
     photos: Optional[List[str]]
     weight: Optional[float]
     size: Optional[Size]
+    zone: Optional[Province]
     neutered: Optional[bool]
     description: Optional[str]
     healthy: Optional[bool]
@@ -190,6 +198,7 @@ class CatUpdate(Animal):
                 ],
                 "weight": 1.0,
                 "size": Size.small,
+                "zone": Province.alava,
                 "neutered": True,
                 "description": "Prueba",
                 "healthy": True,
@@ -222,6 +231,7 @@ class AnimalsInDB(BaseModel):
                         ],
                         "weight": 1.0,
                         "size": Size.small,
+                        "zone": Province.alava,
                         "neutered": True,
                         "description": "Prueba",
                         "healthy": True,
@@ -244,6 +254,7 @@ class AnimalsInDB(BaseModel):
                         ],
                         "weight": 1.0,
                         "size": Size.small,
+                        "zone": Province.alava,
                         "neutered": True,
                         "description": "Prueba",
                         "healthy": True,
