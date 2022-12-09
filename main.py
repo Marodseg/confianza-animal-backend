@@ -69,6 +69,7 @@ You can:
         * **Medium**.
         * **High**.
     * **Urgency:** specify if the adoption of the animal is urgent or not.
+    * **Zone:** specify the province where the animal is located (Albacete, Alicante, ...).
 * **Upload/Delete photos of specific animals by id**.
 
 ## Petitions (managed by users and organizations)
@@ -86,7 +87,7 @@ You can:
 You can:
 
 * **Get** all the filters.
-* **Get** the filters by province.
+* **Get** the filters by zone/province.
 * **Get** the filters by gender.
 * **Get** the filters by size.
 * **Get** the filters by dog raze.

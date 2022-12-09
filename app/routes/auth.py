@@ -3,7 +3,7 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
 from starlette.responses import JSONResponse
 
-from app.config.database import firebase_admin_auth, pyrebase_auth
+from app.config.database import firebase_admin_auth, pyrebase_auth, test_pyrebase_auth
 
 router = APIRouter()
 
@@ -12,7 +12,7 @@ security = HTTPBearer()
 
 
 # Verify token and return user email
-async def firebase_email_authentication(
+def firebase_email_authentication(
     token: HTTPAuthorizationCredentials = Depends(security),
 ) -> str:
     user = firebase_admin_auth.verify_id_token(token.credentials)
@@ -20,7 +20,7 @@ async def firebase_email_authentication(
 
 
 # Verify token and return user uid
-async def firebase_uid_authentication(
+def firebase_uid_authentication(
     token: HTTPAuthorizationCredentials = Depends(security),
 ) -> str:
     user = firebase_admin_auth.verify_id_token(token.credentials)
@@ -29,9 +29,13 @@ async def firebase_uid_authentication(
 
 # Reset password endpoint
 @router.post("/reset-password", status_code=200)
-async def reset_password(email: str):
+def reset_password(email: str, test_db: bool = False):
+    if test_db:
+        p_auth = test_pyrebase_auth
+    else:
+        p_auth = pyrebase_auth
     try:
-        pyrebase_auth.send_password_reset_email(email)
+        p_auth.send_password_reset_email(email)
         return JSONResponse(
             status_code=200, content={"message": "Email sent to " + email}
         )

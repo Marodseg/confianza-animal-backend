@@ -14,3 +14,14 @@ firebase_config = {
     "measurementId": os.getenv("FIREBASE_MEASUREMENT_ID"),
     "databaseURL": os.getenv("FIREBASE_DATABASE_URL"),
 }
+
+test_firebase_config = {
+    "apiKey": os.getenv("TEST_FIREBASE_API_KEY"),
+    "authDomain": os.getenv("TEST_FIREBASE_AUTH_DOMAIN"),
+    "projectId": os.getenv("TEST_FIREBASE_PROJECT_ID"),
+    "storageBucket": os.getenv("TEST_FIREBASE_STORAGE_BUCKET"),
+    "messagingSenderId": os.getenv("TEST_FIREBASE_MESSAGING_SENDER_ID"),
+    "appId": os.getenv("TEST_FIREBASE_APP_ID"),
+    "measurementId": os.getenv("TEST_FIREBASE_MEASUREMENT_ID"),
+    "databaseURL": os.getenv("TEST_FIREBASE_DATABASE_URL"),
+}

@@ -1,10 +1,18 @@
-from typing import List
+from typing import List, Optional
 
 from fastapi.security import OAuth2PasswordRequestForm
 from google.cloud.firestore_v1 import ArrayUnion, DELETE_FIELD, ArrayRemove
 from starlette.responses import JSONResponse
 
-from app.config.database import db, firebase_admin_auth, pyrebase_auth, storage
+from app.config.database import (
+    db,
+    db_test,
+    firebase_admin_auth,
+    pyrebase_auth,
+    storage,
+    test_storage,
+    test_pyrebase_auth,
+)
 from fastapi import APIRouter, HTTPException, Depends, UploadFile
 
 from app.routes.auth import (
@@ -32,8 +40,22 @@ router = APIRouter()
 
 # Get organization with token
 @router.get("/me", status_code=200, response_model=OrganizationAnimals)
-async def get_user_profile(uid: str = Depends(firebase_uid_authentication)):
-    org = db.collection("organizations").where("id", "==", uid).get()
+def get_user_profile(
+    uid: str = Depends(firebase_uid_authentication), test_db: bool = False
+):
+    if test_db:
+        db_a = db_test
+        uid_a = (
+            db_a.collection("organizations")
+            .document("TEST ORGANIZATION")
+            .get()
+            .to_dict()["id"]
+        )
+    else:
+        db_a = db
+        uid_a = uid
+
+    org = db_a.collection("organizations").where("id", "==", uid_a).get()
     if not org:
         raise HTTPException(status_code=404, detail="Organization not found")
 
@@ -42,8 +64,22 @@ async def get_user_profile(uid: str = Depends(firebase_uid_authentication)):
 
 # Get dogs from organization
 @router.get("/dogs", status_code=200, response_model=List[Dog])
-async def get_dogs_from_organization(uid: str = Depends(firebase_uid_authentication)):
-    org = db.collection("organizations").where("id", "==", uid).get()
+def get_dogs_from_organization(
+    uid: str = Depends(firebase_uid_authentication), test_db: bool = False
+):
+    if test_db:
+        db_a = db_test
+        uid_a = (
+            db_a.collection("organizations")
+            .document("TEST ORGANIZATION")
+            .get()
+            .to_dict()["id"]
+        )
+    else:
+        db_a = db
+        uid_a = uid
+
+    org = db_a.collection("organizations").where("id", "==", uid_a).get()
     if not org:
         raise HTTPException(status_code=404, detail="Organization not found")
 
@@ -52,8 +88,22 @@ async def get_dogs_from_organization(uid: str = Depends(firebase_uid_authenticat
 
 # Get cats from organization
 @router.get("/cats", status_code=200, response_model=List[Cat])
-async def get_cats_from_organization(uid: str = Depends(firebase_uid_authentication)):
-    org = db.collection("organizations").where("id", "==", uid).get()
+def get_cats_from_organization(
+    uid: str = Depends(firebase_uid_authentication), test_db: bool = False
+):
+    if test_db:
+        db_a = db_test
+        uid_a = (
+            db_a.collection("organizations")
+            .document("TEST ORGANIZATION")
+            .get()
+            .to_dict()["id"]
+        )
+    else:
+        db_a = db
+        uid_a = uid
+
+    org = db_a.collection("organizations").where("id", "==", uid_a).get()
     if not org:
         raise HTTPException(status_code=404, detail="Organization not found")
 
@@ -62,8 +112,12 @@ async def get_cats_from_organization(uid: str = Depends(firebase_uid_authenticat
 
 # Get all organizations
 @router.get("/", status_code=200, response_model=List[OrganizationCreate])
-async def get_organizations():
-    organizations = db.collection("organizations").get()
+def get_organizations(test_db: bool = False):
+    if test_db:
+        db_a = db_test
+    else:
+        db_a = db
+    organizations = db_a.collection("organizations").get()
     if not organizations:
         return []
     return [OrganizationCreate(**org.to_dict()) for org in organizations]
@@ -71,9 +125,13 @@ async def get_organizations():
 
 # Get organization by name
 @router.get("/{organization_name}", status_code=200, response_model=OrganizationAnimals)
-async def get_organization_by_name(organization_name: str):
+def get_organization_by_name(organization_name: str, test_db: bool = False):
+    if test_db:
+        db_a = db_test
+    else:
+        db_a = db
     organization = (
-        db.collection("organizations")
+        db_a.collection("organizations")
         .where("name", "==", organization_name)
         .where("active", "==", True)
         .get()
@@ -85,11 +143,24 @@ async def get_organization_by_name(organization_name: str):
 
 # Post a dog to an organization
 @router.post("/dog", status_code=200, response_model=Dog)
-async def post_dog(
+def post_dog(
     dog: Dog,
     uid: str = Depends(firebase_uid_authentication),
+    test_db: bool = False,
 ):
-    org = db.collection("organizations").where("id", "==", uid).get()[0].to_dict()
+    if test_db:
+        db_a = db_test
+        uid_a = (
+            db_a.collection("organizations")
+            .document("TEST ORGANIZATION")
+            .get()
+            .to_dict()["id"]
+        )
+    else:
+        db_a = db
+        uid_a = uid
+
+    org = db_a.collection("organizations").where("id", "==", uid_a).get()[0].to_dict()
 
     if not org:
         raise HTTPException(status_code=404, detail="Organization not found")
@@ -99,10 +170,10 @@ async def post_dog(
     dog.organization_phone = org["phone"]
     dog.organization_photo = org["photo"]
 
-    db.collection("organizations").document(org["name"]).update(
+    db_a.collection("organizations").document(org["name"]).update(
         {"dogs": ArrayUnion([dog.dict()])}
     )
-    db.collection("animals").document("animals").set(
+    db_a.collection("animals").document("animals").set(
         {"dogs": ArrayUnion([dog.dict()])}, merge=True
     )
     return dog
@@ -110,11 +181,24 @@ async def post_dog(
 
 # Post a cat to an organization
 @router.post("/cat", status_code=200, response_model=Cat)
-async def post_cat(
+def post_cat(
     cat: Cat,
     uid: str = Depends(firebase_uid_authentication),
+    test_db: bool = False,
 ):
-    org = db.collection("organizations").where("id", "==", uid).get()[0].to_dict()
+    if test_db:
+        db_a = db_test
+        uid_a = (
+            db_a.collection("organizations")
+            .document("TEST ORGANIZATION")
+            .get()
+            .to_dict()["id"]
+        )
+    else:
+        db_a = db
+        uid_a = uid
+
+    org = db_a.collection("organizations").where("id", "==", uid_a).get()[0].to_dict()
 
     if not org:
         raise HTTPException(status_code=404, detail="Organization not found")
@@ -124,10 +208,10 @@ async def post_cat(
     cat.organization_phone = org["phone"]
     cat.organization_photo = org["photo"]
 
-    db.collection("organizations").document(org["name"]).update(
+    db_a.collection("organizations").document(org["name"]).update(
         {"cats": ArrayUnion([cat.dict()])}
     )
-    db.collection("animals").document("animals").set(
+    db_a.collection("animals").document("animals").set(
         {"cats": ArrayUnion([cat.dict()])}, merge=True
     )
     return cat
@@ -135,16 +219,22 @@ async def post_cat(
 
 # Register an organization
 @router.post("/register", status_code=200, response_model=OrganizationCreate)
-async def register_organization(organization: Organization):
-    if exists_name_in_organization(organization.name):
+def register_organization(organization: Organization, test_db: bool = False):
+    if test_db:
+        db_a = db_test
+        p_auth = test_pyrebase_auth
+    else:
+        db_a = db
+        p_auth = pyrebase_auth
+    if exists_name_in_organization(organization.name, test_db):
         raise HTTPException(status_code=400, detail="Organization name already exists")
-    if exists_phone_in_organization(organization.phone):
+    if exists_phone_in_organization(organization.phone, test_db):
         raise HTTPException(status_code=400, detail="Phone already exists")
-    if exists_email_in_organization(organization.email):
+    if exists_email_in_organization(organization.email, test_db):
         raise HTTPException(status_code=400, detail="Email already exists")
 
     try:
-        org = pyrebase_auth.create_user_with_email_and_password(
+        org = p_auth.create_user_with_email_and_password(
             organization.email, organization.password
         )
     except HTTPException:
@@ -152,23 +242,23 @@ async def register_organization(organization: Organization):
 
     try:
         organization.id = org["localId"]
-        db.collection("organizations").document(organization.name).set(
+        db_a.collection("organizations").document(organization.name).set(
             organization.dict()
         )
         # For security, we don't save the password in the database
         # as is handled by Firebase Authentication
-        db.collection("organizations").document(organization.name).update(
+        db_a.collection("organizations").document(organization.name).update(
             {"password": DELETE_FIELD}
         )
         # Send email verification
-        pyrebase_auth.send_email_verification(org["idToken"])
+        p_auth.send_email_verification(org["idToken"])
         return organization
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.post("/login", status_code=200, response_model=Token)
-async def login_organization(form_data: OAuth2PasswordRequestForm = Depends()):
+def login_organization(form_data: OAuth2PasswordRequestForm = Depends()):
     try:
         org = pyrebase_auth.sign_in_with_email_and_password(
             form_data.username, form_data.password
@@ -201,10 +291,30 @@ async def login_organization(form_data: OAuth2PasswordRequestForm = Depends()):
 
 # Upload photo profile
 @router.post("/upload/photo", status_code=200)
-async def upload_profile_photo_organization(
-    file: UploadFile, email: str = Depends(firebase_email_authentication)
+def upload_profile_photo_organization(
+    file: UploadFile,
+    email: str = Depends(firebase_email_authentication),
+    test_db: bool = False,
 ):
-    org = db.collection("organizations").where("email", "==", email).get()[0].to_dict()
+    if test_db:
+        db_a = db_test
+        storage_a = test_storage
+        email_a = (
+            db_a.collection("organizations")
+            .document("TEST ORGANIZATION")
+            .get()
+            .to_dict()["email"]
+        )
+    else:
+        db_a = db
+        storage_a = storage
+        email_a = email
+    org = (
+        db_a.collection("organizations")
+        .where("email", "==", email_a)
+        .get()[0]
+        .to_dict()
+    )
     if not org:
         raise HTTPException(status_code=404, detail="Organization not found")
 
@@ -219,11 +329,15 @@ async def upload_profile_photo_organization(
             # But we want to overwrite the previous photo
 
             # Upload the file and delete the previous one
-            storage.child(f"organizations/{org['name']}/{filename}").put(file.file)
+            storage_a.child(f"organizations/{org['name']}/{filename}").put(file.file)
             # Get the url of the uploaded file
-            url = storage.child(f"organizations/{org['name']}/{filename}").get_url(None)
+            url = storage_a.child(f"organizations/{org['name']}/{filename}").get_url(
+                None
+            )
             # Update the user's photo
-            db.collection("organizations").document(org["name"]).update({"photo": url})
+            db_a.collection("organizations").document(org["name"]).update(
+                {"photo": url}
+            )
             return JSONResponse(status_code=200, content={"message": "Photo uploaded"})
         else:
             raise HTTPException(status_code=401, detail="File is not an image")
@@ -233,17 +347,31 @@ async def upload_profile_photo_organization(
 
 # Modify a dog from an organization
 @router.put("/dog/{dog_id}", status_code=200, response_model=Dog)
-async def modify_dog(
+def modify_dog(
     dog_id: str,
     new_dog: DogUpdate,
     uid: str = Depends(firebase_uid_authentication),
+    test_db: bool = False,
 ):
-    org = db.collection("organizations").where("id", "==", uid).get()[0].to_dict()
+    if test_db:
+        db_a = db_test
+        uid_a = (
+            db_a.collection("organizations")
+            .document("TEST ORGANIZATION")
+            .get()
+            .to_dict()["id"]
+        )
+    else:
+        db_a = db
+        uid_a = uid
+    org = db_a.collection("organizations").where("id", "==", uid_a).get()[0].to_dict()
 
     if not org:
         raise HTTPException(status_code=404, detail="Organization not found")
 
-    dogs = db.collection("organizations").document(org["name"]).get().to_dict()["dogs"]
+    dogs = (
+        db_a.collection("organizations").document(org["name"]).get().to_dict()["dogs"]
+    )
 
     for (count, dog) in enumerate(dogs, start=1):
         if dog["id"] == dog_id:
@@ -259,25 +387,25 @@ async def modify_dog(
             new_dog = dog.copy()
 
             # We update the dog in the organization
-            db.collection("organizations").document(org["name"]).update(
+            db_a.collection("organizations").document(org["name"]).update(
                 {"dogs": ArrayRemove([old_dog])}
             )
-            db.collection("organizations").document(org["name"]).update(
+            db_a.collection("organizations").document(org["name"]).update(
                 {"dogs": ArrayUnion([new_dog])}
             )
             # We update the dog in the global animals
-            db.collection("animals").document("animals").update(
+            db_a.collection("animals").document("animals").update(
                 {"dogs": ArrayRemove([old_dog])}
             )
-            db.collection("animals").document("animals").update(
+            db_a.collection("animals").document("animals").update(
                 {"dogs": ArrayUnion([new_dog])}
             )
 
-            petitions = db.collection("petitions").get()
+            petitions = db_a.collection("petitions").get()
             for petition in petitions:
                 if petition.to_dict()["dog"]:
                     if petition.to_dict()["dog"]["id"] == dog_id:
-                        db.collection("petitions").document(petition.id).update(
+                        db_a.collection("petitions").document(petition.id).update(
                             {"dog": new_dog}
                         )
 
@@ -290,17 +418,31 @@ async def modify_dog(
 
 # Modify a cat from an organization
 @router.put("/cat/{cat_id}", status_code=200, response_model=Cat)
-async def modify_cat(
+def modify_cat(
     cat_id: str,
     new_cat: CatUpdate,
     uid: str = Depends(firebase_uid_authentication),
+    test_db: bool = False,
 ):
-    org = db.collection("organizations").where("id", "==", uid).get()[0].to_dict()
+    if test_db:
+        db_a = db_test
+        uid_a = (
+            db_a.collection("organizations")
+            .document("TEST ORGANIZATION")
+            .get()
+            .to_dict()["id"]
+        )
+    else:
+        db_a = db
+        uid_a = uid
+    org = db_a.collection("organizations").where("id", "==", uid_a).get()[0].to_dict()
 
     if not org:
         raise HTTPException(status_code=404, detail="Organization not found")
 
-    cats = db.collection("organizations").document(org["name"]).get().to_dict()["cats"]
+    cats = (
+        db_a.collection("organizations").document(org["name"]).get().to_dict()["cats"]
+    )
 
     for (count, cat) in enumerate(cats, start=1):
         if cat["id"] == cat_id:
@@ -316,26 +458,26 @@ async def modify_cat(
             new_cat = cat.copy()
 
             # We update the cat in the organization
-            db.collection("organizations").document(org["name"]).update(
+            db_a.collection("organizations").document(org["name"]).update(
                 {"cats": ArrayRemove([old_cat])}
             )
-            db.collection("organizations").document(org["name"]).update(
+            db_a.collection("organizations").document(org["name"]).update(
                 {"cats": ArrayUnion([new_cat])}
             )
 
             # We update the cat in the global animals
-            db.collection("animals").document("animals").update(
+            db_a.collection("animals").document("animals").update(
                 {"cats": ArrayRemove([old_cat])}
             )
-            db.collection("animals").document("animals").update(
+            db_a.collection("animals").document("animals").update(
                 {"cats": ArrayUnion([new_cat])}
             )
 
-            petitions = db.collection("petitions").get()
+            petitions = db_a.collection("petitions").get()
             for petition in petitions:
                 if petition.to_dict()["cat"]:
                     if petition.to_dict()["cat"]["id"] == cat_id:
-                        db.collection("petitions").document(petition.id).update(
+                        db_a.collection("petitions").document(petition.id).update(
                             {"cat": new_cat}
                         )
 
@@ -348,32 +490,61 @@ async def modify_cat(
 
 # Enable organization
 @router.put("/enable", status_code=200)
-async def enable_organization(uid: str = Depends(firebase_uid_authentication)):
-    org = db.collection("organizations").where("id", "==", uid).get()[0].to_dict()
+def enable_organization(
+    uid: str = Depends(firebase_uid_authentication), test_db: bool = False
+):
+    if test_db:
+        db_a = db_test
+        uid_a = (
+            db_a.collection("organizations")
+            .document("TEST ORGANIZATION")
+            .get()
+            .to_dict()["id"]
+        )
+    else:
+        db_a = db
+        uid_a = uid
+
+    org = db_a.collection("organizations").where("id", "==", uid_a).get()[0].to_dict()
 
     if not org:
         raise HTTPException(status_code=404, detail="Organization not found")
 
-    if org["active"]:
-        raise HTTPException(status_code=400, detail="Organization already enabled")
-
-    db.collection("organizations").document(org["name"]).update({"active": True})
+    db_a.collection("organizations").document(org["name"]).update({"active": True})
     return JSONResponse(status_code=200, content={"message": "Organization enabled"})
 
 
 # Update organization
 @router.put("/update", status_code=200, response_model=OrganizationUpdateOut)
-async def update_organization(
-    org_update: OrganizationUpdateIn, uid: str = Depends(firebase_uid_authentication)
+def update_organization(
+    org_update: OrganizationUpdateIn,
+    uid: str = Depends(firebase_uid_authentication),
+    test_db: bool = False,
 ):
-    org = db.collection("organizations").where("id", "==", uid).get()[0].to_dict()
+    if test_db:
+        db_a = db_test
+        uid_a = (
+            db_a.collection("organizations")
+            .document("TEST ORGANIZATION")
+            .get()
+            .to_dict()["id"]
+        )
+    else:
+        db_a = db
+        uid_a = uid
+
+    org = db_a.collection("organizations").where("id", "==", uid_a).get()[0].to_dict()
 
     if not org:
         raise HTTPException(status_code=404, detail="Organization not found")
 
     # Check if the changes exists in the database
     if org_update.phone:
-        if db.collection("organizations").where("phone", "==", org_update.phone).get():
+        if (
+            db_a.collection("organizations")
+            .where("phone", "==", org_update.phone)
+            .get()
+        ):
             raise HTTPException(status_code=409, detail="Phone already exists")
 
     # We keep a copy of the old organization
@@ -385,9 +556,9 @@ async def update_organization(
         old_org["zone"] = org_update.zone
 
     try:
-        db.collection("organizations").document(old_org["name"]).update(old_org)
+        db_a.collection("organizations").document(old_org["name"]).update(old_org)
         new_org = (
-            db.collection("organizations").document(old_org["name"]).get().to_dict()
+            db_a.collection("organizations").document(old_org["name"]).get().to_dict()
         )
         return new_org
     except Exception as e:
@@ -396,14 +567,24 @@ async def update_organization(
 
 # delete organization
 @router.delete("/disable", status_code=200)
-async def delete_organization(uid: str = Depends(firebase_uid_authentication)):
-    org = db.collection("organizations").where("id", "==", uid).get()[0].to_dict()
+def delete_organization(
+    uid: str = Depends(firebase_uid_authentication), test_db: bool = False
+):
+    if test_db:
+        db_a = db_test
+        uid_a = (
+            db_a.collection("organizations")
+            .document("TEST ORGANIZATION")
+            .get()
+            .to_dict()["id"]
+        )
+    else:
+        db_a = db
+        uid_a = uid
+    org = db_a.collection("organizations").where("id", "==", uid_a).get()[0].to_dict()
 
     if not org:
         raise HTTPException(status_code=404, detail="Organization not found")
 
-    if not org["active"]:
-        raise HTTPException(status_code=401, detail="Organization already disabled")
-
-    db.collection("organizations").document(org["name"]).update({"active": False})
+    db_a.collection("organizations").document(org["name"]).update({"active": False})
     return JSONResponse(status_code=200, content={"message": "Organization disabled"})

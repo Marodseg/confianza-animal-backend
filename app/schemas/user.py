@@ -55,6 +55,7 @@ class UserView(BaseModel):
     email: str
     name: str
     photo: Optional[str]
+    active: Optional[bool]
 
     class Config:
         orm_mode = True

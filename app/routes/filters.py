@@ -14,43 +14,43 @@ router = APIRouter()
 
 # Get provinces enum
 @router.get("/provinces", status_code=200, response_model=List[str])
-async def get_provinces():
+def get_provinces():
     return [province.value for province in Province]
 
 
 # Get gender enum
 @router.get("/gender", status_code=200, response_model=List[str])
-async def get_gender():
+def get_gender():
     return [gender.value for gender in Gender]
 
 
 # Get activity level enum
 @router.get("/activity", status_code=200, response_model=List[str])
-async def get_activity():
+def get_activity():
     return [activity.value for activity in Activity]
 
 
 # Get size enum
 @router.get("/size", status_code=200, response_model=List[str])
-async def get_size():
+def get_size():
     return [size.value for size in Size]
 
 
 # Get cat raze enum
 @router.get("/cat-raze", status_code=200, response_model=List[str])
-async def get_cat_raze():
+def get_cat_raze():
     return [raze.value for raze in CatRaze]
 
 
 # Get dog raze enum
 @router.get("/dog-raze", status_code=200, response_model=List[str])
-async def get_dog_raze():
+def get_dog_raze():
     return [raze.value for raze in DogRaze]
 
 
 # Get all enums
 @router.get("/all", status_code=200, response_model=dict)
-async def get_all():
+def get_all():
     return {
         "provinces": [province.value for province in Province],
         "gender": [gender.value for gender in Gender],

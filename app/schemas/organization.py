@@ -1,4 +1,3 @@
-import datetime
 import re
 
 from pydantic import BaseModel, validator
@@ -67,6 +66,7 @@ class OrganizationAnimals(BaseModel):
     email: str
     phone: str
     photo: Optional[str]
+    active: Optional[bool]
     zone: Province
     dogs: Optional[List[Dog]]
     cats: Optional[List[Cat]]

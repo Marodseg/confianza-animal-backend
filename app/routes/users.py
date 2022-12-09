@@ -2,7 +2,15 @@ from fastapi.security import OAuth2PasswordRequestForm
 from google.cloud.firestore_v1 import DELETE_FIELD
 from starlette.responses import JSONResponse
 
-from app.config.database import db, firebase_admin_auth, pyrebase_auth, storage
+from app.config.database import (
+    db,
+    db_test,
+    firebase_admin_auth,
+    pyrebase_auth,
+    storage,
+    test_storage,
+    test_pyrebase_auth,
+)
 from fastapi import APIRouter, HTTPException, Depends, UploadFile
 
 from app.routes.auth import (
@@ -10,11 +18,9 @@ from app.routes.auth import (
     firebase_uid_authentication,
     Token,
 )
-from app.schemas.animal import AnimalsInDB
 from app.schemas.user import User, UserCreate, UserView, UserUpdateIn, UserUpdateOut
 from app.utils import (
     exists_email_in_user,
-    exists_id_in_user,
 )
 
 router = APIRouter()
@@ -22,8 +28,21 @@ router = APIRouter()
 
 # Get user with token
 @router.get("/me", status_code=200, response_model=UserView)
-async def get_user_profile(uid: str = Depends(firebase_uid_authentication)):
-    user = db.collection("users").where("id", "==", uid).get()
+def get_user_profile(
+    uid: str = Depends(firebase_uid_authentication), test_db: bool = False
+):
+    if test_db:
+        db_a = db_test
+        uid_a = (
+            db_a.collection("users")
+            .where("name", "==", "TEST USER")
+            .get()[0]
+            .to_dict()["id"]
+        )
+    else:
+        db_a = db
+        uid_a = uid
+    user = db_a.collection("users").where("id", "==", uid_a).get()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return UserView(**user[0].to_dict())
@@ -31,38 +50,53 @@ async def get_user_profile(uid: str = Depends(firebase_uid_authentication)):
 
 # Get user by id
 @router.get("/{user_id}", status_code=200, response_model=UserView)
-async def get_user_by_id(user_id: str):
-    user = db.collection("users").document(user_id).get().to_dict()
+def get_user_by_id(user_id: str, test_db: bool = False):
+    if test_db:
+        db_a = db_test
+    else:
+        db_a = db
+    user = db_a.collection("users").document(user_id).get().to_dict()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
     return user
 
 
-# Get animals by user id
-@router.get("/animals/{user_id}", status_code=200, response_model=AnimalsInDB)
-async def get_animals_by_user_id(user_id: str):
-    if exists_id_in_user(user_id):
-        animals = db.collection("animals").document(user_id).get().to_dict()
-        if not animals:
-            dogs = []
-            cats = []
-        else:
-            dogs = animals["dogs"]
-            cats = animals["cats"]
-        return AnimalsInDB(dogs=dogs, cats=cats)
-    else:
-        raise HTTPException(status_code=404, detail="User not found")
+# Get animals by user id (NOT USED YET)
+# @router.get("/animals/{user_id}", status_code=200, response_model=AnimalsInDB)
+# def get_animals_by_user_id(user_id: str, test_db: bool = False):
+#     if test_db:
+#         db_a = db_test
+#     else:
+#         db_a = db
+#     if exists_id_in_user(user_id, test_db):
+#         animals = db_a.collection("animals").document(user_id).get().to_dict()
+#         if not animals:
+#             dogs = []
+#             cats = []
+#         else:
+#             dogs = animals["dogs"]
+#             cats = animals["cats"]
+#         return AnimalsInDB(dogs=dogs, cats=cats)
+#     else:
+#         raise HTTPException(status_code=404, detail="User not found")
 
 
 # Register a user
 @router.post("/register", status_code=200, response_model=UserCreate)
-async def register_user(user: User):
-    if exists_email_in_user(user.email):
+def register_user(user: User, test_db: bool = False):
+    if test_db:
+        db_a = db_test
+        p_auth = test_pyrebase_auth
+    else:
+        db_a = db
+        p_auth = pyrebase_auth
+
+    if exists_email_in_user(user.email, test_db):
         raise HTTPException(status_code=401, detail="Email already exists")
 
     try:
-        create_user = pyrebase_auth.create_user_with_email_and_password(
+        create_user = p_auth.create_user_with_email_and_password(
             user.email, user.password
         )
     except HTTPException:
@@ -70,19 +104,19 @@ async def register_user(user: User):
 
     try:
         user.id = create_user["localId"]
-        db.collection("users").document(user.id).set(user.dict())
+        db_a.collection("users").document(user.id).set(user.dict())
         # For security, we don't save the password in the database
         # as is handled by Firebase Authentication
-        db.collection("users").document(user.id).update({"password": DELETE_FIELD})
+        db_a.collection("users").document(user.id).update({"password": DELETE_FIELD})
         # Send email verification
-        pyrebase_auth.send_email_verification(create_user["idToken"])
+        p_auth.send_email_verification(create_user["idToken"])
         return user
     except Exception as e:
         raise HTTPException(status_code=401, detail=str(e))
 
 
 @router.post("/login", status_code=200, response_model=Token)
-async def login_user(form_data: OAuth2PasswordRequestForm = Depends()):
+def login_user(form_data: OAuth2PasswordRequestForm = Depends()):
     try:
         user_py = pyrebase_auth.sign_in_with_email_and_password(
             form_data.username, form_data.password
@@ -113,26 +147,46 @@ async def login_user(form_data: OAuth2PasswordRequestForm = Depends()):
 
 # Enable user
 @router.put("/enable", status_code=200)
-async def enable_user(uid: str = Depends(firebase_uid_authentication)):
-    user = db.collection("users").where("id", "==", uid).get()[0].to_dict()
+def enable_user(uid: str = Depends(firebase_uid_authentication), test_db: bool = False):
+    if test_db:
+        db_a = db_test
+        uid_a = (
+            db_a.collection("users")
+            .where("name", "==", "TEST USER")
+            .get()[0]
+            .to_dict()["id"]
+        )
+    else:
+        db_a = db
+        uid_a = uid
+    user = db_a.collection("users").where("id", "==", uid_a).get()[0].to_dict()
 
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    if user["active"]:
-        raise HTTPException(status_code=400, detail="User already active")
-
-    db.collection("users").document(uid).update({"active": True})
+    db_a.collection("users").document(uid_a).update({"active": True})
 
     return JSONResponse(status_code=200, content={"message": "User enabled"})
 
 
 @router.put("/update", status_code=200, response_model=UserUpdateOut)
-async def update_user(
+def update_user(
     user: UserUpdateIn,
     email: str = Depends(firebase_email_authentication),
+    test_db: bool = False,
 ):
-    my_user = db.collection("users").where("email", "==", email).get()[0].to_dict()
+    if test_db:
+        db_a = db_test
+        email_a = (
+            db_a.collection("users")
+            .where("name", "==", "TEST USER")
+            .get()[0]
+            .to_dict()["email"]
+        )
+    else:
+        db_a = db
+        email_a = email
+    my_user = db_a.collection("users").where("email", "==", email_a).get()[0].to_dict()
 
     if not user or not my_user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -144,8 +198,8 @@ async def update_user(
         old_user["name"] = user.name
 
     try:
-        db.collection("users").document(old_user["id"]).update(old_user)
-        user = db.collection("users").document(old_user["id"]).get().to_dict()
+        db_a.collection("users").document(old_user["id"]).update(old_user)
+        user = db_a.collection("users").document(old_user["id"]).get().to_dict()
         return user
     except Exception as e:
         raise HTTPException(status_code=401, detail=str(e))
@@ -153,25 +207,50 @@ async def update_user(
 
 # Disable user
 @router.put("/disable", status_code=200)
-async def disable_user(uid: str = Depends(firebase_uid_authentication)):
-    user = db.collection("users").where("id", "==", uid).get()[0].to_dict()
+def disable_user(
+    uid: str = Depends(firebase_uid_authentication), test_db: bool = False
+):
+    if test_db:
+        db_a = db_test
+        uid_a = (
+            db_a.collection("users")
+            .where("name", "==", "TEST USER")
+            .get()[0]
+            .to_dict()["id"]
+        )
+    else:
+        db_a = db
+        uid_a = uid
+    user = db_a.collection("users").where("id", "==", uid_a).get()[0].to_dict()
 
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    if not user["active"]:
-        raise HTTPException(status_code=400, detail="User already disabled")
-
-    db.collection("users").document(uid).update({"active": False})
+    db_a.collection("users").document(uid_a).update({"active": False})
     return JSONResponse(status_code=200, content={"message": "User disabled"})
 
 
 # Upload photo profile
 @router.post("/upload/photo", status_code=200)
-async def upload_profile_photo(
-    file: UploadFile, email: str = Depends(firebase_email_authentication)
+def upload_profile_photo(
+    file: UploadFile,
+    email: str = Depends(firebase_email_authentication),
+    test_db: bool = False,
 ):
-    user_logged = db.collection("users").where("email", "==", email).get()
+    if test_db:
+        db_a = db_test
+        storage_a = test_storage
+        email_a = (
+            db_a.collection("users")
+            .where("name", "==", "TEST USER")
+            .get()[0]
+            .to_dict()["email"]
+        )
+    else:
+        db_a = db
+        storage_a = storage
+        email_a = email
+    user_logged = db_a.collection("users").where("email", "==", email_a).get()
 
     if not user_logged:
         raise HTTPException(status_code=404, detail="User not found")
@@ -189,11 +268,11 @@ async def upload_profile_photo(
             # But we want to overwrite the previous photo
 
             # Upload the file and delete the previous one
-            storage.child(f"users/{user.id}/{filename}").put(file.file)
+            storage_a.child(f"users/{user.id}/{filename}").put(file.file)
             # Get the url of the uploaded file
-            url = storage.child(f"users/{user.id}/{filename}").get_url(None)
+            url = storage_a.child(f"users/{user.id}/{filename}").get_url(None)
             # Update the user's photo
-            db.collection("users").document(user.id).update({"photo": url})
+            db_a.collection("users").document(user.id).update({"photo": url})
             return JSONResponse(status_code=200, content={"message": "Photo uploaded"})
         else:
             raise HTTPException(status_code=401, detail="File is not an image")
