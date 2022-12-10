@@ -9,8 +9,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Set environment variables from the .env file
-          env:
-            env-from: .env
+        env-from: .env
       - uses: actions/setup-python@v2
         with:
           python-version: 3.9
