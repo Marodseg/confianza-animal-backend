@@ -1,5 +1,7 @@
 import os
 
+from dotenv import load_dotenv
+
 import firebase_admin
 
 from firebase_admin import firestore, auth, credentials
@@ -7,6 +9,8 @@ from firebase_admin import firestore, auth, credentials
 import pyrebase
 
 from app.config.firebase_config import firebase_config, test_firebase_config
+
+load_dotenv()
 
 # CLOUD FIRESTORE CONFIGURATION
 
