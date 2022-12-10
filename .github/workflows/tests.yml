@@ -10,7 +10,7 @@ jobs:
         run: |
           echo $HOLA
         env:
-          FIREBASE_API_KEY: ${{ secrets.HOLA }}
+          HOLA: ${{ secrets.HOLA }}
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
         with:
