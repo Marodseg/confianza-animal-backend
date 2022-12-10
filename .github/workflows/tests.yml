@@ -14,5 +14,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
       - uses: c-py/action-dotenv-to-setenv@v2
+        with:
+          env-file: ./env
       - run: |
           pytest
