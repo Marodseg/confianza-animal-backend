@@ -8,9 +8,9 @@ jobs:
     steps:
       - name: Test
         run: |
-          echo $FIREBASE_API_KEY
+          echo $HOLA
         env:
-          FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
+          FIREBASE_API_KEY: ${{ secrets.HOLA }}
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
         with:
