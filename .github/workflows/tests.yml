@@ -8,11 +8,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+      - name: Set secrets and environment variables
+        env:
+          SECRETS: ${{ secrets.* }}
       - uses: actions/setup-python@v2
         with:
           python-version: 3.9
-      - run: |
-          echo "${{ secrets.ENV_FILE }}" > .env
       - run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
