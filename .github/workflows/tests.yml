@@ -6,11 +6,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Test
-        run: |
-          echo $HOLA
+      - name: Environment variables for GitHub Actions
         env:
-          HOLA: ${{ secrets.HOLA_QUE_TAL }}
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+          TEST_GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.TEST_GOOGLE_APPLICATION_CREDENTIALS }}
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
         with:
