@@ -1,8 +1,8 @@
 import os
 
-# from dotenv import load_dotenv
-#
-# load_dotenv()
+from dotenv import load_dotenv
+
+load_dotenv()
 
 firebase_config = {
     "apiKey": os.environ.get("FIREBASE_API_KEY"),
