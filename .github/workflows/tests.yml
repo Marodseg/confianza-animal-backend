@@ -17,4 +17,5 @@ jobs:
           env:
             GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
             TEST_GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.TEST_GOOGLE_APPLICATION_CREDENTIALS }}
-          run: pytest
+          run: |
+            pytest
