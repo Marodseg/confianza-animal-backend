@@ -327,3 +327,57 @@ def accept_petition_by_organization(
 
     db_a.collection("petitions").document(petition_id).update({"status": "approved"})
     return JSONResponse(status_code=200, content={"message": "Petition accepted"})
+
+
+# Switch visibility of a petition by id by user
+@router.put("/{petition_id}/user", status_code=200)
+def change_petition_visibility_by_user(
+    petition_id: str,
+    email: str = Depends(firebase_email_authentication),
+    test_db: bool = False,
+):
+    if test_db:
+        db_a = db_test
+        email_a = (
+            db_a.collection("users")
+            .where("name", "==", "TEST USER")
+            .get()[0]
+            .to_dict()["email"]
+        )
+    else:
+        db_a = db
+        email_a = email
+    user = db_a.collection("users").where("email", "==", email_a).get()[0].to_dict()
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    petitions = db_a.collection("petitions").where("user_id", "==", user["id"]).get()
+
+    if not petitions:
+        raise HTTPException(
+            status_code=404, detail="There are no petitions for this user"
+        )
+
+    for petition in petitions:
+        if petition.id == petition_id:
+
+            if petition.to_dict()["user_id"] != user["id"]:
+                raise HTTPException(
+                    status_code=404, detail="The user is not the owner of the petition"
+                )
+
+            # update the status of the petition
+            if petition.to_dict()["visible"]:
+                db_a.collection("petitions").document(petition_id).update(
+                    {"visible": False}
+                )
+            else:
+                db_a.collection("petitions").document(petition_id).update(
+                    {"visible": True}
+                )
+            return JSONResponse(
+                status_code=200, content={"message": "Petition visibility changed"}
+            )
+
+    raise HTTPException(status_code=404, detail="Petition not found")

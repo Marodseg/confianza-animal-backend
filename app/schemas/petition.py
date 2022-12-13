@@ -18,6 +18,7 @@ class Petition(BaseModel):
     status: PetitionStatus = PetitionStatus.pending
     message: str
     organization_name: Optional[str]
+    visible: bool = True
 
     class Config:
         orm_mode = True
