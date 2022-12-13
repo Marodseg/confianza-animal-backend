@@ -21,7 +21,7 @@ router = APIRouter()
 # Get all animals
 @router.get("/", status_code=200, response_model=Optional[AnimalsInDB])
 def get_all_animals(test_db=False):
-    if test_db:
+    if test_db is True:
         db_a = db_test
     else:
         db_a = db
@@ -34,7 +34,7 @@ def get_all_animals(test_db=False):
 # Get dog by id
 @router.get("/dog/{dog_id}", status_code=200, response_model=Dog)
 def get_dog_by_id(dog_id: str, test_db=False):
-    if test_db:
+    if test_db is True:
         db_a = db_test
     else:
         db_a = db
@@ -50,7 +50,7 @@ def get_dog_by_id(dog_id: str, test_db=False):
 # Get cat by id
 @router.get("/cat/{cat_id}", status_code=200, response_model=Cat)
 def get_cat_by_id(cat_id: str, test_db=False):
-    if test_db:
+    if test_db is True:
         db_a = db_test
     else:
         db_a = db
@@ -76,7 +76,7 @@ def get_dog_by_filters(
     is_urgent: bool = None,
     test_db=False,
 ):
-    if test_db:
+    if test_db is True:
         db_a = db_test
     else:
         db_a = db
@@ -111,7 +111,7 @@ def get_cat_by_filters(
     is_urgent: bool = None,
     test_db=False,
 ):
-    if test_db:
+    if test_db is True:
         db_a = db_test
     else:
         db_a = db
@@ -139,7 +139,7 @@ def upload_dog_photos(
     uid: str = Depends(firebase_uid_authentication),
     test_db=False,
 ):
-    if test_db:
+    if test_db is True:
         db_a = db_test
         storage_a = test_storage
         uid_a = (
@@ -208,7 +208,7 @@ def upload_cat_photos(
     uid: str = Depends(firebase_uid_authentication),
     test_db=False,
 ):
-    if test_db:
+    if test_db is True:
         db_a = db_test
         storage_a = test_storage
         uid_a = (
@@ -275,7 +275,7 @@ def delete_dog_photo(
     uid: str = Depends(firebase_uid_authentication),
     test_db=False,
 ):
-    if test_db:
+    if test_db is True:
         db_a = db_test
         uid_a = (
             db_a.collection("organizations").document("TEST USER").get().to_dict()["id"]
@@ -336,7 +336,7 @@ def delete_cat_photo(
     uid: str = Depends(firebase_uid_authentication),
     test_db=False,
 ):
-    if test_db:
+    if test_db is True:
         db_a = db_test
         uid_a = (
             db_a.collection("organizations").document("TEST USER").get().to_dict()["id"]
@@ -393,7 +393,7 @@ def delete_dog_by_id(
     uid: str = Depends(firebase_uid_authentication),
     test_db=False,
 ):
-    if test_db:
+    if test_db is True:
         db_a = db_test
         uid_a = (
             db_a.collection("organizations").document("TEST USER").get().to_dict()["id"]
@@ -441,7 +441,7 @@ def delete_cat_by_id(
     uid: str = Depends(firebase_uid_authentication),
     test_db=False,
 ):
-    if test_db:
+    if test_db is True:
         db_a = db_test
         uid_a = (
             db_a.collection("organizations").document("TEST USER").get().to_dict()["id"]

@@ -22,7 +22,7 @@ def ask_for_dog(
     email: str = Depends(firebase_email_authentication),
     test_db: bool = False,
 ):
-    if test_db:
+    if test_db is True:
         db_a = db_test
         email_a = (
             db_a.collection("users")
@@ -88,7 +88,7 @@ def ask_for_cat(
     email: str = Depends(firebase_email_authentication),
     test_db: bool = False,
 ):
-    if test_db:
+    if test_db is True:
         db_a = db_test
         email_a = (
             db_a.collection("users")
@@ -149,7 +149,7 @@ def ask_for_cat(
 def get_petitions_by_user(
     email: str = Depends(firebase_email_authentication), test_db: bool = False
 ):
-    if test_db:
+    if test_db is True:
         db_a = db_test
         email_a = (
             db_a.collection("users")
@@ -172,13 +172,45 @@ def get_petitions_by_user(
     return [Petition(**petition.to_dict()) for petition in petitions]
 
 
+# Get petitions visibles by user
+@router.get("/user/visibles", status_code=200, response_model=List[Petition])
+def get_petitions_visibles_by_user(
+    email: str = Depends(firebase_email_authentication), test_db: bool = False
+):
+    if test_db is True:
+        db_a = db_test
+        email_a = (
+            db_a.collection("users")
+            .where("name", "==", "TEST USER")
+            .get()[0]
+            .to_dict()["email"]
+        )
+    else:
+        db_a = db
+        email_a = email
+    user = db_a.collection("users").where("email", "==", email_a).get()[0].to_dict()
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    petitions = db_a.collection("petitions").where("user_id", "==", user["id"]).get()
+    if not petitions:
+        return []
+
+    return [
+        Petition(**petition.to_dict())
+        for petition in petitions
+        if petition.to_dict()["visible"] == True
+    ]
+
+
 # Get petition from organization logged
 @router.get("/organization", status_code=200, response_model=List[Petition])
 def get_petitions_by_organization(
     uid: str = Depends(firebase_uid_authentication),
     test_db: bool = False,
 ):
-    if test_db:
+    if test_db is True:
         db_a = db_test
         uid_a = (
             db_a.collection("organizations")
@@ -211,7 +243,7 @@ def reject_petition_by_user(
     email: str = Depends(firebase_email_authentication),
     test_db: bool = False,
 ):
-    if test_db:
+    if test_db is True:
         db_a = db_test
         email_a = (
             db_a.collection("users")
@@ -260,7 +292,7 @@ def reject_petition_by_organization(
     uid: str = Depends(firebase_uid_authentication),
     test_db: bool = False,
 ):
-    if test_db:
+    if test_db is True:
         db_a = db_test
         uid_a = (
             db_a.collection("organizations")
@@ -298,7 +330,7 @@ def accept_petition_by_organization(
     uid: str = Depends(firebase_uid_authentication),
     test_db: bool = False,
 ):
-    if test_db:
+    if test_db is True:
         db_a = db_test
         uid_a = (
             db_a.collection("organizations")
@@ -336,7 +368,7 @@ def change_petition_visibility_by_user(
     email: str = Depends(firebase_email_authentication),
     test_db: bool = False,
 ):
-    if test_db:
+    if test_db is True:
         db_a = db_test
         email_a = (
             db_a.collection("users")

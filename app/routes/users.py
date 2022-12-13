@@ -31,7 +31,7 @@ router = APIRouter()
 def get_user_profile(
     uid: str = Depends(firebase_uid_authentication), test_db: bool = False
 ):
-    if test_db:
+    if test_db is True:
         db_a = db_test
         uid_a = (
             db_a.collection("users")
@@ -51,7 +51,7 @@ def get_user_profile(
 # Get user by id
 @router.get("/{user_id}", status_code=200, response_model=UserView)
 def get_user_by_id(user_id: str, test_db: bool = False):
-    if test_db:
+    if test_db is True:
         db_a = db_test
     else:
         db_a = db
@@ -65,7 +65,7 @@ def get_user_by_id(user_id: str, test_db: bool = False):
 # Get animals by user id (NOT USED YET)
 # @router.get("/animals/{user_id}", status_code=200, response_model=AnimalsInDB)
 # def get_animals_by_user_id(user_id: str, test_db: bool = False):
-#     if test_db:
+#     if test_db is True:
 #         db_a = db_test
 #     else:
 #         db_a = db
@@ -85,7 +85,7 @@ def get_user_by_id(user_id: str, test_db: bool = False):
 # Register a user
 @router.post("/register", status_code=200, response_model=UserCreate)
 def register_user(user: User, test_db: bool = False):
-    if test_db:
+    if test_db is True:
         db_a = db_test
         p_auth = test_pyrebase_auth
     else:
@@ -148,7 +148,7 @@ def login_user(form_data: OAuth2PasswordRequestForm = Depends()):
 # Enable user
 @router.put("/enable", status_code=200)
 def enable_user(uid: str = Depends(firebase_uid_authentication), test_db: bool = False):
-    if test_db:
+    if test_db is True:
         db_a = db_test
         uid_a = (
             db_a.collection("users")
@@ -175,7 +175,7 @@ def update_user(
     email: str = Depends(firebase_email_authentication),
     test_db: bool = False,
 ):
-    if test_db:
+    if test_db is True:
         db_a = db_test
         email_a = (
             db_a.collection("users")
@@ -210,7 +210,7 @@ def update_user(
 def disable_user(
     uid: str = Depends(firebase_uid_authentication), test_db: bool = False
 ):
-    if test_db:
+    if test_db is True:
         db_a = db_test
         uid_a = (
             db_a.collection("users")
@@ -237,7 +237,7 @@ def upload_profile_photo(
     email: str = Depends(firebase_email_authentication),
     test_db: bool = False,
 ):
-    if test_db:
+    if test_db is True:
         db_a = db_test
         storage_a = test_storage
         email_a = (

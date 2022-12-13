@@ -11,7 +11,7 @@ from app.schemas.enums.size import Size
 
 
 def exists_email_in_organization(email: str, test_db: bool = False) -> bool:
-    if test_db:
+    if test_db is True:
         db_a = db_test
     else:
         db_a = db
@@ -19,7 +19,7 @@ def exists_email_in_organization(email: str, test_db: bool = False) -> bool:
 
 
 def exists_phone_in_organization(phone: str, test_db: bool = False) -> bool:
-    if test_db:
+    if test_db is True:
         db_a = db_test
     else:
         db_a = db
@@ -27,7 +27,7 @@ def exists_phone_in_organization(phone: str, test_db: bool = False) -> bool:
 
 
 def exists_name_in_organization(name: str, test_db: bool = False) -> bool:
-    if test_db:
+    if test_db is True:
         db_a = db_test
     else:
         db_a = db
@@ -35,7 +35,7 @@ def exists_name_in_organization(name: str, test_db: bool = False) -> bool:
 
 
 def exists_email_in_user(email: str, test_db: bool = False) -> bool:
-    if test_db:
+    if test_db is True:
         db_a = db_test
     else:
         db_a = db
@@ -43,7 +43,7 @@ def exists_email_in_user(email: str, test_db: bool = False) -> bool:
 
 
 def exists_id_in_user(user_id: str, test_db: bool = False) -> bool:
-    if test_db:
+    if test_db is True:
         db_a = db_test
     else:
         db_a = db
@@ -51,7 +51,7 @@ def exists_id_in_user(user_id: str, test_db: bool = False) -> bool:
 
 
 def exists_dog_in_animals(dog_id: str, test_db: bool = False) -> bool:
-    if test_db:
+    if test_db is True:
         db_a = db_test
     else:
         db_a = db
@@ -63,7 +63,7 @@ def exists_dog_in_animals(dog_id: str, test_db: bool = False) -> bool:
 
 
 def exists_cat_in_animals(cat_id: str, test_db: bool = False) -> bool:
-    if test_db:
+    if test_db is True:
         db_a = db_test
     else:
         db_a = db

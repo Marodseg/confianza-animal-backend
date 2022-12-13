@@ -30,7 +30,7 @@ def firebase_uid_authentication(
 # Reset password endpoint
 @router.post("/reset-password", status_code=200)
 def reset_password(email: str, test_db: bool = False):
-    if test_db:
+    if test_db is True:
         p_auth = test_pyrebase_auth
     else:
         p_auth = pyrebase_auth

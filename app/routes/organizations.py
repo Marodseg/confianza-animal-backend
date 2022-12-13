@@ -43,7 +43,7 @@ router = APIRouter()
 def get_user_profile(
     uid: str = Depends(firebase_uid_authentication), test_db: bool = False
 ):
-    if test_db:
+    if test_db is True:
         db_a = db_test
         uid_a = (
             db_a.collection("organizations")
@@ -67,7 +67,7 @@ def get_user_profile(
 def get_dogs_from_organization(
     uid: str = Depends(firebase_uid_authentication), test_db: bool = False
 ):
-    if test_db:
+    if test_db is True:
         db_a = db_test
         uid_a = (
             db_a.collection("organizations")
@@ -91,7 +91,7 @@ def get_dogs_from_organization(
 def get_cats_from_organization(
     uid: str = Depends(firebase_uid_authentication), test_db: bool = False
 ):
-    if test_db:
+    if test_db is True:
         db_a = db_test
         uid_a = (
             db_a.collection("organizations")
@@ -113,7 +113,7 @@ def get_cats_from_organization(
 # Get all organizations
 @router.get("/", status_code=200, response_model=List[OrganizationCreate])
 def get_organizations(test_db: bool = False):
-    if test_db:
+    if test_db is True:
         db_a = db_test
     else:
         db_a = db
@@ -126,7 +126,7 @@ def get_organizations(test_db: bool = False):
 # Get organization by name
 @router.get("/{organization_name}", status_code=200, response_model=OrganizationAnimals)
 def get_organization_by_name(organization_name: str, test_db: bool = False):
-    if test_db:
+    if test_db is True:
         db_a = db_test
     else:
         db_a = db
@@ -148,7 +148,7 @@ def post_dog(
     uid: str = Depends(firebase_uid_authentication),
     test_db: bool = False,
 ):
-    if test_db:
+    if test_db is True:
         db_a = db_test
         uid_a = (
             db_a.collection("organizations")
@@ -186,7 +186,7 @@ def post_cat(
     uid: str = Depends(firebase_uid_authentication),
     test_db: bool = False,
 ):
-    if test_db:
+    if test_db is True:
         db_a = db_test
         uid_a = (
             db_a.collection("organizations")
@@ -220,7 +220,7 @@ def post_cat(
 # Register an organization
 @router.post("/register", status_code=200, response_model=OrganizationCreate)
 def register_organization(organization: Organization, test_db: bool = False):
-    if test_db:
+    if test_db is True:
         db_a = db_test
         p_auth = test_pyrebase_auth
     else:
@@ -296,7 +296,7 @@ def upload_profile_photo_organization(
     email: str = Depends(firebase_email_authentication),
     test_db: bool = False,
 ):
-    if test_db:
+    if test_db is True:
         db_a = db_test
         storage_a = test_storage
         email_a = (
@@ -353,7 +353,7 @@ def modify_dog(
     uid: str = Depends(firebase_uid_authentication),
     test_db: bool = False,
 ):
-    if test_db:
+    if test_db is True:
         db_a = db_test
         uid_a = (
             db_a.collection("organizations")
@@ -424,7 +424,7 @@ def modify_cat(
     uid: str = Depends(firebase_uid_authentication),
     test_db: bool = False,
 ):
-    if test_db:
+    if test_db is True:
         db_a = db_test
         uid_a = (
             db_a.collection("organizations")
@@ -493,7 +493,7 @@ def modify_cat(
 def enable_organization(
     uid: str = Depends(firebase_uid_authentication), test_db: bool = False
 ):
-    if test_db:
+    if test_db is True:
         db_a = db_test
         uid_a = (
             db_a.collection("organizations")
@@ -521,7 +521,7 @@ def update_organization(
     uid: str = Depends(firebase_uid_authentication),
     test_db: bool = False,
 ):
-    if test_db:
+    if test_db is True:
         db_a = db_test
         uid_a = (
             db_a.collection("organizations")
@@ -570,7 +570,7 @@ def update_organization(
 def delete_organization(
     uid: str = Depends(firebase_uid_authentication), test_db: bool = False
 ):
-    if test_db:
+    if test_db is True:
         db_a = db_test
         uid_a = (
             db_a.collection("organizations")
