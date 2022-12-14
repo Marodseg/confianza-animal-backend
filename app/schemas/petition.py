@@ -24,6 +24,7 @@ class Petition(BaseModel):
         orm_mode = True
         schema_extra = {
             "example": {
+                "id": "1",
                 "user_id": "1",
                 "user_name": "Prueba",
                 "user_email": "prueba@prueba.com",
