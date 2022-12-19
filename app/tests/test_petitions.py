@@ -12,6 +12,7 @@ from app.routes.petitions import (
     accept_petition_by_organization,
     change_petition_visibility_by_user,
     get_petitions_visibles_by_user,
+    get_petitions_invisibles_by_user,
 )
 from app.schemas.animal import Dog, Cat
 from app.schemas.enums.activity import Activity
@@ -488,6 +489,56 @@ def test_get_petitions_visibles_by_user(login_user):
 
     # Check that we are not getting this petition
     petitions = get_petitions_visibles_by_user(test_db=True)
+    assert petitions == []
+
+    # Delete petitions and animals from the database
+    db_test.collection("petitions").document(petition.id).delete()
+    delete_dog_by_name("Prueba")
+
+
+def test_get_petitions_invisibles_by_user(login_user):
+    # Let's create a petition
+    dog = Dog(
+        name="Prueba",
+        age=1,
+        gender=Gender.male,
+        photos=[
+            "https://www.image.com/image.jpg",
+            "https://www.image.com/image2.jpg",
+        ],
+        weight=1.0,
+        size=Size.small,
+        zone=Province.alava,
+        neutered=True,
+        description="Prueba",
+        healthy=True,
+        wormed=True,
+        vaccinated=True,
+        activity_level=Activity.low,
+        microchip=True,
+        is_urgent=True,
+        raze=DogRaze.chihuahua,
+    )
+
+    dog = post_dog(dog, test_db=True)
+    petition = ask_for_dog(dog.id, "I want this dog", test_db=True)
+
+    # Check that the petition is visible when is created
+    assert petition.visible is True
+
+    # Let's change the visibility to False
+    change_petition_visibility_by_user(petition.id, test_db=True)
+
+    # Check that we are getting this petition
+    petitions = get_petitions_invisibles_by_user(test_db=True)
+    assert petitions[0].id == petition.id
+    assert len(petitions) == 1
+
+    # Change the visibility to True
+    change_petition_visibility_by_user(petition.id, test_db=True)
+
+    # Check that we are not getting this petition
+    petitions = get_petitions_invisibles_by_user(test_db=True)
     assert petitions == []
 
     # Delete petitions and animals from the database
