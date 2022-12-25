@@ -143,7 +143,10 @@ def upload_dog_photos(
         db_a = db_test
         storage_a = test_storage
         uid_a = (
-            db_a.collection("organizations").document("TEST USER").get().to_dict()["id"]
+            db_a.collection("organizations")
+            .document("TEST ORGANIZATION")
+            .get()
+            .to_dict()["id"]
         )
     else:
         db_a = db
@@ -212,7 +215,10 @@ def upload_cat_photos(
         db_a = db_test
         storage_a = test_storage
         uid_a = (
-            db_a.collection("organizations").document("TEST USER").get().to_dict()["id"]
+            db_a.collection("organizations")
+            .document("TEST ORGANIZATION")
+            .get()
+            .to_dict()["id"]
         )
     else:
         db_a = db
@@ -278,7 +284,10 @@ def delete_dog_photo(
     if test_db is True:
         db_a = db_test
         uid_a = (
-            db_a.collection("organizations").document("TEST USER").get().to_dict()["id"]
+            db_a.collection("organizations")
+            .document("TEST ORGANIZATION")
+            .get()
+            .to_dict()["id"]
         )
     else:
         db_a = db
@@ -339,7 +348,10 @@ def delete_cat_photo(
     if test_db is True:
         db_a = db_test
         uid_a = (
-            db_a.collection("organizations").document("TEST USER").get().to_dict()["id"]
+            db_a.collection("organizations")
+            .document("TEST ORGANIZATION")
+            .get()
+            .to_dict()["id"]
         )
     else:
         db_a = db
@@ -396,7 +408,10 @@ def delete_dog_by_id(
     if test_db is True:
         db_a = db_test
         uid_a = (
-            db_a.collection("organizations").document("TEST USER").get().to_dict()["id"]
+            db_a.collection("organizations")
+            .document("TEST ORGANIZATION")
+            .get()
+            .to_dict()["id"]
         )
     else:
         db_a = db
@@ -444,7 +459,10 @@ def delete_cat_by_id(
     if test_db is True:
         db_a = db_test
         uid_a = (
-            db_a.collection("organizations").document("TEST USER").get().to_dict()["id"]
+            db_a.collection("organizations")
+            .document("TEST ORGANIZATION")
+            .get()
+            .to_dict()["id"]
         )
     else:
         db_a = db
