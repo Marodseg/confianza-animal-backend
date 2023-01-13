@@ -15,7 +15,7 @@ class User(BaseModel):
     active: bool = True
     dogs: Optional[List[Dog]]
     cats: Optional[List[Cat]]
-    favorites: dict = {"dogs": Optional[List[Dog]], "cats": Optional[List[Cat]]}
+    favorites: dict = {"dogs": [], "cats": []}
 
     @validator("email")
     def email_must_be_valid(cls, v) -> str:
@@ -60,7 +60,7 @@ class UserView(BaseModel):
     name: str
     photo: Optional[str]
     active: Optional[bool]
-    favorites: dict = {"dogs": Optional[List[Dog]], "cats": Optional[List[Cat]]}
+    favorites: dict = {"dogs": [], "cats": []}
 
     class Config:
         orm_mode = True
