@@ -44,7 +44,7 @@ def test_exists_name_in_organization():
 def test_exists_id_in_user():
     # Get user by name
     user_firebase = test_pyrebase_auth.sign_in_with_email_and_password(
-        "userconfianzaanimaltest@gmail.com", "123456"
+        "userconfianzaanimaltest@gmail.com", "12345678!Ll"
     )
     user = exists_id_in_user(user_firebase["localId"], test_db=True)
     assert user is not None

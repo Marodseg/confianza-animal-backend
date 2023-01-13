@@ -39,7 +39,7 @@ from app.tests.conftest import (
 
 
 def test_organization_register():
-    # Short password (less than 6 characters)
+    # Short password (less than 8 characters)
     org = {
         "name": "testing",
         "email": "test@test.com",
@@ -48,7 +48,8 @@ def test_organization_register():
         "zone": Province.alava,
     }
     with pytest.raises(
-        ValidationError, match="Password must have 6 characters at least"
+        ValidationError,
+        match="Password must have 8 characters and contain at least one number, one uppercase and one symbol",
     ):
         Organization(**org)
 
@@ -56,7 +57,7 @@ def test_organization_register():
     org = {
         "name": "testing",
         "email": "test",
-        "password": "testtest",
+        "password": "12345678!Ll",
         "phone": "+34123456789",
         "zone": Province.alava,
     }
@@ -67,7 +68,7 @@ def test_organization_register():
     org = {
         "name": "testing",
         "email": "test@test.com",
-        "password": "123456",
+        "password": "12345678!Ll",
         "phone": "123456789",
         "zone": Province.alava,
     }
@@ -79,7 +80,7 @@ def test_organization_register():
         {
             "name": "testing",
             "email": "test@test.com",
-            "password": "123456",
+            "password": "12345678!Ll",
             "phone": "+34123456789",
             "zone": Province.alava,
         },
@@ -100,16 +101,16 @@ def test_login_organization(login_org):
     # Invalid password
     with pytest.raises(HTTPError, match="INVALID_PASSWORD"):
         test_pyrebase_auth.sign_in_with_email_and_password(
-            "confianzaanimaltest@gmail.com", "123457"
+            "confianzaanimaltest@gmail.com", "12345678!La"
         )
 
     # Invalid email
     with pytest.raises(HTTPError, match="INVALID_EMAIL"):
-        test_pyrebase_auth.sign_in_with_email_and_password("jnarear", "123456")
+        test_pyrebase_auth.sign_in_with_email_and_password("jnarear", "12345678!Ll")
 
     # Valid data
     org = test_pyrebase_auth.sign_in_with_email_and_password(
-        "confianzaanimaltest@gmail.com", "123456"
+        "confianzaanimaltest@gmail.com", "12345678!Ll"
     )
     assert org["email"] == "confianzaanimaltest@gmail.com"
     assert org["registered"] is True

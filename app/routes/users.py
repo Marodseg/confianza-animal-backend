@@ -20,7 +20,6 @@ from app.routes.auth import (
     firebase_uid_authentication,
     Token,
 )
-from app.schemas.animal import Dog, Cat, AnimalsInDB
 from app.schemas.user import User, UserCreate, UserView, UserUpdateIn, UserUpdateOut
 from app.utils import (
     exists_email_in_user,

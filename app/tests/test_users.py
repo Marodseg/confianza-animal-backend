@@ -19,22 +19,34 @@ from app.schemas.user import User, UserUpdateIn
 from app.tests.conftest import delete_user_by_name
 
 
-def test_organization_register():
-    # Short password (less than 6 characters)
+def test_user_register():
+    # Short password (less than 8 characters)
     with pytest.raises(
-        ValidationError, match="Password must have 6 characters at least"
+        ValidationError,
+        match="Password must have 8 characters and contain at least one number, one uppercase and one symbol",
     ):
-        User(name="testing", email="test@test.com", password="12345")
+        User(
+            name="testing",
+            email="test@test.com",
+            password="12345",
+            favorites={"dogs": [], "cats": []},
+        )
 
     # Invalid email (missing @)
     with pytest.raises(ValidationError, match="Email is not valid"):
-        User(name="testing", email="testtest.com", password="123456")
+        User(
+            name="testing",
+            email="testtest.com",
+            password="12345678!Ll",
+            favorites={"dogs": [], "cats": []},
+        )
 
     # Valid data
     user = User(
         name="testing",
         email="test@test.com",
-        password="123456",
+        password="12345678!Ll",
+        favorites={"dogs": [], "cats": []},
     )
     user_created = register_user(user, test_db=True)
 
@@ -52,16 +64,16 @@ def test_login_user(login_user):
     # Invalid password
     with pytest.raises(HTTPError, match="INVALID_PASSWORD"):
         test_pyrebase_auth.sign_in_with_email_and_password(
-            "userconfianzaanimaltest@gmail.com", "123457"
+            "userconfianzaanimaltest@gmail.com", "1234578!La"
         )
 
     # Invalid email
     with pytest.raises(HTTPError, match="INVALID_EMAIL"):
-        test_pyrebase_auth.sign_in_with_email_and_password("jnarear", "123456")
+        test_pyrebase_auth.sign_in_with_email_and_password("jnarear", "12345678!Ll")
 
     # Valid data
     org = test_pyrebase_auth.sign_in_with_email_and_password(
-        "userconfianzaanimaltest@gmail.com", "123456"
+        "userconfianzaanimaltest@gmail.com", "12345678!Ll"
     )
     assert org["email"] == "userconfianzaanimaltest@gmail.com"
     assert org["registered"] is True
@@ -78,7 +90,7 @@ def test_get_user_by_id(login_user):
         get_user_by_id("invalid_id", test_db=True)
 
     user_firebase = test_pyrebase_auth.sign_in_with_email_and_password(
-        "userconfianzaanimaltest@gmail.com", "123456"
+        "userconfianzaanimaltest@gmail.com", "12345678!Ll"
     )
     user = get_user_by_id(user_firebase["localId"], test_db=True)
     assert user["name"] == "TEST USER"
