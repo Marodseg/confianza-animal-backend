@@ -7,7 +7,9 @@ def delete_organization_by_name(name: str):
     org = (
         db_test.collection("organizations").where("name", "==", name).get()[0].to_dict()
     )
-    user = test_pyrebase_auth.sign_in_with_email_and_password(org["email"], "123456")
+    user = test_pyrebase_auth.sign_in_with_email_and_password(
+        org["email"], "12345678!Ll"
+    )
     db_test.collection("organizations").document(org["name"]).delete()
     test_pyrebase_auth.delete_user_account(user["idToken"])
 
@@ -15,7 +17,7 @@ def delete_organization_by_name(name: str):
 def delete_user_by_name(name: str):
     user = db_test.collection("users").where("name", "==", name).get()[0].to_dict()
     user_db = test_pyrebase_auth.sign_in_with_email_and_password(
-        user["email"], "123456"
+        user["email"], "12345678!Ll"
     )
     db_test.collection("users").document(user["id"]).delete()
     test_pyrebase_auth.delete_user_account(user_db["idToken"])
@@ -54,7 +56,7 @@ def delete_dog_by_name(name: str):
 @pytest.fixture
 def login_org() -> str:
     org = test_pyrebase_auth.sign_in_with_email_and_password(
-        "confianzaanimaltest@gmail.com", "123456"
+        "confianzaanimaltest@gmail.com", "12345678!Ll"
     )
     if org:
         return org["idToken"]
@@ -65,7 +67,7 @@ def login_org() -> str:
 @pytest.fixture
 def login_user() -> str:
     user = test_pyrebase_auth.sign_in_with_email_and_password(
-        "userconfianzaanimaltest@gmail.com", "123456"
+        "userconfianzaanimaltest@gmail.com", "12345678!Ll"
     )
     if user:
         return user["idToken"]
