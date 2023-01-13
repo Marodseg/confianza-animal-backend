@@ -1,6 +1,4 @@
-import datetime
 import re
-from uuid import uuid4
 
 from pydantic import BaseModel, validator
 from typing import Optional, List
@@ -17,6 +15,7 @@ class User(BaseModel):
     active: bool = True
     dogs: Optional[List[Dog]]
     cats: Optional[List[Cat]]
+    favorites: dict = {"dogs": Optional[List[Dog]], "cats": Optional[List[Cat]]}
 
     @validator("email")
     def email_must_be_valid(cls, v) -> str:
@@ -26,8 +25,13 @@ class User(BaseModel):
 
     @validator("password")
     def password_must_be_valid(cls, v) -> str:
-        if len(v) < 6:
-            raise ValueError("Password must have 6 characters at least")
+        # The password must be at least 8 characters long and contain at least one number, one uppercase and one symbol
+        if not re.match(
+            r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$", v
+        ):
+            raise ValueError(
+                "Password must have 8 characters and contain at least one number, one uppercase and one symbol"
+            )
         return v
 
     class Config:
@@ -56,6 +60,7 @@ class UserView(BaseModel):
     name: str
     photo: Optional[str]
     active: Optional[bool]
+    favorites: dict = {"dogs": Optional[List[Dog]], "cats": Optional[List[Cat]]}
 
     class Config:
         orm_mode = True

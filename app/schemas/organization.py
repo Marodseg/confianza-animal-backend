@@ -34,8 +34,12 @@ class Organization(BaseModel):
 
     @validator("password")
     def password_must_be_valid(cls, v) -> str:
-        if len(v) < 6:
-            raise ValueError("Password must have 6 characters at least")
+        if not re.match(
+            r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$", v
+        ):
+            raise ValueError(
+                "Password must have 8 characters and contain at least one number, one uppercase and one symbol"
+            )
         return v
 
     class Config:

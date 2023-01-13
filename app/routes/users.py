@@ -1,3 +1,5 @@
+from typing import List, Union
+
 from fastapi.security import OAuth2PasswordRequestForm
 from google.cloud.firestore_v1 import DELETE_FIELD
 from starlette.responses import JSONResponse
@@ -18,6 +20,7 @@ from app.routes.auth import (
     firebase_uid_authentication,
     Token,
 )
+from app.schemas.animal import Dog, Cat, AnimalsInDB
 from app.schemas.user import User, UserCreate, UserView, UserUpdateIn, UserUpdateOut
 from app.utils import (
     exists_email_in_user,
@@ -46,6 +49,32 @@ def get_user_profile(
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return UserView(**user[0].to_dict())
+
+
+# Get user favorites list
+@router.get("/favorites", status_code=200, response_model=dict)
+def get_user_favorites(
+    uid: str = Depends(firebase_uid_authentication), test_db: bool = False
+):
+    if test_db is True:
+        db_a = db_test
+        uid_a = (
+            db_a.collection("users")
+            .where("name", "==", "TEST USER")
+            .get()[0]
+            .to_dict()["id"]
+        )
+    else:
+        db_a = db
+        uid_a = uid
+    user = db_a.collection("users").where("id", "==", uid_a).get()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    return {
+        "dogs": user[0].to_dict()["favorites"]["dogs"],
+        "cats": user[0].to_dict()["favorites"]["cats"],
+    }
 
 
 # Get user by id
@@ -80,6 +109,78 @@ def get_user_by_id(user_id: str, test_db: bool = False):
 #         return AnimalsInDB(dogs=dogs, cats=cats)
 #     else:
 #         raise HTTPException(status_code=404, detail="User not found")
+
+
+# Post user favorite animal
+@router.post("/favorites/{animal_id}", status_code=200, response_model=dict)
+def post_user_favorites(
+    animal_id: str,
+    uid: str = Depends(firebase_uid_authentication),
+    test_db: bool = False,
+):
+    if test_db is True:
+        db_a = db_test
+        uid_a = (
+            db_a.collection("users")
+            .where("name", "==", "TEST USER")
+            .get()[0]
+            .to_dict()["id"]
+        )
+    else:
+        db_a = db
+        uid_a = uid
+    user = db_a.collection("users").where("id", "==", uid_a).get()[0].to_dict()
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    animals = db_a.collection("animals").document("animals").get().to_dict()
+    favorite_dog = None
+    favorite_cat = None
+
+    for animal in animals["dogs"]:
+        if animal["id"] == animal_id:
+            favorite_dog = animal
+
+    if favorite_dog is None:
+        for animal in animals["cats"]:
+            if animal["id"] == animal_id:
+                favorite_cat = animal
+
+    if favorite_cat is None and favorite_dog is None:
+        raise HTTPException(status_code=404, detail="Animal not found")
+
+    user_favorites_dogs = user["favorites"]["dogs"]
+    user_favorites_cats = user["favorites"]["cats"]
+
+    if favorite_dog is not None:
+        for dog in user_favorites_dogs:
+            if dog["id"] == favorite_dog["id"]:
+                raise HTTPException(
+                    status_code=400, detail="Animal already in favorites"
+                )
+
+    if favorite_cat is not None:
+        for cat in user_favorites_cats:
+            if cat["id"] == favorite_cat["id"]:
+                raise HTTPException(
+                    status_code=400, detail="Animal already in favorites"
+                )
+
+    if favorite_dog is not None:
+        user_favorites_dogs.append(favorite_dog)
+    else:
+        user_favorites_cats.append(favorite_cat)
+
+    db_a.collection("users").document(uid_a).update(
+        {"favorites": {"dogs": user_favorites_dogs, "cats": user_favorites_cats}}
+    )
+
+    user_with_favorites = (
+        db_a.collection("users").where("id", "==", uid_a).get()[0].to_dict()
+    )
+
+    return user_with_favorites["favorites"]
 
 
 # Register a user
@@ -278,3 +379,52 @@ def upload_profile_photo(
             raise HTTPException(status_code=401, detail="File is not an image")
     except Exception as e:
         raise HTTPException(status_code=401, detail="File is not an image")
+
+
+# Delete favorite
+@router.delete("/favorites/{animal_id}", status_code=200, response_model=str)
+def delete_favorite(
+    animal_id: str,
+    uid: str = Depends(firebase_uid_authentication),
+    test_db: bool = False,
+):
+    if test_db is True:
+        db_a = db_test
+        uid_a = (
+            db_a.collection("users")
+            .where("name", "==", "TEST USER")
+            .get()[0]
+            .to_dict()["id"]
+        )
+    else:
+        db_a = db
+        uid_a = uid
+    user = db_a.collection("users").where("id", "==", uid_a).get()[0].to_dict()
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    dog_favorites = user["favorites"]["dogs"]
+    cat_favorites = user["favorites"]["cats"]
+    removed = False
+
+    for dog in dog_favorites:
+        if dog["id"] == animal_id:
+            dog_favorites.remove(dog)
+            removed = True
+
+    for cat in cat_favorites:
+        if cat["id"] == animal_id:
+            cat_favorites.remove(cat)
+            removed = True
+
+    if not removed:
+        raise HTTPException(
+            status_code=404, detail="The animal is not in the favorites list"
+        )
+
+    db_a.collection("users").document(uid_a).update(
+        {"favorites": {"dogs": dog_favorites, "cats": cat_favorites}}
+    )
+
+    return JSONResponse(status_code=200, content={"message": "Favorite deleted"})

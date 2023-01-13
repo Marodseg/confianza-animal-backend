@@ -17,12 +17,11 @@ from app.schemas.organization import Organization
 
 
 # SECOND STEP:
-# Execute this file to register the organization and populate the database with test data as follows:
-# pytest app/config/populate_test_database.py
+# Execute this file to register the organization and populate the database with test data
 from app.schemas.user import User
 
 
-def test_populate_db():
+def populate_db():
     org = Organization(
         name="TEST ORGANIZATION",
         email="confianzaanimaltest@gmail.com",
@@ -50,5 +49,6 @@ def test_populate_db():
     ].reference.update({"id": user.id})
 
 
-# If the test is successful, the organization will be registered and the database will be populated with test data.
-# If the test fails, it is because the test database has suffered some changes and is not as the original blank database.
+# After executing this file, you will have a test organization and a test user in the database.
+if __name__ == "__main__":
+    populate_db()

@@ -16,7 +16,7 @@ from app.routes.users import (
     update_user,
 )
 from app.schemas.user import User, UserUpdateIn
-from app.tests.conftest import delete_user_by_name, delete_cat_by_name
+from app.tests.conftest import delete_user_by_name
 
 
 def test_organization_register():
@@ -124,7 +124,9 @@ def test_upload_profile_photo(login_user):
     user = get_user_profile(test_db=True)
     assert (
         user.photo
-        == "https://firebasestorage.googleapis.com/v0/b/confianza-animal-test.appspot.com/o/users%2F1y9VWoRfhtZRjoIVdzTroacWK7F3%2Fprofile_photo?alt=media"
+        == "https://firebasestorage.googleapis.com/v0/b/confianza-animal-test.appspot.com/o/users%2F"
+        + user.id
+        + "%2Fprofile_photo?alt=media"
     )
 
     # Upload a photo that is not an image
