@@ -16,6 +16,12 @@ class User(BaseModel):
     dogs: Optional[List[Dog]]
     cats: Optional[List[Cat]]
     favorites: dict = {"dogs": [], "cats": []}
+    home_type: Optional[str]
+    free_time: Optional[str]
+    previous_experience: Optional[str]
+    frequency_travel: Optional[str]
+    kids: Optional[str]
+    other_animals: Optional[str]
 
     @validator("email")
     def email_must_be_valid(cls, v) -> str:
@@ -61,14 +67,26 @@ class UserView(BaseModel):
     photo: Optional[str]
     active: Optional[bool]
     favorites: dict = {"dogs": [], "cats": []}
+    home_type: Optional[str]
+    free_time: Optional[str]
+    previous_experience: Optional[str]
+    frequency_travel: Optional[str]
+    kids: Optional[str]
+    other_animals: Optional[str]
 
     class Config:
         orm_mode = True
 
 
 class UserUpdateIn(BaseModel):
-    name: str
+    name: Optional[str]
     photo: Optional[str]
+    home_type: Optional[str]
+    free_time: Optional[str]
+    previous_experience: Optional[str]
+    frequency_travel: Optional[str]
+    kids: Optional[str]
+    other_animals: Optional[str]
 
     class Config:
         orm_mode = True
@@ -81,6 +99,12 @@ class UserUpdateOut(BaseModel):
     photo: Optional[str]
     dogs: Optional[List[Dog]]
     cats: Optional[List[Cat]]
+    home_type: Optional[str]
+    free_time: Optional[str]
+    previous_experience: Optional[str]
+    frequency_travel: Optional[str]
+    kids: Optional[str]
+    other_animals: Optional[str]
 
     class Config:
         orm_mode = True

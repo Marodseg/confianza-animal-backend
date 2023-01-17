@@ -20,6 +20,7 @@ from app.routes.auth import (
     firebase_uid_authentication,
     Token,
 )
+from app.schemas.enums.petition_status import PetitionStatus
 from app.schemas.user import User, UserCreate, UserView, UserUpdateIn, UserUpdateOut
 from app.utils import (
     exists_email_in_user,
@@ -76,6 +77,41 @@ def get_user_favorites(
     }
 
 
+# Check if animal is in favorites list of a user
+@router.get("/favorites/{animal_id}", status_code=200, response_model=bool)
+def check_if_animal_is_in_favorites(
+    animal_id: str,
+    uid: str = Depends(firebase_uid_authentication),
+    test_db: bool = False,
+):
+    if test_db is True:
+        db_a = db_test
+        uid_a = (
+            db_a.collection("users")
+            .where("name", "==", "TEST USER")
+            .get()[0]
+            .to_dict()["id"]
+        )
+    else:
+        db_a = db
+        uid_a = uid
+    user = db_a.collection("users").where("id", "==", uid_a).get()[0].to_dict()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    user_dogs_favorites = user["favorites"]["dogs"]
+    user_cats_favorites = user["favorites"]["cats"]
+
+    for dog in user_dogs_favorites:
+        if dog["id"] == animal_id:
+            return True
+    for cat in user_cats_favorites:
+        if cat["id"] == animal_id:
+            return True
+
+    return False
+
+
 # Get user by id
 @router.get("/{user_id}", status_code=200, response_model=UserView)
 def get_user_by_id(user_id: str, test_db: bool = False):
@@ -90,24 +126,43 @@ def get_user_by_id(user_id: str, test_db: bool = False):
     return user
 
 
-# Get animals by user id (NOT USED YET)
-# @router.get("/animals/{user_id}", status_code=200, response_model=AnimalsInDB)
-# def get_animals_by_user_id(user_id: str, test_db: bool = False):
-#     if test_db is True:
-#         db_a = db_test
-#     else:
-#         db_a = db
-#     if exists_id_in_user(user_id, test_db):
-#         animals = db_a.collection("animals").document(user_id).get().to_dict()
-#         if not animals:
-#             dogs = []
-#             cats = []
-#         else:
-#             dogs = animals["dogs"]
-#             cats = animals["cats"]
-#         return AnimalsInDB(dogs=dogs, cats=cats)
-#     else:
-#         raise HTTPException(status_code=404, detail="User not found")
+# Update user docu
+@router.post("/documentation", status_code=200, response_model=str)
+def envy_user_documentation(
+    petition_id: str,
+    message: str,
+    uid: str = Depends(firebase_uid_authentication),
+    test_db: bool = False,
+):
+    if test_db is True:
+        db_a = db_test
+        uid_a = (
+            db_a.collection("users")
+            .where("name", "==", "TEST USER")
+            .get()[0]
+            .to_dict()["id"]
+        )
+    else:
+        db_a = db
+        uid_a = uid
+    user = db_a.collection("users").where("id", "==", uid_a).get()[0].to_dict()
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    petitions = db_a.collection("petitions").where("user_id", "==", uid_a).get()
+    for petition in petitions:
+        if (
+            petition.id == petition_id
+            and petition.to_dict()["status"] == PetitionStatus.info_approved
+        ):
+            db_a.collection("petitions").document(petition.id).update(
+                {"status": PetitionStatus.docu_envied, "user_message": message}
+            )
+            return JSONResponse(
+                status_code=200, content={"message": "User documentation envied"}
+            )
+    return HTTPException(status_code=404, detail="Documentation can not be envied")
 
 
 # Post user favorite animal
@@ -293,16 +348,104 @@ def update_user(
 
     # We keep a copy of the old user
     old_user = my_user.copy()
+    # Check if the info changed to update the petition
+    info_user_changed = False
 
     if user.name:
         old_user["name"] = user.name
 
+    if user.photo:
+        old_user["photo"] = user.photo
+
+    if user.home_type:
+        old_user["home_type"] = user.home_type
+        info_user_changed = True
+
+    if user.free_time:
+        old_user["free_time"] = user.free_time
+        info_user_changed = True
+
+    if user.previous_experience:
+        old_user["previous_experience"] = user.previous_experience
+        info_user_changed = True
+
+    if user.frequency_travel:
+        old_user["frequency_travel"] = user.frequency_travel
+        info_user_changed = True
+
+    if user.kids:
+        old_user["kids"] = user.kids
+        info_user_changed = True
+
+    if user.other_animals:
+        old_user["other_animals"] = user.other_animals
+        info_user_changed = True
+
     try:
         db_a.collection("users").document(old_user["id"]).update(old_user)
         user = db_a.collection("users").document(old_user["id"]).get().to_dict()
+
+        petitions = (
+            db_a.collection("petitions").where("user_id", "==", user["id"]).get()
+        )
+        if info_user_changed:
+            for petition in petitions:
+                if petition.info_updated is False:
+                    db_a.collection("petitions").document(petition.id).update(
+                        {
+                            "info_updated": True,
+                            "status": PetitionStatus.info_changed,
+                            "home_type_bool": False,
+                            "free_time_bool": False,
+                            "previous_experience_bool": False,
+                            "frequency_travel_bool": False,
+                            "kids_bool": False,
+                            "other_animals_bool": False,
+                        }
+                    )
         return user
     except Exception as e:
         raise HTTPException(status_code=401, detail=str(e))
+
+
+# Update user docu
+@router.put("/update-documentation", status_code=200, response_model=str)
+def update_user_documentation(
+    petition_id: str,
+    message: str,
+    uid: str = Depends(firebase_uid_authentication),
+    test_db: bool = False,
+):
+    if test_db is True:
+        db_a = db_test
+        uid_a = (
+            db_a.collection("users")
+            .where("name", "==", "TEST USER")
+            .get()[0]
+            .to_dict()["id"]
+        )
+    else:
+        db_a = db
+        uid_a = uid
+    user = db_a.collection("users").where("id", "==", uid_a).get()[0].to_dict()
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    petitions = db_a.collection("petitions").where("user_id", "==", uid_a).get()
+    for petition in petitions:
+        if petition.id == petition_id and petition.to_dict()["docu_updated"] is False:
+            db_a.collection("petitions").document(petition.id).update(
+                {
+                    "docu_updated": True,
+                    "status": PetitionStatus.docu_changed,
+                    "user_message": message,
+                }
+            )
+            return JSONResponse(
+                status_code=200, content={"message": "User documentation updated"}
+            )
+    raise HTTPException(status_code=404, detail="User documentation can't be updated")
 
 
 # Disable user
