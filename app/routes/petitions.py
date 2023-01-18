@@ -294,7 +294,7 @@ def get_petitions_by_organization(
 
 
 # Update state of petition by organization
-@router.put("/organization/{petition_id}", status_code=200, response_model=Petition)
+@router.post("/organization/{petition_id}", status_code=200, response_model=Petition)
 def update_state_petition_by_organization(
     petition_id: str,
     message: str,
@@ -365,6 +365,215 @@ def update_state_petition_by_organization(
         return petition
 
     return HTTPException(status_code=400, detail="Petition can't be updated")
+
+
+# Reject a petition for the user documentation by organization
+@router.post("/{petition_id}/organization/documentation", status_code=200)
+def reject_documentation_by_organization(
+    petition_id: str,
+    message: str,
+    uid: str = Depends(firebase_uid_authentication),
+    test_db: bool = False,
+):
+    if test_db is True:
+        db_a = db_test
+        uid_a = (
+            db_a.collection("organizations")
+            .document("TEST ORGANIZATION")
+            .get()
+            .to_dict()["id"]
+        )
+    else:
+        db_a = db
+        uid_a = uid
+    org = db_a.collection("organizations").where("id", "==", uid_a).get()[0].to_dict()
+
+    if not org:
+        raise HTTPException(status_code=404, detail="Organization not found")
+
+    petition = db_a.collection("petitions").document(petition_id).get().to_dict()
+
+    if not petition:
+        raise HTTPException(status_code=404, detail="Petition not found")
+
+    if petition["status"] == PetitionStatus.docu_pending:
+        db_a.collection("petitions").document(petition_id).update(
+            {"status": PetitionStatus.docu_rejected, "organization_message": message}
+        )
+        return JSONResponse(
+            status_code=200, content={"message": "Documentation rejected"}
+        )
+
+    raise HTTPException(
+        status_code=404, detail="Petition can not be rejected by documentation"
+    )
+
+
+# Reject a petition for the user information by organization
+@router.post("/{petition_id}/organization/information", status_code=200)
+def reject_information_by_organization(
+    petition_id: str,
+    message: str,
+    home_type_bool: bool,
+    free_time_bool: bool,
+    previous_experience_bool: bool,
+    frequency_travel_bool: bool,
+    kids_bool: bool,
+    other_animals_bool: bool,
+    uid: str = Depends(firebase_uid_authentication),
+    test_db: bool = False,
+):
+    if test_db is True:
+        db_a = db_test
+        uid_a = (
+            db_a.collection("organizations")
+            .document("TEST ORGANIZATION")
+            .get()
+            .to_dict()["id"]
+        )
+    else:
+        db_a = db
+        uid_a = uid
+    org = db_a.collection("organizations").where("id", "==", uid_a).get()[0].to_dict()
+
+    if not org:
+        raise HTTPException(status_code=404, detail="Organization not found")
+
+    petition = db_a.collection("petitions").document(petition_id).get().to_dict()
+
+    if not petition:
+        raise HTTPException(status_code=404, detail="Petition not found")
+
+    if petition["status"] == PetitionStatus.docu_pending:
+        db_a.collection("petitions").document(petition_id).update(
+            {
+                "status": PetitionStatus.info_rejected,
+                "home_type_bool": home_type_bool,
+                "free_time_bool": free_time_bool,
+                "previous_experience_bool": previous_experience_bool,
+                "frequency_travel_bool": frequency_travel_bool,
+                "kids_bool": kids_bool,
+                "other_animals_bool": other_animals_bool,
+                "organization_message": message,
+            }
+        )
+        return JSONResponse(
+            status_code=200, content={"message": "Information rejected"}
+        )
+
+    return HTTPException(
+        status_code=404, detail="Petition can not be rejected by information"
+    )
+
+
+# Accept a petition by id by organization
+@router.post("/{petition_id}/organization", status_code=200)
+def accept_petition_by_organization(
+    petition_id: str,
+    message: str,
+    home_type_bool: bool,
+    free_time_bool: bool,
+    previous_experience_bool: bool,
+    frequency_travel_bool: bool,
+    kids_bool: bool,
+    other_animals_bool: bool,
+    uid: str = Depends(firebase_uid_authentication),
+    test_db: bool = False,
+):
+    if test_db is True:
+        db_a = db_test
+        uid_a = (
+            db_a.collection("organizations")
+            .document("TEST ORGANIZATION")
+            .get()
+            .to_dict()["id"]
+        )
+    else:
+        db_a = db
+        uid_a = uid
+    org = db_a.collection("organizations").where("id", "==", uid_a).get()[0].to_dict()
+
+    if not org:
+        raise HTTPException(status_code=404, detail="Organization not found")
+
+    petition = db_a.collection("petitions").document(petition_id).get().to_dict()
+
+    if not petition:
+        raise HTTPException(status_code=404, detail="Petition not found")
+
+    if petition["organization_name"] != org["name"]:
+        raise HTTPException(
+            status_code=404,
+            detail="The organization is not the owner of the animal",
+        )
+    if (
+        home_type_bool is True
+        and free_time_bool is True
+        and previous_experience_bool is True
+        and frequency_travel_bool is True
+        and kids_bool is True
+        and other_animals_bool is True
+    ):
+        db_a.collection("petitions").document(petition_id).update(
+            {"status": PetitionStatus.accepted, "organization_message": message}
+        )
+        return JSONResponse(status_code=200, content={"message": "Petition accepted"})
+
+    raise HTTPException(status_code=404, detail="Petition can not be accepted")
+
+
+# Switch visibility of a petition by id by user
+@router.post("/{petition_id}/user", status_code=200)
+def change_petition_visibility_by_user(
+    petition_id: str,
+    email: str = Depends(firebase_email_authentication),
+    test_db: bool = False,
+):
+    if test_db is True:
+        db_a = db_test
+        email_a = (
+            db_a.collection("users")
+            .where("name", "==", "TEST USER")
+            .get()[0]
+            .to_dict()["email"]
+        )
+    else:
+        db_a = db
+        email_a = email
+    user = db_a.collection("users").where("email", "==", email_a).get()[0].to_dict()
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    petitions = db_a.collection("petitions").where("user_id", "==", user["id"]).get()
+
+    if not petitions:
+        raise HTTPException(
+            status_code=404, detail="There are no petitions for this user"
+        )
+
+    for petition in petitions:
+        if petition.id == petition_id:
+
+            if petition.to_dict()["user_id"] != user["id"]:
+                raise HTTPException(
+                    status_code=404, detail="The user is not the owner of the petition"
+                )
+
+            # update the status of the petition
+            if petition.to_dict()["visible"] is True:
+                db_a.collection("petitions").document(petition_id).update(
+                    {"visible": False}
+                )
+            else:
+                db_a.collection("petitions").document(petition_id).update(
+                    {"visible": True}
+                )
+            return JSONResponse(
+                status_code=200, content={"message": "Petition visibility changed"}
+            )
+
+    raise HTTPException(status_code=404, detail="Petition not found")
 
 
 # Reject a petition by id by user
@@ -456,212 +665,3 @@ def reject_petition_by_organization(
         {"status": PetitionStatus.rejected, "organization_message": message}
     )
     return JSONResponse(status_code=200, content={"message": "Petition rejected"})
-
-
-# Reject a petition for the user documentation by organization
-@router.put("/{petition_id}/organization/documentation", status_code=200)
-def reject_documentation_by_organization(
-    petition_id: str,
-    message: str,
-    uid: str = Depends(firebase_uid_authentication),
-    test_db: bool = False,
-):
-    if test_db is True:
-        db_a = db_test
-        uid_a = (
-            db_a.collection("organizations")
-            .document("TEST ORGANIZATION")
-            .get()
-            .to_dict()["id"]
-        )
-    else:
-        db_a = db
-        uid_a = uid
-    org = db_a.collection("organizations").where("id", "==", uid_a).get()[0].to_dict()
-
-    if not org:
-        raise HTTPException(status_code=404, detail="Organization not found")
-
-    petition = db_a.collection("petitions").document(petition_id).get().to_dict()
-
-    if not petition:
-        raise HTTPException(status_code=404, detail="Petition not found")
-
-    if petition["status"] == PetitionStatus.docu_pending:
-        db_a.collection("petitions").document(petition_id).update(
-            {"status": PetitionStatus.docu_rejected, "organization_message": message}
-        )
-        return JSONResponse(
-            status_code=200, content={"message": "Documentation rejected"}
-        )
-
-    raise HTTPException(
-        status_code=404, detail="Petition can not be rejected by documentation"
-    )
-
-
-# Reject a petition for the user information by organization
-@router.put("/{petition_id}/organization/information", status_code=200)
-def reject_information_by_organization(
-    petition_id: str,
-    message: str,
-    home_type_bool: bool,
-    free_time_bool: bool,
-    previous_experience_bool: bool,
-    frequency_travel_bool: bool,
-    kids_bool: bool,
-    other_animals_bool: bool,
-    uid: str = Depends(firebase_uid_authentication),
-    test_db: bool = False,
-):
-    if test_db is True:
-        db_a = db_test
-        uid_a = (
-            db_a.collection("organizations")
-            .document("TEST ORGANIZATION")
-            .get()
-            .to_dict()["id"]
-        )
-    else:
-        db_a = db
-        uid_a = uid
-    org = db_a.collection("organizations").where("id", "==", uid_a).get()[0].to_dict()
-
-    if not org:
-        raise HTTPException(status_code=404, detail="Organization not found")
-
-    petition = db_a.collection("petitions").document(petition_id).get().to_dict()
-
-    if not petition:
-        raise HTTPException(status_code=404, detail="Petition not found")
-
-    if petition["status"] == PetitionStatus.docu_pending:
-        db_a.collection("petitions").document(petition_id).update(
-            {
-                "status": PetitionStatus.info_rejected,
-                "home_type_bool": home_type_bool,
-                "free_time_bool": free_time_bool,
-                "previous_experience_bool": previous_experience_bool,
-                "frequency_travel_bool": frequency_travel_bool,
-                "kids_bool": kids_bool,
-                "other_animals_bool": other_animals_bool,
-                "organization_message": message,
-            }
-        )
-        return JSONResponse(
-            status_code=200, content={"message": "Information rejected"}
-        )
-
-    return HTTPException(
-        status_code=404, detail="Petition can not be rejected by information"
-    )
-
-
-# Accept a petition by id by organization
-@router.put("/{petition_id}/organization", status_code=200)
-def accept_petition_by_organization(
-    petition_id: str,
-    message: str,
-    home_type_bool: bool,
-    free_time_bool: bool,
-    previous_experience_bool: bool,
-    frequency_travel_bool: bool,
-    kids_bool: bool,
-    other_animals_bool: bool,
-    uid: str = Depends(firebase_uid_authentication),
-    test_db: bool = False,
-):
-    if test_db is True:
-        db_a = db_test
-        uid_a = (
-            db_a.collection("organizations")
-            .document("TEST ORGANIZATION")
-            .get()
-            .to_dict()["id"]
-        )
-    else:
-        db_a = db
-        uid_a = uid
-    org = db_a.collection("organizations").where("id", "==", uid_a).get()[0].to_dict()
-
-    if not org:
-        raise HTTPException(status_code=404, detail="Organization not found")
-
-    petition = db_a.collection("petitions").document(petition_id).get().to_dict()
-
-    if not petition:
-        raise HTTPException(status_code=404, detail="Petition not found")
-
-    if petition["organization_name"] != org["name"]:
-        raise HTTPException(
-            status_code=404,
-            detail="The organization is not the owner of the animal",
-        )
-    if (
-        home_type_bool is True
-        and free_time_bool is True
-        and previous_experience_bool is True
-        and frequency_travel_bool is True
-        and kids_bool is True
-        and other_animals_bool is True
-    ):
-        db_a.collection("petitions").document(petition_id).update(
-            {"status": PetitionStatus.accepted, "organization_message": message}
-        )
-        return JSONResponse(status_code=200, content={"message": "Petition accepted"})
-
-    raise HTTPException(status_code=404, detail="Petition can not be accepted")
-
-
-# Switch visibility of a petition by id by user
-@router.put("/{petition_id}/user", status_code=200)
-def change_petition_visibility_by_user(
-    petition_id: str,
-    email: str = Depends(firebase_email_authentication),
-    test_db: bool = False,
-):
-    if test_db is True:
-        db_a = db_test
-        email_a = (
-            db_a.collection("users")
-            .where("name", "==", "TEST USER")
-            .get()[0]
-            .to_dict()["email"]
-        )
-    else:
-        db_a = db
-        email_a = email
-    user = db_a.collection("users").where("email", "==", email_a).get()[0].to_dict()
-
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    petitions = db_a.collection("petitions").where("user_id", "==", user["id"]).get()
-
-    if not petitions:
-        raise HTTPException(
-            status_code=404, detail="There are no petitions for this user"
-        )
-
-    for petition in petitions:
-        if petition.id == petition_id:
-
-            if petition.to_dict()["user_id"] != user["id"]:
-                raise HTTPException(
-                    status_code=404, detail="The user is not the owner of the petition"
-                )
-
-            # update the status of the petition
-            if petition.to_dict()["visible"] is True:
-                db_a.collection("petitions").document(petition_id).update(
-                    {"visible": False}
-                )
-            else:
-                db_a.collection("petitions").document(petition_id).update(
-                    {"visible": True}
-                )
-            return JSONResponse(
-                status_code=200, content={"message": "Petition visibility changed"}
-            )
-
-    raise HTTPException(status_code=404, detail="Petition not found")

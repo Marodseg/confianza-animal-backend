@@ -301,7 +301,7 @@ def login_user(form_data: OAuth2PasswordRequestForm = Depends()):
 
 
 # Enable user
-@router.put("/enable", status_code=200)
+@router.post("/enable", status_code=200)
 def enable_user(uid: str = Depends(firebase_uid_authentication), test_db: bool = False):
     if test_db is True:
         db_a = db_test
@@ -324,92 +324,8 @@ def enable_user(uid: str = Depends(firebase_uid_authentication), test_db: bool =
     return JSONResponse(status_code=200, content={"message": "User enabled"})
 
 
-@router.put("/update", status_code=200, response_model=UserUpdateOut)
-def update_user(
-    user: UserUpdateIn,
-    email: str = Depends(firebase_email_authentication),
-    test_db: bool = False,
-):
-    if test_db is True:
-        db_a = db_test
-        email_a = (
-            db_a.collection("users")
-            .where("name", "==", "TEST USER")
-            .get()[0]
-            .to_dict()["email"]
-        )
-    else:
-        db_a = db
-        email_a = email
-    my_user = db_a.collection("users").where("email", "==", email_a).get()[0].to_dict()
-
-    if not user or not my_user:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    # We keep a copy of the old user
-    old_user = my_user.copy()
-    # Check if the info changed to update the petition
-    info_user_changed = False
-
-    if user.name:
-        old_user["name"] = user.name
-
-    if user.photo:
-        old_user["photo"] = user.photo
-
-    if user.home_type:
-        old_user["home_type"] = user.home_type
-        info_user_changed = True
-
-    if user.free_time:
-        old_user["free_time"] = user.free_time
-        info_user_changed = True
-
-    if user.previous_experience:
-        old_user["previous_experience"] = user.previous_experience
-        info_user_changed = True
-
-    if user.frequency_travel:
-        old_user["frequency_travel"] = user.frequency_travel
-        info_user_changed = True
-
-    if user.kids:
-        old_user["kids"] = user.kids
-        info_user_changed = True
-
-    if user.other_animals:
-        old_user["other_animals"] = user.other_animals
-        info_user_changed = True
-
-    try:
-        db_a.collection("users").document(old_user["id"]).update(old_user)
-        user = db_a.collection("users").document(old_user["id"]).get().to_dict()
-
-        petitions = (
-            db_a.collection("petitions").where("user_id", "==", user["id"]).get()
-        )
-        if info_user_changed:
-            for petition in petitions:
-                if petition.info_updated is False:
-                    db_a.collection("petitions").document(petition.id).update(
-                        {
-                            "info_updated": True,
-                            "status": PetitionStatus.info_changed,
-                            "home_type_bool": False,
-                            "free_time_bool": False,
-                            "previous_experience_bool": False,
-                            "frequency_travel_bool": False,
-                            "kids_bool": False,
-                            "other_animals_bool": False,
-                        }
-                    )
-        return user
-    except Exception as e:
-        raise HTTPException(status_code=401, detail=str(e))
-
-
 # Update user docu
-@router.put("/update-documentation", status_code=200, response_model=str)
+@router.post("/update-documentation", status_code=200, response_model=str)
 def update_user_documentation(
     petition_id: str,
     message: str,
@@ -449,7 +365,7 @@ def update_user_documentation(
 
 
 # Disable user
-@router.put("/disable", status_code=200)
+@router.post("/disable", status_code=200)
 def disable_user(
     uid: str = Depends(firebase_uid_authentication), test_db: bool = False
 ):
@@ -521,6 +437,121 @@ def upload_profile_photo(
             raise HTTPException(status_code=401, detail="File is not an image")
     except Exception as e:
         raise HTTPException(status_code=401, detail="File is not an image")
+
+
+@router.put("/update", status_code=200, response_model=UserUpdateOut)
+def update_user(
+    user: UserUpdateIn,
+    email: str = Depends(firebase_email_authentication),
+    test_db: bool = False,
+):
+    if test_db is True:
+        db_a = db_test
+        email_a = (
+            db_a.collection("users")
+            .where("name", "==", "TEST USER")
+            .get()[0]
+            .to_dict()["email"]
+        )
+    else:
+        db_a = db
+        email_a = email
+    my_user = db_a.collection("users").where("email", "==", email_a).get()[0].to_dict()
+
+    if not user or not my_user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    # We keep a copy of the old user
+    old_user = my_user.copy()
+    # Check if the info changed to update the petition
+    info_user_changed = False
+
+    if user.name:
+        old_user["name"] = user.name
+
+    if user.photo:
+        old_user["photo"] = user.photo
+
+    if user.home_type:
+        old_user["home_type"] = user.home_type
+        info_user_changed = True
+
+    if user.free_time:
+        old_user["free_time"] = user.free_time
+        info_user_changed = True
+
+    if user.previous_experience:
+        old_user["previous_experience"] = user.previous_experience
+        info_user_changed = True
+
+    if user.frequency_travel:
+        old_user["frequency_travel"] = user.frequency_travel
+        info_user_changed = True
+
+    if user.kids:
+        old_user["kids"] = user.kids
+        info_user_changed = True
+
+    if user.other_animals:
+        old_user["other_animals"] = user.other_animals
+        info_user_changed = True
+
+    try:
+        db_a.collection("users").document(old_user["id"]).update(old_user)
+        user = db_a.collection("users").document(old_user["id"]).get().to_dict()
+
+        petitions = (
+            db_a.collection("petitions").where("user_id", "==", user["id"]).get()
+        )
+        if info_user_changed:
+            for petition in petitions:
+                if (
+                    (
+                        user["home_type"]
+                        and (user["home_type"] != petition.to_dict()["home_type"])
+                    )
+                    or (
+                        user["free_time"]
+                        and (user["free_time"] != petition.to_dict()["free_time"])
+                    )
+                    or (
+                        user["previous_experience"]
+                        and (
+                            user["previous_experience"]
+                            != petition.to_dict()["previous_experience"]
+                        )
+                    )
+                    or (
+                        user["frequency_travel"]
+                        and (
+                            user["frequency_travel"]
+                            != petition.to_dict()["frequency_travel"]
+                        )
+                    )
+                    or (user["kids"] and (user["kids"] != petition.to_dict()["kids"]))
+                    or (
+                        user["other_animals"]
+                        and (
+                            user["other_animals"] != petition.to_dict()["other_animals"]
+                        )
+                    )
+                ):
+                    if petition.to_dict()["info_updated"] is False:
+                        db_a.collection("petitions").document(petition.id).update(
+                            {
+                                "info_updated": True,
+                                "status": PetitionStatus.info_changed,
+                                "home_type_bool": False,
+                                "free_time_bool": False,
+                                "previous_experience_bool": False,
+                                "frequency_travel_bool": False,
+                                "kids_bool": False,
+                                "other_animals_bool": False,
+                            }
+                        )
+        return user
+    except Exception as e:
+        raise HTTPException(status_code=401, detail=str(e))
 
 
 # Delete favorite

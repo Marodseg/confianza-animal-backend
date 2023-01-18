@@ -345,6 +345,32 @@ def upload_profile_photo_organization(
         raise HTTPException(status_code=401, detail="File is not an image")
 
 
+# Enable organization
+@router.post("/enable", status_code=200)
+def enable_organization(
+    uid: str = Depends(firebase_uid_authentication), test_db: bool = False
+):
+    if test_db is True:
+        db_a = db_test
+        uid_a = (
+            db_a.collection("organizations")
+            .document("TEST ORGANIZATION")
+            .get()
+            .to_dict()["id"]
+        )
+    else:
+        db_a = db
+        uid_a = uid
+
+    org = db_a.collection("organizations").where("id", "==", uid_a).get()[0].to_dict()
+
+    if not org:
+        raise HTTPException(status_code=404, detail="Organization not found")
+
+    db_a.collection("organizations").document(org["name"]).update({"active": True})
+    return JSONResponse(status_code=200, content={"message": "Organization enabled"})
+
+
 # Modify a dog from an organization
 @router.put("/dog/{dog_id}", status_code=200, response_model=Dog)
 def modify_dog(
@@ -486,32 +512,6 @@ def modify_cat(
             # In case there are no more
             if len(cats) == count:
                 raise HTTPException(status_code=404, detail="Cat not found")
-
-
-# Enable organization
-@router.put("/enable", status_code=200)
-def enable_organization(
-    uid: str = Depends(firebase_uid_authentication), test_db: bool = False
-):
-    if test_db is True:
-        db_a = db_test
-        uid_a = (
-            db_a.collection("organizations")
-            .document("TEST ORGANIZATION")
-            .get()
-            .to_dict()["id"]
-        )
-    else:
-        db_a = db
-        uid_a = uid
-
-    org = db_a.collection("organizations").where("id", "==", uid_a).get()[0].to_dict()
-
-    if not org:
-        raise HTTPException(status_code=404, detail="Organization not found")
-
-    db_a.collection("organizations").document(org["name"]).update({"active": True})
-    return JSONResponse(status_code=200, content={"message": "Organization enabled"})
 
 
 # Update organization
