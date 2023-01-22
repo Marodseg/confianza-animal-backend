@@ -15,8 +15,8 @@ class Animal(BaseModel):
     # The id will be set automatically by the database (setting it here will generate always the same id)
     id: str = None
     name: str
-    years: Optional[int] = 0
-    months: Optional[int] = 0
+    years: Optional[int]
+    months: Optional[int]
     gender: Gender
     photos: Optional[List[str]] = []
     weight: float
@@ -37,8 +37,9 @@ class Animal(BaseModel):
 
     @validator("months")
     def months_must_be_valid(cls, v) -> str:
-        if v < 0 or v > 11:
-            raise ValueError("Months must be between 0 and 11")
+        if v is not None:
+            if v < 0 or v > 11:
+                raise ValueError("Months must be between 0 and 11")
         return v
 
     class Config:

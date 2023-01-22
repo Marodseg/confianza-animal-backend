@@ -410,6 +410,13 @@ def modify_dog(
                 if value is not None:  # Only the fields that are updated
                     dog[key] = value
 
+            if new_dog.years == 0:
+                dog["years"] = None
+            if new_dog.months == 0:
+                dog["months"] = None
+            if new_dog.birth_date is None:
+                dog["birth_date"] = None
+
             new_dog = dog.copy()
 
             # We update the dog in the organization
@@ -480,6 +487,13 @@ def modify_cat(
             for key, value in new_cat.dict().items():
                 if value is not None:  # Only the fields that are updated
                     cat[key] = value
+
+            if new_cat.years == 0:
+                cat["years"] = None
+            if new_cat.months == 0:
+                cat["months"] = None
+            if new_cat.birth_date is None:
+                cat["birth_date"] = None
 
             new_cat = cat.copy()
 
