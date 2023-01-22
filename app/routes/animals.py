@@ -69,7 +69,7 @@ def get_dog_by_filters(
     province: Province = None,
     size: Size = None,
     raze: DogRaze = None,
-    age: int = None,
+    years: int = None,
     greater_or_equal: bool = True,
     gender: Gender = None,
     activity: Activity = None,
@@ -94,7 +94,7 @@ def get_dog_by_filters(
     if not dogs:
         return []
     return get_dog_or_cat_by_filters(
-        dogs, province, size, raze, age, greater_or_equal, gender, activity, is_urgent
+        dogs, province, size, raze, years, greater_or_equal, gender, activity, is_urgent
     )
 
 
@@ -104,7 +104,7 @@ def get_cat_by_filters(
     province: Province = None,
     size: Size = None,
     raze: CatRaze = None,
-    age: int = None,
+    years: int = None,
     greater_or_equal: bool = True,
     gender: Gender = None,
     activity: Activity = None,
@@ -128,7 +128,7 @@ def get_cat_by_filters(
     cats = animals["cats"]
 
     return get_dog_or_cat_by_filters(
-        cats, province, size, raze, age, greater_or_equal, gender, activity, is_urgent
+        cats, province, size, raze, years, greater_or_equal, gender, activity, is_urgent
     )
 
 

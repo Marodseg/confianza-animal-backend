@@ -1,6 +1,6 @@
 import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 from typing import Optional, List
 
 from app.schemas.enums.activity import Activity
@@ -15,7 +15,8 @@ class Animal(BaseModel):
     # The id will be set automatically by the database (setting it here will generate always the same id)
     id: str = None
     name: str
-    age: int
+    years: Optional[int] = 0
+    months: Optional[int] = 0
     gender: Gender
     photos: Optional[List[str]] = []
     weight: float
@@ -34,12 +35,19 @@ class Animal(BaseModel):
     organization_phone: str = None
     organization_photo: Optional[str]
 
+    @validator("months")
+    def months_must_be_valid(cls, v) -> str:
+        if v < 0 or v > 11:
+            raise ValueError("Months must be between 0 and 11")
+        return v
+
     class Config:
         orm_mode = True
         schema_extra = {
             "example": {
                 "name": "Prueba",
-                "age": 1,
+                "years": 1,
+                "months": 1,
                 "gender": Gender.male,
                 "photos": [
                     "https://www.image.com/image.jpg",
@@ -68,7 +76,8 @@ class Dog(Animal):
         schema_extra = {
             "example": {
                 "name": "Prueba",
-                "age": 1,
+                "years": 1,
+                "months": 1,
                 "gender": Gender.male,
                 "photos": [
                     "https://www.image.com/image.jpg",
@@ -92,7 +101,8 @@ class Dog(Animal):
 
 class DogUpdate(Animal):
     name: Optional[str]
-    age: Optional[int]
+    years: Optional[int]
+    months: Optional[int]
     gender: Optional[Gender]
     photos: Optional[List[str]]
     weight: Optional[float]
@@ -109,12 +119,19 @@ class DogUpdate(Animal):
     is_urgent: Optional[bool]
     raze: Optional[DogRaze]
 
+    @validator("months")
+    def months_must_be_valid(cls, v) -> str:
+        if v < 0 or v > 11:
+            raise ValueError("Months must be between 0 and 11")
+        return v
+
     class Config:
         orm_mode = True
         schema_extra = {
             "example": {
                 "name": "Prueba",
-                "age": 1,
+                "years": 1,
+                "months": 1,
                 "gender": Gender.male,
                 "photos": [
                     "https://www.image.com/image.jpg",
@@ -144,7 +161,8 @@ class Cat(Animal):
         schema_extra = {
             "example": {
                 "name": "Prueba",
-                "age": 1,
+                "years": 1,
+                "months": 1,
                 "gender": Gender.male,
                 "photos": [
                     "https://www.image.com/image.jpg",
@@ -168,7 +186,8 @@ class Cat(Animal):
 
 class CatUpdate(Animal):
     name: Optional[str]
-    age: Optional[int]
+    years: Optional[int]
+    months: Optional[int]
     gender: Optional[Gender]
     photos: Optional[List[str]]
     weight: Optional[float]
@@ -185,12 +204,19 @@ class CatUpdate(Animal):
     is_urgent: Optional[bool]
     raze: Optional[CatRaze]
 
+    @validator("months")
+    def months_must_be_valid(cls, v) -> str:
+        if v < 0 or v > 11:
+            raise ValueError("Months must be between 0 and 11")
+        return v
+
     class Config:
         orm_mode = True
         schema_extra = {
             "example": {
                 "name": "Prueba",
-                "age": 1,
+                "years": 1,
+                "months": 1,
                 "gender": Gender.male,
                 "photos": [
                     "https://www.image.com/image.jpg",
@@ -223,7 +249,8 @@ class AnimalsInDB(BaseModel):
                 "dogs": [
                     {
                         "name": "Prueba",
-                        "age": 1,
+                        "years": 1,
+                        "months": 1,
                         "gender": Gender.male,
                         "photos": [
                             "https://www.image.com/image.jpg",
@@ -246,7 +273,8 @@ class AnimalsInDB(BaseModel):
                 "cats": [
                     {
                         "name": "Prueba",
-                        "age": 1,
+                        "years": 1,
+                        "months": 1,
                         "gender": Gender.male,
                         "photos": [
                             "https://www.image.com/image.jpg",

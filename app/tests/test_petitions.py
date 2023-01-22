@@ -33,7 +33,7 @@ def test_ask_for_dog(login_user):
     # First, let's add a dog in the database in a organization to ask for
     dog = Dog(
         name="Prueba",
-        age=1,
+        years=1,
         gender=Gender.male,
         photos=[
             "https://www.image.com/image.jpg",
@@ -107,7 +107,7 @@ def test_ask_for_cat(login_user):
     # First, let's add a cat in the database in a organization to ask for
     cat = Cat(
         name="Prueba",
-        age=1,
+        years=1,
         gender=Gender.male,
         photos=[
             "https://www.image.com/image.jpg",
@@ -181,7 +181,7 @@ def test_get_petitions_by_user(login_user):
     # Let's create two petitions (e.g. asking for a dog and for a cat)
     dog = Dog(
         name="Prueba",
-        age=1,
+        years=1,
         gender=Gender.male,
         photos=[
             "https://www.image.com/image.jpg",
@@ -216,7 +216,7 @@ def test_get_petitions_by_user(login_user):
 
     cat = Cat(
         name="Prueba",
-        age=1,
+        years=1,
         gender=Gender.male,
         photos=[
             "https://www.image.com/image.jpg",
@@ -274,7 +274,7 @@ def test_get_petitions_by_organization(login_user, login_org):
     # Let's create two petitions (e.g. asking for a dog and for a cat)
     dog = Dog(
         name="Prueba",
-        age=1,
+        years=1,
         gender=Gender.male,
         photos=[
             "https://www.image.com/image.jpg",
@@ -309,7 +309,7 @@ def test_get_petitions_by_organization(login_user, login_org):
 
     cat = Cat(
         name="Prueba",
-        age=1,
+        years=1,
         gender=Gender.male,
         photos=[
             "https://www.image.com/image.jpg",
@@ -369,7 +369,7 @@ def test_reject_petition_by_user(login_user):
     # Let's create a petition
     dog = Dog(
         name="Prueba",
-        age=1,
+        years=1,
         gender=Gender.male,
         photos=[
             "https://www.image.com/image.jpg",
@@ -430,7 +430,7 @@ def test_reject_petition_by_organization(login_org):
     # Let's create a petition
     dog = Dog(
         name="Prueba",
-        age=1,
+        years=1,
         gender=Gender.male,
         photos=[
             "https://www.image.com/image.jpg",
@@ -490,7 +490,7 @@ def test_accept_petition_by_organization(login_org):
     # Let's create a petition
     dog = Dog(
         name="Prueba",
-        age=1,
+        years=1,
         gender=Gender.male,
         photos=[
             "https://www.image.com/image.jpg",
@@ -551,7 +551,7 @@ def test_change_petition_visibility_by_user(login_user):
     # Let's create a petition
     dog = Dog(
         name="Prueba",
-        age=1,
+        years=1,
         gender=Gender.male,
         photos=[
             "https://www.image.com/image.jpg",
@@ -613,7 +613,7 @@ def test_get_petitions_visibles_by_user(login_user):
     # Let's create a petition
     dog = Dog(
         name="Prueba",
-        age=1,
+        years=1,
         gender=Gender.male,
         photos=[
             "https://www.image.com/image.jpg",
@@ -670,7 +670,7 @@ def test_get_petitions_invisibles_by_user(login_user):
     # Let's create a petition
     dog = Dog(
         name="Prueba",
-        age=1,
+        years=1,
         gender=Gender.male,
         photos=[
             "https://www.image.com/image.jpg",
@@ -730,7 +730,7 @@ def test_update_state_petition_by_organization(login_org, login_user):
     # Let's create a petition
     dog = Dog(
         name="Prueba",
-        age=1,
+        years=1,
         gender=Gender.male,
         photos=[
             "https://www.image.com/image.jpg",
@@ -811,7 +811,7 @@ def test_reject_documentation_by_organization(login_org, login_user):
     # Let's create a petition
     dog = Dog(
         name="Prueba",
-        age=1,
+        years=1,
         gender=Gender.male,
         photos=[
             "https://www.image.com/image.jpg",
@@ -894,7 +894,7 @@ def test_reject_information_by_organization(login_org, login_user):
     # Let's create a petition
     dog = Dog(
         name="Prueba",
-        age=1,
+        years=1,
         gender=Gender.male,
         photos=[
             "https://www.image.com/image.jpg",

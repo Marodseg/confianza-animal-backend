@@ -59,7 +59,7 @@ You can:
         * **Medium**.
         * **Big**.
         * **Very big**.
-    * **Age:** with the parameter ***greater_or_equal*** allows you to choose if the age of the animal must be ≥ or ≤ than the number specified in the age field.
+    * **Years:** with the parameter ***greater_or_equal*** allows you to choose if the age of the animal must be ≥ or ≤ than the number specified in the years field.
     * **Gender**.
         * **Male**.
         * **Female**.

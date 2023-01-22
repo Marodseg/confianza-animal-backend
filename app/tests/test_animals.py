@@ -31,7 +31,7 @@ def test_get_all_animals():
     # Let's add a dog and a cat to the database
     cat = Cat(
         name="Prueba",
-        age=1,
+        years=1,
         gender=Gender.male,
         photos=[
             "https://www.image.com/image.jpg",
@@ -55,7 +55,7 @@ def test_get_all_animals():
 
     dog = Dog(
         name="Prueba",
-        age=1,
+        years=1,
         gender=Gender.male,
         photos=[
             "https://www.image.com/image.jpg",
@@ -92,7 +92,7 @@ def test_get_dog_by_id():
     # Let's add a dog to the database
     dog = Dog(
         name="Prueba",
-        age=1,
+        years=1,
         gender=Gender.male,
         photos=[
             "https://www.image.com/image.jpg",
@@ -125,7 +125,7 @@ def test_get_cat_by_id():
     # Let's add a cat to the database
     cat = Cat(
         name="Prueba",
-        age=1,
+        years=1,
         gender=Gender.male,
         photos=[
             "https://www.image.com/image.jpg",
@@ -157,7 +157,7 @@ def test_get_cat_by_id():
 def test_get_dog_by_filters():
     dog = Dog(
         name="Prueba",
-        age=1,
+        years=1,
         gender=Gender.male,
         photos=[
             "https://www.image.com/image.jpg",
@@ -181,7 +181,7 @@ def test_get_dog_by_filters():
 
     dog2 = Dog(
         name="Prueba 2",
-        age=1,
+        years=1,
         gender=Gender.female,
         photos=[
             "https://www.image.com/image.jpg",
@@ -220,7 +220,7 @@ def test_get_dog_by_filters():
 def test_get_cat_by_filters():
     cat = Cat(
         name="Prueba",
-        age=1,
+        years=1,
         gender=Gender.male,
         photos=[
             "https://www.image.com/image.jpg",
@@ -244,7 +244,7 @@ def test_get_cat_by_filters():
 
     cat2 = Cat(
         name="Prueba 2",
-        age=1,
+        years=1,
         gender=Gender.female,
         photos=[
             "https://www.image.com/image.jpg",
@@ -294,7 +294,7 @@ def test_upload_dog_photos(login_org):
     )
     dog = Dog(
         name="Prueba",
-        age=1,
+        years=1,
         gender=Gender.male,
         weight=1.0,
         size=Size.small,
@@ -337,7 +337,7 @@ def test_upload_cat_photos(login_org):
     )
     cat = Cat(
         name="Prueba",
-        age=1,
+        years=1,
         gender=Gender.male,
         weight=1.0,
         size=Size.small,
@@ -381,7 +381,7 @@ def test_delete_dog_photo(login_org):
     )
     dog = Dog(
         name="Prueba",
-        age=1,
+        years=1,
         gender=Gender.male,
         weight=1.0,
         size=Size.small,
@@ -427,7 +427,7 @@ def test_delete_cat_photo(login_org):
     )
     cat = Cat(
         name="Prueba",
-        age=1,
+        years=1,
         gender=Gender.male,
         weight=1.0,
         size=Size.small,
@@ -463,7 +463,7 @@ def test_delete_cat_photo(login_org):
 def test_delete_dog_by_id(login_org):
     dog = Dog(
         name="Prueba",
-        age=1,
+        years=1,
         gender=Gender.male,
         weight=1.0,
         size=Size.small,
@@ -488,7 +488,7 @@ def test_delete_dog_by_id(login_org):
 def test_delete_cat_by_id(login_org):
     cat = Cat(
         name="Prueba",
-        age=1,
+        years=1,
         gender=Gender.male,
         weight=1.0,
         size=Size.small,

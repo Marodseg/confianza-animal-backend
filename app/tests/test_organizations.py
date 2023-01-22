@@ -120,7 +120,6 @@ def test_post_cat(login_org):
     # Cat with a missing fields
     with pytest.raises(ValidationError, match="field required"):
         cat = Cat(
-            name="Prueba",
             gender=Gender.male,
             weight=1.0,
             size=Size.small,
@@ -139,7 +138,7 @@ def test_post_cat(login_org):
 
     cat = Cat(
         name="Prueba",
-        age=1,
+        years=1,
         gender=Gender.male,
         weight=1.0,
         size=Size.small,
@@ -157,7 +156,7 @@ def test_post_cat(login_org):
 
     response = post_cat(cat, test_db=True)
     assert response.name == "Prueba"
-    assert response.age == 1
+    assert response.years == 1
 
     # Delete cat from database
     delete_cat_by_name("Prueba")
@@ -167,7 +166,6 @@ def test_post_dog(login_org):
     # Dog with a missing fields
     with pytest.raises(ValidationError, match="field required"):
         dog = Dog(
-            name="Prueba",
             gender=Gender.male,
             weight=1.0,
             size=Size.small,
@@ -186,7 +184,7 @@ def test_post_dog(login_org):
 
     dog = Dog(
         name="Prueba",
-        age=1,
+        years=1,
         gender=Gender.male,
         weight=1.0,
         size=Size.small,
@@ -204,7 +202,7 @@ def test_post_dog(login_org):
 
     response = post_dog(dog, test_db=True)
     assert response.name == "Prueba"
-    assert response.age == 1
+    assert response.years == 1
 
     # Delete dog from database
     delete_dog_by_name("Prueba")
@@ -224,7 +222,7 @@ def test_get_dogs_from_organization(login_org):
     # Insert a dog in the organization and check if it is returned
     dog = Dog(
         name="Prueba",
-        age=1,
+        years=1,
         gender=Gender.male,
         weight=1.0,
         size=Size.small,
@@ -259,7 +257,7 @@ def test_get_cats_from_organization(login_org):
     # Insert a dog in the organization and check if it is returned
     cat = Cat(
         name="Prueba",
-        age=1,
+        years=1,
         gender=Gender.male,
         weight=1.0,
         size=Size.small,
@@ -335,7 +333,7 @@ def test_modify_cat(login_org):
     # First, we need to have a cat in the database
     cat = Cat(
         name="Prueba",
-        age=1,
+        years=1,
         gender=Gender.male,
         weight=1.0,
         size=Size.small,
@@ -353,7 +351,7 @@ def test_modify_cat(login_org):
 
     response = post_cat(cat, test_db=True)
     assert response.name == "Prueba"
-    assert response.age == 1
+    assert response.years == 1
 
     cat_id = response.id
 
@@ -376,7 +374,7 @@ def test_modify_dog(login_org):
     # First, we need to have a dog in the database
     dog = Dog(
         name="Prueba",
-        age=1,
+        years=1,
         gender=Gender.male,
         weight=1.0,
         size=Size.small,
@@ -394,7 +392,7 @@ def test_modify_dog(login_org):
 
     response = post_dog(dog, test_db=True)
     assert response.name == "Prueba"
-    assert response.age == 1
+    assert response.years == 1
 
     dog_id = response.id
 

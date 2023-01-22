@@ -79,7 +79,7 @@ def get_dog_or_cat_by_filters(
     province: Province = None,
     size: Size = None,
     raze: Union[CatRaze, DogRaze] = None,
-    age: int = None,
+    years: int = None,
     greater_or_equal: bool = True,
     gender: Gender = None,
     activity: Activity = None,
@@ -92,11 +92,11 @@ def get_dog_or_cat_by_filters(
             animals = [animal for animal in animals if animal["size"] == size]
         if raze is not None:
             animals = [animal for animal in animals if animal["raze"] == raze]
-        if age is not None:
+        if years is not None:
             if greater_or_equal:
-                animals = [animal for animal in animals if animal["age"] >= age]
+                animals = [animal for animal in animals if animal["years"] >= years]
             else:
-                animals = [animal for animal in animals if animal["age"] <= age]
+                animals = [animal for animal in animals if animal["years"] <= years]
         if gender is not None:
             animals = [animal for animal in animals if animal["gender"] == gender]
         if activity is not None:

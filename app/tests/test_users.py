@@ -104,7 +104,7 @@ def test_get_user_favorites(login_user):
     # Let's create a dog favorite
     dog = Dog(
         name="Prueba",
-        age=1,
+        years=1,
         gender=Gender.male,
         photos=[
             "https://www.image.com/image.jpg",
@@ -144,7 +144,7 @@ def test_check_if_animal_is_in_favorites(login_user):
     # Let's create a dog favorite
     dog = Dog(
         name="Prueba",
-        age=1,
+        years=1,
         gender=Gender.male,
         photos=[
             "https://www.image.com/image.jpg",
@@ -194,7 +194,7 @@ def test_envy_user_documentation(login_user, login_org):
     # Let's create a petition
     dog = Dog(
         name="Prueba",
-        age=1,
+        years=1,
         gender=Gender.male,
         photos=[
             "https://www.image.com/image.jpg",
@@ -262,7 +262,7 @@ def test_post_user_favorites(login_user):
     # Let's create a petition
     dog = Dog(
         name="Prueba",
-        age=1,
+        years=1,
         gender=Gender.male,
         photos=[
             "https://www.image.com/image.jpg",
@@ -378,7 +378,7 @@ def test_update_user_documentation(login_user):
     # Let's create a petition
     dog = Dog(
         name="Prueba",
-        age=1,
+        years=1,
         gender=Gender.male,
         photos=[
             "https://www.image.com/image.jpg",
@@ -446,7 +446,7 @@ def test_delete_favorite(login_user):
     # Let's create a dog favorite
     dog = Dog(
         name="Prueba",
-        age=1,
+        years=1,
         gender=Gender.male,
         photos=[
             "https://www.image.com/image.jpg",

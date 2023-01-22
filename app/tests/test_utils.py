@@ -55,7 +55,7 @@ def test_exists_dog_in_animals():
     # Add a dog to the database
     dog = Dog(
         name="Prueba",
-        age=1,
+        years=1,
         gender=Gender.male,
         weight=1.0,
         size=Size.small,
@@ -82,7 +82,7 @@ def test_exists_cat_in_animals():
     # Add a cat to the database
     cat = Cat(
         name="Prueba",
-        age=1,
+        years=1,
         gender=Gender.male,
         weight=1.0,
         size=Size.small,
@@ -108,7 +108,7 @@ def test_exists_cat_in_animals():
 def test_get_dog_or_cat_by_filters():
     dog1 = {
         "name": "Dog1",
-        "age": 1,
+        "years": 1,
         "gender": Gender.male,
         "weight": 1.0,
         "size": Size.small,
@@ -125,7 +125,7 @@ def test_get_dog_or_cat_by_filters():
     }
     dog2 = {
         "name": "Dog2",
-        "age": 1,
+        "years": 1,
         "gender": Gender.male,
         "weight": 1.0,
         "size": Size.small,
@@ -142,7 +142,7 @@ def test_get_dog_or_cat_by_filters():
     }
     cat1 = {
         "name": "Cat1",
-        "age": 1,
+        "years": 1,
         "gender": Gender.male,
         "weight": 1.0,
         "size": Size.small,
@@ -159,7 +159,7 @@ def test_get_dog_or_cat_by_filters():
     }
     cat2 = {
         "name": "Cat2",
-        "age": 1,
+        "years": 1,
         "gender": Gender.female,
         "weight": 1.0,
         "size": Size.mini,
