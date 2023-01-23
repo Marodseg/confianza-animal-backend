@@ -319,7 +319,7 @@ def test_get_petition_by_id_by_user(login_user):
 
     # Delete petitions and animals from the database
     db_test.collection("petitions").document(petition.id).delete()
-    delete_cat_by_name("Prueba")
+    delete_dog_by_name("Prueba")
 
 
 def test_get_petitions_by_organization(login_user, login_org):
