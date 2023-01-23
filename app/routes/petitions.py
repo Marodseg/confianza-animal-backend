@@ -198,7 +198,7 @@ def get_petitions_by_user(
 
 
 # Get petition by id of user logged
-@router.get("{petition_id}/user", status_code=200, response_model=Petition)
+@router.get("/{petition_id}/user", status_code=200, response_model=Petition)
 def get_petition_by_id_by_user(
     petition_id: str,
     email: str = Depends(firebase_email_authentication),
