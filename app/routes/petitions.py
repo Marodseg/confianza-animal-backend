@@ -197,6 +197,39 @@ def get_petitions_by_user(
     return [Petition(**petition.to_dict()) for petition in petitions]
 
 
+# Get petition by id of user logged
+@router.get("{petition_id}/user", status_code=200, response_model=Petition)
+def get_petition_by_id_by_user(
+    petition_id: str,
+    email: str = Depends(firebase_email_authentication),
+    test_db: bool = False,
+):
+    if test_db is True:
+        db_a = db_test
+        email_a = (
+            db_a.collection("users")
+            .where("name", "==", "TEST USER")
+            .get()[0]
+            .to_dict()["email"]
+        )
+    else:
+        db_a = db
+        email_a = email
+    user = db_a.collection("users").where("email", "==", email_a).get()[0].to_dict()
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    for petition in (
+        db_a.collection("petitions").where("user_id", "==", user["id"]).get()
+    ):
+        petition = Petition(**petition.to_dict())
+        if petition.id == petition_id:
+            return petition
+
+    raise HTTPException(status_code=404, detail="Petition not found")
+
+
 # Get petitions visibles by user
 @router.get("/user/visibles", status_code=200, response_model=List[Petition])
 def get_petitions_visibles_by_user(

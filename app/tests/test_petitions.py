@@ -16,8 +16,9 @@ from app.routes.petitions import (
     reject_information_by_organization,
     update_state_petition_by_organization,
     reject_documentation_by_organization,
+    get_petition_by_id_by_user,
 )
-from app.routes.users import update_user_documentation, envy_user_documentation
+from app.routes.users import envy_user_documentation
 from app.schemas.animal import Dog, Cat
 from app.schemas.enums.activity import Activity
 from app.schemas.enums.cat_raze import CatRaze
@@ -267,6 +268,57 @@ def test_get_petitions_by_user(login_user):
     db_test.collection("petitions").document(petition1.id).delete()
     db_test.collection("petitions").document(petition2.id).delete()
     delete_dog_by_name("Prueba")
+    delete_cat_by_name("Prueba")
+
+
+def test_get_petition_by_id_by_user(login_user):
+    # Let's create two petitions (e.g. asking for a dog and for a cat)
+    dog = Dog(
+        name="Prueba",
+        years=1,
+        gender=Gender.male,
+        photos=[
+            "https://www.image.com/image.jpg",
+            "https://www.image.com/image2.jpg",
+        ],
+        weight=1.0,
+        size=Size.small,
+        zone=Province.alava,
+        neutered=True,
+        description="Prueba",
+        healthy=True,
+        wormed=True,
+        vaccinated=True,
+        activity_level=Activity.low,
+        microchip=True,
+        is_urgent=True,
+        raze=DogRaze.chihuahua,
+    )
+
+    dog = post_dog(dog, test_db=True)
+    petition = ask_for_dog(
+        dog.id,
+        "I want this dog",
+        "casa",
+        "2h",
+        "si",
+        "2 veces al mes",
+        "si",
+        "si",
+        test_db=True,
+    )
+
+    petition = get_petition_by_id_by_user(petition.id, test_db=True)
+
+    # Let's check that the petitions are the same as the ones we created
+    assert petition.dog.id == dog.id
+    assert petition.user_name == "TEST USER"
+    assert petition.user_message == "I want this dog"
+    assert petition.home_type == "casa"
+    assert petition.kids == "si"
+
+    # Delete petitions and animals from the database
+    db_test.collection("petitions").document(petition.id).delete()
     delete_cat_by_name("Prueba")
 
 
