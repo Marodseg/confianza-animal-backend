@@ -73,7 +73,6 @@ def ask_for_dog(
                     user_name=user["name"],
                     user_email=user["email"],
                     dog=dog,
-                    date=datetime.datetime.now(),
                     user_message=message,
                     organization_name=dog.organization_name,
                     home_type=home_type,
@@ -149,7 +148,6 @@ def ask_for_cat(
                     user_name=user["name"],
                     user_email=user["email"],
                     cat=cat,
-                    date=datetime.datetime.now(),
                     user_message=message,
                     organization_name=cat.organization_name,
                     home_type=home_type,
@@ -362,24 +360,21 @@ def update_state_petition_by_organization(
     if petition["status"] == PetitionStatus.initiated:
         petition["status"] = PetitionStatus.info_pending
         petition["organization_message"] = message
-        db_a.collection("petitions").document(petition_id).set(petition)
-        return petition
-
-    if petition["status"] == PetitionStatus.info_pending:
-        petition["status"] = PetitionStatus.info_approved
-        petition["organization_message"] = message
+        petition["status_date"] = datetime.datetime.now()
         db_a.collection("petitions").document(petition_id).set(petition)
         return petition
 
     if petition["status"] == PetitionStatus.docu_envied:
         petition["status"] = PetitionStatus.docu_pending
         petition["organization_message"] = message
+        petition["status_date"] = datetime.datetime.now()
         db_a.collection("petitions").document(petition_id).set(petition)
         return petition
 
     if petition["status"] == PetitionStatus.docu_pending:
         petition["status"] = PetitionStatus.accepted
         petition["organization_message"] = message
+        petition["status_date"] = datetime.datetime.now()
         db_a.collection("petitions").document(petition_id).set(petition)
         return petition
 
@@ -387,6 +382,7 @@ def update_state_petition_by_organization(
         petition["status"] = PetitionStatus.info_pending
         petition["organization_message"] = message
         petition["info_updated"] = False
+        petition["status_date"] = datetime.datetime.now()
         db_a.collection("petitions").document(petition_id).set(petition)
         return petition
 
@@ -394,6 +390,7 @@ def update_state_petition_by_organization(
         petition["status"] = PetitionStatus.docu_pending
         petition["organization_message"] = message
         petition["docu_updated"] = False
+        petition["status_date"] = datetime.datetime.now()
         db_a.collection("petitions").document(petition_id).set(petition)
         return petition
 
@@ -431,7 +428,11 @@ def reject_documentation_by_organization(
 
     if petition["status"] == PetitionStatus.docu_pending:
         db_a.collection("petitions").document(petition_id).update(
-            {"status": PetitionStatus.docu_rejected, "organization_message": message}
+            {
+                "status": PetitionStatus.docu_rejected,
+                "organization_message": message,
+                "status_date": datetime.datetime.now(),
+            }
         )
         return JSONResponse(
             status_code=200, content={"message": "Documentation rejected"}
@@ -442,8 +443,73 @@ def reject_documentation_by_organization(
     )
 
 
+# Accept the info petition by organization
+@router.post("/{petition_id}/organization/accept-information", status_code=200)
+def accept_information_by_organization(
+    petition_id: str,
+    message: str,
+    home_type_bool: bool,
+    free_time_bool: bool,
+    previous_experience_bool: bool,
+    frequency_travel_bool: bool,
+    kids_bool: bool,
+    other_animals_bool: bool,
+    uid: str = Depends(firebase_uid_authentication),
+    test_db: bool = False,
+):
+    if test_db is True:
+        db_a = db_test
+        uid_a = (
+            db_a.collection("organizations")
+            .document("TEST ORGANIZATION")
+            .get()
+            .to_dict()["id"]
+        )
+    else:
+        db_a = db
+        uid_a = uid
+    org = db_a.collection("organizations").where("id", "==", uid_a).get()[0].to_dict()
+
+    if not org:
+        raise HTTPException(status_code=404, detail="Organization not found")
+
+    petition = db_a.collection("petitions").document(petition_id).get().to_dict()
+
+    if not petition:
+        raise HTTPException(status_code=404, detail="Petition not found")
+
+    if (
+        home_type_bool is True
+        and free_time_bool is True
+        and previous_experience_bool is True
+        and frequency_travel_bool is True
+        and kids_bool is True
+        and other_animals_bool is True
+    ):
+        if petition["status"] == PetitionStatus.info_pending:
+            db_a.collection("petitions").document(petition_id).update(
+                {
+                    "status": PetitionStatus.info_approved,
+                    "organization_message": message,
+                    "home_type_bool": home_type_bool,
+                    "free_time_bool": free_time_bool,
+                    "previous_experience_bool": previous_experience_bool,
+                    "frequency_travel_bool": frequency_travel_bool,
+                    "kids_bool": kids_bool,
+                    "other_animals_bool": other_animals_bool,
+                    "status_date": datetime.datetime.now(),
+                }
+            )
+            return JSONResponse(
+                status_code=200, content={"message": "Information accepted"}
+            )
+    raise HTTPException(
+        status_code=404, detail="Petition can not be accepted by information"
+    )
+
+
 # Reject a petition for the user information by organization
-@router.post("/{petition_id}/organization/information", status_code=200)
+@router.post("/{petition_id}/organization/reject-information", status_code=200)
 def reject_information_by_organization(
     petition_id: str,
     message: str,
@@ -477,7 +543,7 @@ def reject_information_by_organization(
     if not petition:
         raise HTTPException(status_code=404, detail="Petition not found")
 
-    if petition["status"] == PetitionStatus.docu_pending:
+    if petition["status"] == PetitionStatus.info_pending:
         db_a.collection("petitions").document(petition_id).update(
             {
                 "status": PetitionStatus.info_rejected,
@@ -488,6 +554,7 @@ def reject_information_by_organization(
                 "kids_bool": kids_bool,
                 "other_animals_bool": other_animals_bool,
                 "organization_message": message,
+                "status_date": datetime.datetime.now(),
             }
         )
         return JSONResponse(
@@ -548,7 +615,11 @@ def accept_petition_by_organization(
         and other_animals_bool is True
     ):
         db_a.collection("petitions").document(petition_id).update(
-            {"status": PetitionStatus.accepted, "organization_message": message}
+            {
+                "status": PetitionStatus.accepted,
+                "organization_message": message,
+                "status_date": datetime.datetime.now(),
+            }
         )
         return JSONResponse(status_code=200, content={"message": "Petition accepted"})
 
@@ -650,7 +721,11 @@ def reject_petition_by_user(
 
             # update the status of the petition
             db_a.collection("petitions").document(petition_id).update(
-                {"status": PetitionStatus.rejected, "user_message": message}
+                {
+                    "status": PetitionStatus.rejected,
+                    "user_message": message,
+                    "status_date": datetime.datetime.now(),
+                }
             )
             return JSONResponse(
                 status_code=200, content={"message": "Petition rejected"}
@@ -695,6 +770,10 @@ def reject_petition_by_organization(
         )
 
     db_a.collection("petitions").document(petition_id).update(
-        {"status": PetitionStatus.rejected, "organization_message": message}
+        {
+            "status": PetitionStatus.rejected,
+            "organization_message": message,
+            "status_date": datetime.datetime.now(),
+        }
     )
     return JSONResponse(status_code=200, content={"message": "Petition rejected"})

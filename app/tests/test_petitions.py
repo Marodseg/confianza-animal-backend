@@ -1,4 +1,5 @@
 import pytest
+from fastapi import HTTPException
 
 from app.config.database import db_test
 from app.routes.organizations import post_dog, post_cat
@@ -17,6 +18,7 @@ from app.routes.petitions import (
     update_state_petition_by_organization,
     reject_documentation_by_organization,
     get_petition_by_id_by_user,
+    accept_information_by_organization,
 )
 from app.routes.users import envy_user_documentation
 from app.schemas.animal import Dog, Cat
@@ -820,7 +822,7 @@ def test_update_state_petition_by_organization(login_org, login_user):
         == PetitionStatus.initiated
     )
 
-    # Update the state to "docu_pending"
+    # Update the state to "info_pending"
     update_state_petition_by_organization(petition.id, "Actualizo estado", test_db=True)
     # Check that the status is in info_pending
     assert (
@@ -828,6 +830,15 @@ def test_update_state_petition_by_organization(login_org, login_user):
         == PetitionStatus.info_pending
     )
     update_state_petition_by_organization(petition.id, "Actualizo estado", test_db=True)
+    # Check that the status is not in info_approved and still in info_pending until we send all True booleans
+    assert (
+        db_test.collection("petitions").document(petition.id).get().to_dict()["status"]
+        == PetitionStatus.info_pending
+    )
+    # Let's accept the information to change the status to info_approved
+    accept_information_by_organization(
+        petition.id, "Acepto info", True, True, True, True, True, True, test_db=True
+    )
     # Check that the status is in info_approved
     assert (
         db_test.collection("petitions").document(petition.id).get().to_dict()["status"]
@@ -847,7 +858,7 @@ def test_update_state_petition_by_organization(login_org, login_user):
         db_test.collection("petitions").document(petition.id).get().to_dict()["status"]
         == PetitionStatus.docu_pending
     )
-    # Update the state to "approved" and check the final status
+    # Update the state to "accepted" as this is the final state
     update_state_petition_by_organization(petition.id, "Actualizo estado", test_db=True)
     assert (
         db_test.collection("petitions").document(petition.id).get().to_dict()["status"]
@@ -901,14 +912,25 @@ def test_reject_documentation_by_organization(login_org, login_user):
         == PetitionStatus.initiated
     )
 
-    # Update the state to "docu_pending"
+    # Update the state to "info_pending"
     update_state_petition_by_organization(petition.id, "Actualizo estado", test_db=True)
     # Check that the status is in info_pending
     assert (
         db_test.collection("petitions").document(petition.id).get().to_dict()["status"]
         == PetitionStatus.info_pending
     )
-    update_state_petition_by_organization(petition.id, "Actualizo estado", test_db=True)
+    # Accept the information to pass to info_approved
+    accept_information_by_organization(
+        petition.id,
+        "Actualizo estado",
+        True,
+        True,
+        True,
+        True,
+        True,
+        True,
+        test_db=True,
+    )
     # Check that the status is in info_approved
     assert (
         db_test.collection("petitions").document(petition.id).get().to_dict()["status"]
@@ -979,49 +1001,18 @@ def test_reject_information_by_organization(login_org, login_user):
         test_db=True,
     )
 
-    # Check that if we reject the information but the status is not docu_pending, the status is not changed
-    reject_information_by_organization(
-        petition.id,
-        "Información nula",
-        True,
-        True,
-        False,
-        True,
-        True,
-        True,
-        test_db=True,
-    )
+    # Check that the status is in initiated
     assert (
         db_test.collection("petitions").document(petition.id).get().to_dict()["status"]
         == PetitionStatus.initiated
     )
 
-    # To reject the information we need to change the state to "docu_pending"
+    # To reject the information we need to change the state to "info_pending"
     update_state_petition_by_organization(petition.id, "Actualizo estado", test_db=True)
     # Check that the status is in info_pending
     assert (
         db_test.collection("petitions").document(petition.id).get().to_dict()["status"]
         == PetitionStatus.info_pending
-    )
-    update_state_petition_by_organization(petition.id, "Actualizo estado", test_db=True)
-    # Check that the status is in info_approved
-    assert (
-        db_test.collection("petitions").document(petition.id).get().to_dict()["status"]
-        == PetitionStatus.info_approved
-    )
-    # Now we need the user to send the information and update the state to "docu_envied"
-    envy_user_documentation(petition.id, "Doc enviada", test_db=True)
-    # Check that the status is in docu_envied
-    assert (
-        db_test.collection("petitions").document(petition.id).get().to_dict()["status"]
-        == PetitionStatus.docu_envied
-    )
-    # Update the state to "docu_pending"
-    update_state_petition_by_organization(petition.id, "Actualizo estado", test_db=True)
-    # Check that the status is in docu_pending
-    assert (
-        db_test.collection("petitions").document(petition.id).get().to_dict()["status"]
-        == PetitionStatus.docu_pending
     )
     # Now we can reject the information
     reject_information_by_organization(
@@ -1064,6 +1055,85 @@ def test_reject_information_by_organization(login_org, login_user):
         is False
     )
 
+    # Delete petitions and animals from the database
+    db_test.collection("petitions").document(petition.id).delete()
+    delete_dog_by_name("Prueba")
+
+
+def test_accept_information_by_organization(login_org, login_user):
+    # Let's create a petition
+    dog = Dog(
+        name="Prueba",
+        years=1,
+        gender=Gender.male,
+        photos=[
+            "https://www.image.com/image.jpg",
+            "https://www.image.com/image2.jpg",
+        ],
+        weight=1.0,
+        size=Size.small,
+        zone=Province.alava,
+        neutered=True,
+        description="Prueba",
+        healthy=True,
+        wormed=True,
+        vaccinated=True,
+        activity_level=Activity.low,
+        microchip=True,
+        is_urgent=True,
+        raze=DogRaze.chihuahua,
+    )
+
+    dog = post_dog(dog, test_db=True)
+    petition = ask_for_dog(
+        dog.id,
+        "I want this dog",
+        "casa",
+        "2h",
+        "si",
+        "2 veces al mes",
+        "si",
+        "si",
+        test_db=True,
+    )
+
+    # Check that if we try to accept the information but one of the booleans is not True, there is an error
+    with pytest.raises(HTTPException):
+        accept_information_by_organization(
+            petition.id,
+            "Información nula",
+            True,
+            True,
+            False,
+            True,
+            True,
+            True,
+            test_db=True,
+        )
+
+    # To accept the information we need to change the state to "info_pending"
+    update_state_petition_by_organization(petition.id, "Actualizo estado", test_db=True)
+    # Check that the status is in info_pending
+    assert (
+        db_test.collection("petitions").document(petition.id).get().to_dict()["status"]
+        == PetitionStatus.info_pending
+    )
+    accept_information_by_organization(
+        petition.id,
+        "Acepto información",
+        True,
+        True,
+        True,
+        True,
+        True,
+        True,
+        test_db=True,
+    )
+    # Check that the status is in info_approved
+    assert (
+        db_test.collection("petitions").document(petition.id).get().to_dict()["status"]
+        == PetitionStatus.info_approved
+    )
     # Delete petitions and animals from the database
     db_test.collection("petitions").document(petition.id).delete()
     delete_dog_by_name("Prueba")

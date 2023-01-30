@@ -1,4 +1,4 @@
-from typing import List, Union
+import datetime
 
 from fastapi.security import OAuth2PasswordRequestForm
 from google.cloud.firestore_v1 import DELETE_FIELD
@@ -127,7 +127,7 @@ def get_user_by_id(user_id: str, test_db: bool = False):
 
 
 # Update user docu
-@router.post("/documentation", status_code=200, response_model=str)
+@router.post("/documentation/{petition_id}", status_code=200, response_model=str)
 def envy_user_documentation(
     petition_id: str,
     message: str,
@@ -157,7 +157,11 @@ def envy_user_documentation(
             and petition.to_dict()["status"] == PetitionStatus.info_approved
         ):
             db_a.collection("petitions").document(petition.id).update(
-                {"status": PetitionStatus.docu_envied, "user_message": message}
+                {
+                    "status": PetitionStatus.docu_envied,
+                    "user_message": message,
+                    "status_date": datetime.datetime.now(),
+                }
             )
             return JSONResponse(
                 status_code=200, content={"message": "User documentation envied"}
@@ -325,7 +329,7 @@ def enable_user(uid: str = Depends(firebase_uid_authentication), test_db: bool =
 
 
 # Update user docu
-@router.post("/update-documentation", status_code=200, response_model=str)
+@router.post("/update-documentation/{petition_id}", status_code=200, response_model=str)
 def update_user_documentation(
     petition_id: str,
     message: str,
@@ -356,6 +360,7 @@ def update_user_documentation(
                     "docu_updated": True,
                     "status": PetitionStatus.docu_changed,
                     "user_message": message,
+                    "status_date": datetime.datetime.now(),
                 }
             )
             return JSONResponse(
@@ -547,6 +552,7 @@ def update_user(
                                 "frequency_travel_bool": False,
                                 "kids_bool": False,
                                 "other_animals_bool": False,
+                                "status_date": datetime.datetime.now(),
                             }
                         )
         return user

@@ -14,7 +14,8 @@ class Petition(BaseModel):
     user_email: str
     dog: Optional[Dog]
     cat: Optional[Cat]
-    date: datetime.datetime
+    date: datetime.datetime = datetime.datetime.now()
+    status_date: datetime.datetime = datetime.datetime.now()
     status: PetitionStatus = PetitionStatus.initiated
     user_message: str
     organization_message: Optional[str]
@@ -46,6 +47,7 @@ class Petition(BaseModel):
                 "dog": "{}",
                 "cat": "{}",
                 "date": datetime.datetime.now(),
+                "status_date": datetime.datetime.now(),
                 "status": PetitionStatus.initiated,
                 "user_message": "Prueba",
                 "organization_message": "Prueba",

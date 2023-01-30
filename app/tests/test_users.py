@@ -7,7 +7,11 @@ from requests import HTTPError
 
 from app.config.database import test_pyrebase_auth, db_test
 from app.routes.organizations import post_dog
-from app.routes.petitions import ask_for_dog, update_state_petition_by_organization
+from app.routes.petitions import (
+    ask_for_dog,
+    update_state_petition_by_organization,
+    accept_information_by_organization,
+)
 from app.routes.users import (
     register_user,
     get_user_profile,
@@ -232,14 +236,25 @@ def test_envy_user_documentation(login_user, login_org):
         == PetitionStatus.initiated
     )
 
-    # To reject the information we need to change the state to "docu_pending"
+    # To reject the information we need to change the state to "info_pending"
     update_state_petition_by_organization(petition.id, "Actualizo estado", test_db=True)
     # Check that the status is in info_pending
     assert (
         db_test.collection("petitions").document(petition.id).get().to_dict()["status"]
         == PetitionStatus.info_pending
     )
-    update_state_petition_by_organization(petition.id, "Actualizo estado", test_db=True)
+    # Accept the information to pass to docu_pending
+    accept_information_by_organization(
+        petition.id,
+        "Actualizo estado",
+        True,
+        True,
+        True,
+        True,
+        True,
+        True,
+        test_db=True,
+    )
     # Check that the status is in info_approved
     assert (
         db_test.collection("petitions").document(petition.id).get().to_dict()["status"]

@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List
 
 from fastapi.security import OAuth2PasswordRequestForm
 from google.cloud.firestore_v1 import ArrayUnion, DELETE_FIELD, ArrayRemove
