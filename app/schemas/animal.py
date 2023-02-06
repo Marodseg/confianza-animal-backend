@@ -240,8 +240,8 @@ class CatUpdate(Animal):
 
 
 class AnimalsInDB(BaseModel):
-    dogs: List[Dog]
-    cats: List[Cat]
+    dogs: Optional[List[Dog]]
+    cats: Optional[List[Cat]]
 
     class Config:
         orm_mode = True

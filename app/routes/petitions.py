@@ -82,6 +82,22 @@ def ask_for_dog(
                     kids=kids,
                     other_animals=other_animals,
                 )
+                if (
+                    user["home_type"] == ""
+                    and user["free_time"] == ""
+                    and user["previous_experience"] == ""
+                    and user["frequency_travel"] == ""
+                    and user["kids"] == ""
+                    and user["other_animals"] == ""
+                ):
+                    user["home_type"] = home_type
+                    user["free_time"] = free_time
+                    user["previous_experience"] = previous_experience
+                    user["frequency_travel"] = frequency_travel
+                    user["kids"] = kids
+                    user["other_animals"] = other_animals
+                    db_a.collection("users").document(user["id"]).set(user, merge=True)
+
                 db_a.collection("petitions").document(petition.id).set(
                     petition.dict(), merge=True
                 )
@@ -157,6 +173,22 @@ def ask_for_cat(
                     kids=kids,
                     other_animals=other_animals,
                 )
+                if (
+                    user["home_type"] == ""
+                    and user["free_time"] == ""
+                    and user["previous_experience"] == ""
+                    and user["frequency_travel"] == ""
+                    and user["kids"] == ""
+                    and user["other_animals"] == ""
+                ):
+                    user["home_type"] = home_type
+                    user["free_time"] = free_time
+                    user["previous_experience"] = previous_experience
+                    user["frequency_travel"] = frequency_travel
+                    user["kids"] = kids
+                    user["other_animals"] = other_animals
+                    db_a.collection("users").document(user["id"]).set(user, merge=True)
+
                 db_a.collection("petitions").document(petition.id).set(
                     petition.dict(), merge=True
                 )
@@ -364,15 +396,15 @@ def update_state_petition_by_organization(
         db_a.collection("petitions").document(petition_id).set(petition)
         return petition
 
-    if petition["status"] == PetitionStatus.docu_envied:
-        petition["status"] = PetitionStatus.docu_pending
+    if petition["status"] == PetitionStatus.docu_pending:
+        petition["status"] = PetitionStatus.accepted
         petition["organization_message"] = message
         petition["status_date"] = datetime.datetime.now()
         db_a.collection("petitions").document(petition_id).set(petition)
         return petition
 
-    if petition["status"] == PetitionStatus.docu_pending:
-        petition["status"] = PetitionStatus.accepted
+    if petition["status"] == PetitionStatus.docu_envied:
+        petition["status"] = PetitionStatus.docu_pending
         petition["organization_message"] = message
         petition["status_date"] = datetime.datetime.now()
         db_a.collection("petitions").document(petition_id).set(petition)
@@ -381,7 +413,6 @@ def update_state_petition_by_organization(
     if petition["status"] == PetitionStatus.info_changed:
         petition["status"] = PetitionStatus.info_pending
         petition["organization_message"] = message
-        petition["info_updated"] = False
         petition["status_date"] = datetime.datetime.now()
         db_a.collection("petitions").document(petition_id).set(petition)
         return petition
@@ -389,7 +420,6 @@ def update_state_petition_by_organization(
     if petition["status"] == PetitionStatus.docu_changed:
         petition["status"] = PetitionStatus.docu_pending
         petition["organization_message"] = message
-        petition["docu_updated"] = False
         petition["status_date"] = datetime.datetime.now()
         db_a.collection("petitions").document(petition_id).set(petition)
         return petition

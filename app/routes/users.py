@@ -354,11 +354,24 @@ def update_user_documentation(
 
     petitions = db_a.collection("petitions").where("user_id", "==", uid_a).get()
     for petition in petitions:
-        if petition.id == petition_id and petition.to_dict()["docu_updated"] is False:
+        if (
+            petition.id == petition_id
+            and petition.to_dict()["status"] == PetitionStatus.docu_rejected
+        ):
             db_a.collection("petitions").document(petition.id).update(
                 {
-                    "docu_updated": True,
                     "status": PetitionStatus.docu_changed,
+                    "user_message": message,
+                    "status_date": datetime.datetime.now(),
+                }
+            )
+            return JSONResponse(
+                status_code=200, content={"message": "User documentation updated"}
+            )
+        else:
+            db_a.collection("petitions").document(petition.id).update(
+                {
+                    "status": PetitionStatus.docu_pending,
                     "user_message": message,
                     "status_date": datetime.datetime.now(),
                 }
@@ -541,10 +554,9 @@ def update_user(
                         )
                     )
                 ):
-                    if petition.to_dict()["info_updated"] is False:
+                    if petition.to_dict()["status"] == PetitionStatus.info_rejected:
                         db_a.collection("petitions").document(petition.id).update(
                             {
-                                "info_updated": True,
                                 "status": PetitionStatus.info_changed,
                                 "home_type_bool": False,
                                 "free_time_bool": False,
@@ -553,6 +565,33 @@ def update_user(
                                 "kids_bool": False,
                                 "other_animals_bool": False,
                                 "status_date": datetime.datetime.now(),
+                                "user_message": "Información del usuario modificada",
+                                "home_type": user["home_type"],
+                                "free_time": user["free_time"],
+                                "previous_experience": user["previous_experience"],
+                                "frequency_travel": user["frequency_travel"],
+                                "kids": user["kids"],
+                                "other_animals": user["other_animals"],
+                            }
+                        )
+                    else:
+                        db_a.collection("petitions").document(petition.id).update(
+                            {
+                                "status": PetitionStatus.info_pending,
+                                "home_type_bool": False,
+                                "free_time_bool": False,
+                                "previous_experience_bool": False,
+                                "frequency_travel_bool": False,
+                                "kids_bool": False,
+                                "other_animals_bool": False,
+                                "status_date": datetime.datetime.now(),
+                                "user_message": "Información del usuario modificada",
+                                "home_type": user["home_type"],
+                                "free_time": user["free_time"],
+                                "previous_experience": user["previous_experience"],
+                                "frequency_travel": user["frequency_travel"],
+                                "kids": user["kids"],
+                                "other_animals": user["other_animals"],
                             }
                         )
         return user

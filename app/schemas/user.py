@@ -16,12 +16,12 @@ class User(BaseModel):
     dogs: Optional[List[Dog]]
     cats: Optional[List[Cat]]
     favorites: dict = {"dogs": [], "cats": []}
-    home_type: Optional[str]
-    free_time: Optional[str]
-    previous_experience: Optional[str]
-    frequency_travel: Optional[str]
-    kids: Optional[str]
-    other_animals: Optional[str]
+    home_type: Optional[str] = ""
+    free_time: Optional[str] = ""
+    previous_experience: Optional[str] = ""
+    frequency_travel: Optional[str] = ""
+    kids: Optional[str] = ""
+    other_animals: Optional[str] = ""
 
     @validator("email")
     def email_must_be_valid(cls, v) -> str:

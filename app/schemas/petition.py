@@ -21,8 +21,6 @@ class Petition(BaseModel):
     organization_message: Optional[str]
     organization_name: Optional[str]
     visible: bool = True
-    info_updated: bool = False
-    docu_updated: bool = False
     home_type: str
     home_type_bool: bool = False
     free_time: str
@@ -53,8 +51,6 @@ class Petition(BaseModel):
                 "organization_message": "Prueba",
                 "organization_name": "Prueba",
                 "visible": True,
-                "info_updated": False,
-                "docu_updated": False,
                 "home_type": "Casa",
                 "home_type_bool": False,
                 "free_time": "2h",

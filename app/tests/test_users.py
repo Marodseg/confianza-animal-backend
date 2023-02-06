@@ -11,6 +11,7 @@ from app.routes.petitions import (
     ask_for_dog,
     update_state_petition_by_organization,
     accept_information_by_organization,
+    reject_documentation_by_organization,
 )
 from app.routes.users import (
     register_user,
@@ -389,7 +390,7 @@ def test_update_user(login_user):
     assert user["name"] == "TEST USER"
 
 
-def test_update_user_documentation(login_user):
+def test_update_user_documentation(login_user, login_org):
     # Let's create a petition
     dog = Dog(
         name="Prueba",
@@ -425,21 +426,21 @@ def test_update_user_documentation(login_user):
         "si",
         test_db=True,
     )
-    assert (
-        db_test.collection("petitions")
-        .document(petition.id)
-        .get()
-        .to_dict()["docu_updated"]
-        is False
-    )
     update_user_documentation(petition.id, "La actualizo", test_db=True)
     assert (
+        db_test.collection("petitions").document(petition.id).get().to_dict()["status"]
+        == PetitionStatus.docu_pending
+    )
+    assert (
         db_test.collection("petitions")
         .document(petition.id)
         .get()
-        .to_dict()["docu_updated"]
-        is True
+        .to_dict()["user_message"]
+        == "La actualizo"
     )
+    # If the documentation is rejected and the user updates it, the status changes to docu_changed
+    reject_documentation_by_organization(petition.id, "Falta el DNI", test_db=True)
+    update_user_documentation(petition.id, "Te paso el DNI", test_db=True)
     assert (
         db_test.collection("petitions").document(petition.id).get().to_dict()["status"]
         == PetitionStatus.docu_changed
@@ -449,7 +450,7 @@ def test_update_user_documentation(login_user):
         .document(petition.id)
         .get()
         .to_dict()["user_message"]
-        == "La actualizo"
+        == "Te paso el DNI"
     )
 
     # Delete petitions and animals from the database
