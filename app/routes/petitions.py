@@ -60,7 +60,30 @@ def ask_for_dog(
         for petition in petitions:
             petition = Petition(**petition.to_dict())
             if petition.dog:
-                if petition.dog.id == dog_id:
+                if petition.status == PetitionStatus.rejected:
+                    petition.status = PetitionStatus.initiated
+                    petition.user_message = "Estoy interesado en este animal"
+                    petition.organization_message = ""
+                    petition.home_type_bool = False
+                    petition.free_time_bool = False
+                    petition.previous_experience_bool = False
+                    petition.frequency_travel_bool = False
+                    petition.kids_bool = False
+                    petition.other_animals_bool = False
+                    petition.home_type = user["home_type"]
+                    petition.free_time = user["free_time"]
+                    petition.previous_experience = user["previous_experience"]
+                    petition.frequency_travel = user["frequency_travel"]
+                    petition.kids = user["kids"]
+                    petition.other_animals = user["other_animals"]
+                    petition.visible = True
+                    petition.date = datetime.datetime.now()
+                    db_a.collection("petitions").document(petition.id).set(
+                        petition.dict(), merge=True
+                    )
+
+                    return petition
+                elif petition.dog.id == dog_id:
                     raise HTTPException(
                         status_code=400,
                         detail="You already have a petition for this dog",
@@ -151,7 +174,30 @@ def ask_for_cat(
         for petition in petitions:
             petition = Petition(**petition.to_dict())
             if petition.cat:
-                if petition.cat.id == cat_id:
+                if petition.status == PetitionStatus.rejected:
+                    petition.status = PetitionStatus.initiated
+                    petition.user_message = "Estoy interesado en este animal"
+                    petition.organization_message = ""
+                    petition.home_type_bool = False
+                    petition.free_time_bool = False
+                    petition.previous_experience_bool = False
+                    petition.frequency_travel_bool = False
+                    petition.kids_bool = False
+                    petition.other_animals_bool = False
+                    petition.home_type = user["home_type"]
+                    petition.free_time = user["free_time"]
+                    petition.previous_experience = user["previous_experience"]
+                    petition.frequency_travel = user["frequency_travel"]
+                    petition.kids = user["kids"]
+                    petition.other_animals = user["other_animals"]
+                    petition.visible = True
+                    petition.date = datetime.datetime.now()
+                    db_a.collection("petitions").document(petition.id).set(
+                        petition.dict(), merge=True
+                    )
+
+                    return petition
+                elif petition.cat.id == cat_id:
                     raise HTTPException(
                         status_code=400,
                         detail="You already have a petition for this cat",

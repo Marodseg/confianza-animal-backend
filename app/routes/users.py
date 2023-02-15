@@ -355,23 +355,18 @@ def update_user_documentation(
     petitions = db_a.collection("petitions").where("user_id", "==", uid_a).get()
     for petition in petitions:
         if (
-            petition.id == petition_id
-            and petition.to_dict()["status"] == PetitionStatus.docu_rejected
+            petition.to_dict()["status"] != PetitionStatus.rejected
+            and petition.to_dict()["status"] != PetitionStatus.accepted
+            and petition.to_dict()["status"] != PetitionStatus.initiated
+        ) and (
+            petition.to_dict()["status"] == PetitionStatus.docu_pending
+            or petition.to_dict()["status"] == PetitionStatus.docu_changed
+            or petition.to_dict()["status"] == PetitionStatus.docu_envied
+            or petition.to_dict()["status"] == PetitionStatus.docu_rejected
         ):
             db_a.collection("petitions").document(petition.id).update(
                 {
                     "status": PetitionStatus.docu_changed,
-                    "user_message": message,
-                    "status_date": datetime.datetime.now(),
-                }
-            )
-            return JSONResponse(
-                status_code=200, content={"message": "User documentation updated"}
-            )
-        else:
-            db_a.collection("petitions").document(petition.id).update(
-                {
-                    "status": PetitionStatus.docu_pending,
                     "user_message": message,
                     "status_date": datetime.datetime.now(),
                 }
@@ -577,6 +572,7 @@ def update_user(
                     elif (
                         petition.to_dict()["status"] != PetitionStatus.accepted
                         and petition.to_dict()["status"] != PetitionStatus.rejected
+                        and petition.to_dict()["status"] != PetitionStatus.initiated
                     ):
                         db_a.collection("petitions").document(petition.id).update(
                             {

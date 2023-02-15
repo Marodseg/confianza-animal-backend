@@ -426,17 +426,43 @@ def test_update_user_documentation(login_user, login_org):
         "si",
         test_db=True,
     )
-    update_user_documentation(petition.id, "La actualizo", test_db=True)
+    # You cant update the documentation if the status is not docu_rejected or docu_pending or docu_changed
+    with pytest.raises(HTTPException):
+        update_user_documentation(petition.id, "La actualizo", test_db=True)
+
+    # Let's move the petition to info_pending
+    update_state_petition_by_organization(petition.id, "Actualizo estado", test_db=True)
+    # Let's accept the info
+    accept_information_by_organization(
+        petition.id, "Todo bien", True, True, True, True, True, True, test_db=True
+    )
+    # Let's assert that the petition is in info_approved
     assert (
         db_test.collection("petitions").document(petition.id).get().to_dict()["status"]
-        == PetitionStatus.docu_pending
+        == PetitionStatus.info_approved
     )
+    # Let's send the documentation to the organization
+    envy_user_documentation(petition.id, "Enviada", test_db=True)
+    # Check that the petition is in docu_envied
+    assert (
+        db_test.collection("petitions").document(petition.id).get().to_dict()["status"]
+        == PetitionStatus.docu_envied
+    )
+    # If the documentation is pending and the user updates it, the status changes to docu_changed
+    update_user_documentation(petition.id, "La actualizo", test_db=True)
     assert (
         db_test.collection("petitions")
         .document(petition.id)
         .get()
         .to_dict()["user_message"]
         == "La actualizo"
+    )
+    # Update the status to docu_pending
+    update_state_petition_by_organization(petition.id, "Actualizo estado", test_db=True)
+    # Check the status
+    assert (
+        db_test.collection("petitions").document(petition.id).get().to_dict()["status"]
+        == PetitionStatus.docu_pending
     )
     # If the documentation is rejected and the user updates it, the status changes to docu_changed
     reject_documentation_by_organization(petition.id, "Falta el DNI", test_db=True)
