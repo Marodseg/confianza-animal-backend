@@ -574,7 +574,10 @@ def update_user(
                                 "other_animals": user["other_animals"],
                             }
                         )
-                    else:
+                    elif (
+                        petition.to_dict()["status"] != PetitionStatus.accepted
+                        and petition.to_dict()["status"] != PetitionStatus.rejected
+                    ):
                         db_a.collection("petitions").document(petition.id).update(
                             {
                                 "status": PetitionStatus.info_pending,
