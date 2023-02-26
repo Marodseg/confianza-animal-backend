@@ -37,6 +37,7 @@ class Province(str, Enum):
     murcia = "Murcia"
     navarra = "Navarra"
     ourense = "Ourense"
+    pais_vasco = "País Vasco"
     palencia = "Palencia"
     pontevedra = "Pontevedra"
     salamanca = "Salamanca"

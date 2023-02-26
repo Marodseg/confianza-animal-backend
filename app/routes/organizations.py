@@ -83,7 +83,12 @@ def get_dogs_from_organization(
     if not org:
         raise HTTPException(status_code=404, detail="Organization not found")
 
-    return org[0].to_dict()["dogs"] if org[0].to_dict()["dogs"] else []
+    dogs = []
+    for dog in org[0].to_dict()["dogs"]:
+        if dog["organization_name"] == org[0].to_dict()["name"]:
+            dogs.append(dog)
+
+    return dogs
 
 
 # Get cats from organization
@@ -107,7 +112,12 @@ def get_cats_from_organization(
     if not org:
         raise HTTPException(status_code=404, detail="Organization not found")
 
-    return org[0].to_dict()["cats"] if org[0].to_dict()["cats"] else []
+    cats = []
+    for cat in org[0].to_dict()["cats"]:
+        if cat["organization_name"] == org[0].to_dict()["name"]:
+            cats.append(cat)
+
+    return cats
 
 
 # Get all organizations

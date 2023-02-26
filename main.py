@@ -12,6 +12,12 @@ This API is part of the **Confianza Animal project**:
 * A **web application** that helps an organization to manage a database of animals 
 * An **android application** that helps users to find a pet to adopt.
 
+## Authentication (for users and organizations)
+
+You can:
+
+* **Reset** your password.
+
 ## Organizations
 
 You can:
@@ -28,12 +34,6 @@ You can:
 * **Get** all the animals of your organization.
 * **Update** an animal of your organization.
 
-## Authentication (for users and organizations)
-
-You can:
-
-* **Reset** your password.
-
 ## Users
 
 You can:
@@ -45,6 +45,10 @@ You can:
 * **Disable/Enable** your user.
 * **Update** your user's photo.
 * **Get** all the animals requested by your user.
+* **Envy** documentation for a petition
+* **Update** the documentation for a petition.
+* **Mark** an animal as favorite.
+* **Get** all the animals marked as favorite by your user.
 
 ## Animals (managed by organizations)
 
@@ -81,6 +85,12 @@ You can:
 * **Get** all the petitions of your user.
 * **Delete** a petition of your organization by id.
 * **Delete** a petition of your user by id.
+* **Update** the status of a petition by organization.
+* **Reject** a petition by user or organization.
+* **Accept** a petition by user or organization.
+* **Accept** or **Reject** the information or documentation of a petition by organization.
+* **Change** the visibility of a petition by user (visible/invisible).
+* **Get** all the petitions visibles/inivisibles by user.
 
 ## Filters
 
@@ -123,12 +133,12 @@ app.add_middleware(
 )
 
 # Blueprints registration
+app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
 app.include_router(
     organizations.router, prefix="/organizations", tags=["Organizations"]
 )
-app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
-app.include_router(animals.router, prefix="/animals", tags=["Animals"])
 app.include_router(users.router, prefix="/users", tags=["Users"])
+app.include_router(animals.router, prefix="/animals", tags=["Animals"])
 app.include_router(petitions.router, prefix="/petitions", tags=["Petitions"])
 app.include_router(filters.router, prefix="/filters", tags=["Filters"])
 
