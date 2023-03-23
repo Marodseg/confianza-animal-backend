@@ -178,7 +178,7 @@ def post_dog(
     dog.id = generate_uuid()
     dog.organization_name = org["name"]
     dog.organization_phone = org["phone"]
-    dog.organization_photo = org["photo"]
+    dog.organization_photo = org["photo"] if org["photo"] else None
 
     db_a.collection("organizations").document(org["name"]).update(
         {"dogs": ArrayUnion([dog.dict()])}
@@ -216,7 +216,7 @@ def post_cat(
     cat.id = generate_uuid()
     cat.organization_name = org["name"]
     cat.organization_phone = org["phone"]
-    cat.organization_photo = org["photo"]
+    cat.organization_photo = org["photo"] if org["photo"] else None
 
     db_a.collection("organizations").document(org["name"]).update(
         {"cats": ArrayUnion([cat.dict()])}
@@ -296,7 +296,7 @@ def login_organization(form_data: OAuth2PasswordRequestForm = Depends()):
     except Exception as e:
         if str(e) == "":
             raise HTTPException(status_code=400, detail="Email not verified")
-        raise HTTPException(status_code=400, detail="Invalid credentials")
+        raise HTTPException(status_code=401, detail="Invalid credentials")
 
 
 # Upload photo profile
@@ -428,6 +428,7 @@ def modify_dog(
                 dog["birth_date"] = None
 
             new_dog = dog.copy()
+            new_dog["organization_photo"] = org["photo"]
 
             # We update the dog in the organization
             db_a.collection("organizations").document(org["name"]).update(
@@ -506,6 +507,7 @@ def modify_cat(
                 cat["birth_date"] = None
 
             new_cat = cat.copy()
+            new_cat["organization_photo"] = org["photo"]
 
             # We update the cat in the organization
             db_a.collection("organizations").document(org["name"]).update(

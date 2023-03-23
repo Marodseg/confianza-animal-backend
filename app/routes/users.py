@@ -301,7 +301,7 @@ def login_user(form_data: OAuth2PasswordRequestForm = Depends()):
     except Exception as e:
         if str(e) == "":
             raise HTTPException(status_code=400, detail="Email not verified")
-        raise HTTPException(status_code=400, detail="Invalid credentials")
+        raise HTTPException(status_code=401, detail="Invalid credentials")
 
 
 # Enable user

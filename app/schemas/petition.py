@@ -33,6 +33,7 @@ class Petition(BaseModel):
     kids_bool: bool = False
     other_animals: str
     other_animals_bool: bool = False
+    queue: Optional[int]
 
     class Config:
         orm_mode = True

@@ -10,7 +10,7 @@ from app.routes.auth import firebase_email_authentication, firebase_uid_authenti
 from app.schemas.animal import AnimalsInDB
 from app.schemas.enums.petition_status import PetitionStatus
 from app.schemas.petition import Petition
-from app.utils import exists_dog_in_animals, exists_cat_in_animals, generate_uuid
+from app.utils import generate_uuid
 
 router = APIRouter()
 
@@ -53,11 +53,26 @@ def ask_for_dog(
     dog = next((dog for dog in dogs if dog.id == dog_id), None)
 
     if dog:
-        petitions = (
-            db_a.collection("petitions").where("user_id", "==", user["id"]).get()
-        )
-
+        petitions = db_a.collection("petitions").get()
+        user_petitions = [
+            petition
+            for petition in petitions
+            if Petition(**petition.to_dict()).user_id == user["id"]
+        ]
+        petitions_for_dog = []
         for petition in petitions:
+            petition = Petition(**petition.to_dict())
+            if (
+                petition.dog
+                and petition.dog.id == dog_id
+                and petition.status != PetitionStatus.info_rejected
+                and petition.status != PetitionStatus.rejected
+                and petition.status != PetitionStatus.docu_rejected
+            ):
+                petitions_for_dog.append(petition)
+        number_of_petitions = len(petitions_for_dog)
+
+        for petition in user_petitions:
             petition = Petition(**petition.to_dict())
             if petition.dog:
                 if petition.status == PetitionStatus.rejected:
@@ -89,42 +104,42 @@ def ask_for_dog(
                         detail="You already have a petition for this dog",
                     )
         try:
-            if exists_dog_in_animals(dog_id, test_db):
-                petition = Petition(
-                    id=generate_uuid(),
-                    user_id=user["id"],
-                    user_name=user["name"],
-                    user_email=user["email"],
-                    dog=dog,
-                    user_message=message,
-                    organization_name=dog.organization_name,
-                    home_type=home_type,
-                    free_time=free_time,
-                    previous_experience=previous_experience,
-                    frequency_travel=frequency_travel,
-                    kids=kids,
-                    other_animals=other_animals,
-                )
-                if (
-                    user["home_type"] == ""
-                    and user["free_time"] == ""
-                    and user["previous_experience"] == ""
-                    and user["frequency_travel"] == ""
-                    and user["kids"] == ""
-                    and user["other_animals"] == ""
-                ):
-                    user["home_type"] = home_type
-                    user["free_time"] = free_time
-                    user["previous_experience"] = previous_experience
-                    user["frequency_travel"] = frequency_travel
-                    user["kids"] = kids
-                    user["other_animals"] = other_animals
-                    db_a.collection("users").document(user["id"]).set(user, merge=True)
+            petition = Petition(
+                id=generate_uuid(),
+                user_id=user["id"],
+                user_name=user["name"],
+                user_email=user["email"],
+                dog=dog,
+                user_message=message,
+                organization_name=dog.organization_name,
+                home_type=home_type,
+                free_time=free_time,
+                previous_experience=previous_experience,
+                frequency_travel=frequency_travel,
+                kids=kids,
+                other_animals=other_animals,
+                queue=number_of_petitions,
+            )
+            if (
+                user["home_type"] == ""
+                and user["free_time"] == ""
+                and user["previous_experience"] == ""
+                and user["frequency_travel"] == ""
+                and user["kids"] == ""
+                and user["other_animals"] == ""
+            ):
+                user["home_type"] = home_type
+                user["free_time"] = free_time
+                user["previous_experience"] = previous_experience
+                user["frequency_travel"] = frequency_travel
+                user["kids"] = kids
+                user["other_animals"] = other_animals
+                db_a.collection("users").document(user["id"]).set(user, merge=True)
 
-                db_a.collection("petitions").document(petition.id).set(
-                    petition.dict(), merge=True
-                )
-                return petition
+            db_a.collection("petitions").document(petition.id).set(
+                petition.dict(), merge=True
+            )
+            return petition
         except HTTPException:
             raise HTTPException(status_code=400, detail="Error creating petition")
     else:
@@ -168,10 +183,26 @@ def ask_for_cat(
     cat = next((cat for cat in cats if cat.id == cat_id), None)
 
     if cat:
-        petitions = (
-            db_a.collection("petitions").where("user_id", "==", user["id"]).get()
-        )
+        petitions = db_a.collection("petitions").get()
+        user_petitions = [
+            petition
+            for petition in petitions
+            if Petition(**petition.to_dict()).user_id == user["id"]
+        ]
+        petitions_for_cat = []
         for petition in petitions:
+            petition = Petition(**petition.to_dict())
+            if (
+                petition.cat
+                and petition.cat.id == cat_id
+                and petition.status != PetitionStatus.info_rejected
+                and petition.status != PetitionStatus.rejected
+                and petition.status != PetitionStatus.docu_rejected
+            ):
+                petitions_for_cat.append(petition)
+        number_of_petitions = len(petitions_for_cat)
+
+        for petition in user_petitions:
             petition = Petition(**petition.to_dict())
             if petition.cat:
                 if petition.status == PetitionStatus.rejected:
@@ -203,42 +234,42 @@ def ask_for_cat(
                         detail="You already have a petition for this cat",
                     )
         try:
-            if exists_cat_in_animals(cat_id, test_db):
-                petition = Petition(
-                    id=generate_uuid(),
-                    user_id=user["id"],
-                    user_name=user["name"],
-                    user_email=user["email"],
-                    cat=cat,
-                    user_message=message,
-                    organization_name=cat.organization_name,
-                    home_type=home_type,
-                    free_time=free_time,
-                    previous_experience=previous_experience,
-                    frequency_travel=frequency_travel,
-                    kids=kids,
-                    other_animals=other_animals,
-                )
-                if (
-                    user["home_type"] == ""
-                    and user["free_time"] == ""
-                    and user["previous_experience"] == ""
-                    and user["frequency_travel"] == ""
-                    and user["kids"] == ""
-                    and user["other_animals"] == ""
-                ):
-                    user["home_type"] = home_type
-                    user["free_time"] = free_time
-                    user["previous_experience"] = previous_experience
-                    user["frequency_travel"] = frequency_travel
-                    user["kids"] = kids
-                    user["other_animals"] = other_animals
-                    db_a.collection("users").document(user["id"]).set(user, merge=True)
+            petition = Petition(
+                id=generate_uuid(),
+                user_id=user["id"],
+                user_name=user["name"],
+                user_email=user["email"],
+                cat=cat,
+                user_message=message,
+                organization_name=cat.organization_name,
+                home_type=home_type,
+                free_time=free_time,
+                previous_experience=previous_experience,
+                frequency_travel=frequency_travel,
+                kids=kids,
+                other_animals=other_animals,
+                queue=number_of_petitions,
+            )
+            if (
+                user["home_type"] == ""
+                and user["free_time"] == ""
+                and user["previous_experience"] == ""
+                and user["frequency_travel"] == ""
+                and user["kids"] == ""
+                and user["other_animals"] == ""
+            ):
+                user["home_type"] = home_type
+                user["free_time"] = free_time
+                user["previous_experience"] = previous_experience
+                user["frequency_travel"] = frequency_travel
+                user["kids"] = kids
+                user["other_animals"] = other_animals
+                db_a.collection("users").document(user["id"]).set(user, merge=True)
 
-                db_a.collection("petitions").document(petition.id).set(
-                    petition.dict(), merge=True
-                )
-                return petition
+            db_a.collection("petitions").document(petition.id).set(
+                petition.dict(), merge=True
+            )
+            return petition
         except HTTPException:
             raise HTTPException(status_code=400, detail="Error creating petition")
     else:

@@ -65,6 +65,9 @@ class Animal(BaseModel):
                 "activity_level": Activity.low,
                 "microchip": True,
                 "is_urgent": True,
+                "organization_name": "Prueba",
+                "organization_phone": "+34111111111",
+                "organization_photo": "Prueba",
             }
         }
 
@@ -95,6 +98,9 @@ class Dog(Animal):
                 "activity_level": Activity.low,
                 "microchip": True,
                 "is_urgent": True,
+                "organization_name": "Prueba",
+                "organization_phone": "+34111111111",
+                "organization_photo": "Prueba",
                 "raze": DogRaze.akita,
             }
         }
