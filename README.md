@@ -1,4 +1,6 @@
-# Confianza Animal backend
+# Trabajo de Fin de Grado: *API para la gestión de mascotas en adopción*
+
+***
 
 ## Install project dependencies
 
@@ -28,3 +30,14 @@ In order to format all the files, run `black .` or a specific file with `black "
 In order to create the environment, run `conda env create -f environment.yml`.
 
 After that, activate the environment with `conda activate confianza_animal`.
+
+## Test database
+
+To create the test database, run **(only for the first time)** `python app/config/populate_test_database.py`
+and it will create the database with the test data to run the tests.
+
+
+***
+
+## License
+This project is published under the [GNU General Public License v3](https://opensource.org/licenses/GPL-3.0) license.

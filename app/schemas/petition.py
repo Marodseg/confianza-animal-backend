@@ -64,5 +64,6 @@ class Petition(BaseModel):
                 "kids_bool": False,
                 "other_animals": "Si",
                 "other_animals_bool": False,
+                "queue": 1
             }
         }

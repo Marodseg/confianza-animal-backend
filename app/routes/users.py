@@ -377,31 +377,6 @@ def update_user_documentation(
     raise HTTPException(status_code=404, detail="User documentation can't be updated")
 
 
-# Disable user
-@router.post("/disable", status_code=200)
-def disable_user(
-    uid: str = Depends(firebase_uid_authentication), test_db: bool = False
-):
-    if test_db is True:
-        db_a = db_test
-        uid_a = (
-            db_a.collection("users")
-            .where("name", "==", "TEST USER")
-            .get()[0]
-            .to_dict()["id"]
-        )
-    else:
-        db_a = db
-        uid_a = uid
-    user = db_a.collection("users").where("id", "==", uid_a).get()[0].to_dict()
-
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    db_a.collection("users").document(uid_a).update({"active": False})
-    return JSONResponse(status_code=200, content={"message": "User disabled"})
-
-
 # Upload photo profile
 @router.post("/upload/photo", status_code=200)
 def upload_profile_photo(
@@ -596,6 +571,31 @@ def update_user(
         return user
     except Exception as e:
         raise HTTPException(status_code=401, detail=str(e))
+
+
+# Disable user
+@router.delete("/disable", status_code=200)
+def disable_user(
+    uid: str = Depends(firebase_uid_authentication), test_db: bool = False
+):
+    if test_db is True:
+        db_a = db_test
+        uid_a = (
+            db_a.collection("users")
+            .where("name", "==", "TEST USER")
+            .get()[0]
+            .to_dict()["id"]
+        )
+    else:
+        db_a = db
+        uid_a = uid
+    user = db_a.collection("users").where("id", "==", uid_a).get()[0].to_dict()
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    db_a.collection("users").document(uid_a).update({"active": False})
+    return JSONResponse(status_code=200, content={"message": "User disabled"})
 
 
 # Delete favorite

@@ -208,7 +208,7 @@ def test_post_dog(login_org):
     delete_dog_by_name("Prueba")
 
 
-def test_get_user_profile(login_org):
+def test_get_organization_profile(login_org):
     org = get_user_profile(test_db=True)
     assert org.name == "TEST ORGANIZATION"
     assert org.email == "confianzaanimaltest@gmail.com"
@@ -423,7 +423,7 @@ def test_enable_organization(login_org):
     assert org.active is True
 
 
-def test_delete_organization(login_org):
+def test_disable_organization(login_org):
     org = get_user_profile(test_db=True)
     if org.active:
         delete_organization(test_db=True)
