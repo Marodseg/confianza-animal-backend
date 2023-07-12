@@ -1,8 +1,8 @@
 \chapter{Implementación y despliegues}\label{ch:implementacion-y-despliegues}
 
-En este capítulo se profundiza en los detalles de la implementación de la página web y la API a lo largo de los diferentes
+En este capítulo se profundiza en los detalles de la implementación de la página web y la \textbf{API} a lo largo de los diferentes
 \textit{sprints} que se han realizado durante el desarrollo del proyecto. Además, se explican los detalles de los despliegues
-de la página web y la API así como las herramientas y tecnologías que se han utilizado para llevarlos a cabo.
+de la página web y la \textbf{API} así como las herramientas y tecnologías que se han utilizado para llevarlos a cabo.
 
 \section{Desarrollo basado en sprints}\label{sec:desarrollo-basado-en-sprints}
 
@@ -14,34 +14,34 @@ eficiente.
 \subsection{Sprints 1-4}\label{subsec:sprints-1-4}
 
 En los cuatro primeros \textit{sprints} se han llevado a cabo las tareas que han permitido preparar los entornos de desarrollo
-para la creación de la página web y la API. En concreto, se han llevado a cabo las siguientes tareas:
+para la creación de la página web y la \textbf{API}. En concreto, se han llevado a cabo las siguientes tareas:
 
 \begin{itemize}
-    \item Creación de los repositorios de la página web y la API.
+    \item Creación de los repositorios de la página web y la \textbf{API}.
     \item Creación de la estructura de los proyectos y de la base de datos.
     \item Creación de la estructura inicial de la documentación del proyecto en \textit{LaTeX}.
     \item Fijación de objetivos y alcance del proyecto.
     \item Fijación de la metodología de desarrollo y requisitos del proyecto.
     \item Arquitectura del proyecto.
-    \item Diseño de la API, página web y base de datos.
+    \item Diseño de la \textbf{API}, página web y base de datos.
 \end{itemize}
 
 \subsubsection{Creación de la API}\label{subsubsec:creacion-de-la-api}
 
-Para la creación de la API se ha usado el framework \textit{FastAPI} por medio del lenguaje de programación \textit{Python} el cual
-se ha explicado en profundidad en la subsección:~\ref{subsec:framework-web-de-api}. Todo el código de la API se ha desarrollado
+Para la creación de la \textbf{API} se ha usado el framework \textit{FastAPI} por medio del lenguaje de programación \textit{Python} el cual
+se ha explicado en profundidad en la subsección:~\ref{subsec:framework-web-de-api}. Todo el código de la \textbf{API} se ha desarrollado
 siguiendo la documentación oficial de \textit{FastAPI} que se puede consultar en la siguiente dirección: \url{https://fastapi.tiangolo.com/} y
-las buenas prácticas de desarrollo de APIs que se pueden consultar en la siguiente dirección: \url{https://docs.microsoft.com/en-us/azure/architecture/best-practices/api-design}.
-A continuación se van a mostrar los pasos que se han seguido en concreto para la creación de la API del proyecto:
+las buenas prácticas de desarrollo de \textbf{APIs} que se pueden consultar en la siguiente dirección: \url{https://docs.microsoft.com/en-us/azure/architecture/best-practices/api-design}.
+A continuación se van a mostrar los pasos que se han seguido en concreto para la creación de la \textbf{API} del proyecto:
 
 \begin{enumerate}
     \item Instalar \textit{FastAPI} y \textit{uvicorn} por medio de \textit{pip} con el comando
     \textit{pip install fastapi uvicorn}.
-    \item Crear un fichero \textit{main.py} que contendrá el código de la API que se ejecutará con el comando
+    \item Crear un fichero \textit{main.py} que contendrá el código de la \textbf{API} que se ejecutará con el comando
     \textit{uvicorn main:app --reload}. El parámetro \textit{--reload} permite que cada vez que se realice un cambio
     en el código, el servidor se reinicie automáticamente.
-    \item Definir las clases y esquemas de datos que se van a utilizar en la API.
-    \item Definir las rutas que tendrá la API. En este proyecto se han definido las siguientes:
+    \item Definir las clases y esquemas de datos que se van a utilizar en la \textbf{API}.
+    \item Definir las rutas que tendrá la \textbf{API}. En este proyecto se han definido las siguientes:
         \begin{itemize}
             \item \textbf{/auth}: ruta para reestablecer la contraseña de un usuario u organización
             \item \textbf{/organizations}: ruta que engloba todos los endpoints relacionados con las organizaciones
@@ -52,7 +52,7 @@ A continuación se van a mostrar los pasos que se han seguido en concreto para l
         \end{itemize}
     \item Implementar los diferentes \textit{endpoints} dentro de cada ruta.
     \item Crear los tests para cada uno de los \textit{endpoints} de la API. Estos tests se pueden consultar en la
-    subsección de testing:~\ref{subsubsec:tests}.
+    subsección de testing:~\ref{subsubsec:testing}.
 \end{enumerate}
 
 \subsubsection{Clases}\label{subsubsec:clases}

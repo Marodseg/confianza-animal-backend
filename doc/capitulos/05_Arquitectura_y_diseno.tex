@@ -16,14 +16,14 @@ De forma visual, la arquitectura de todo el proyecto se puede contemplar en la s
 
 A primera vista, vemos que el diagrama de la arquitectura se trata de un modelo
 \textbf{cliente/servidor} en el que tanto el usuario mobile (parte amarilla que referencia la arquitectura de mi compañero Alejandro)
-como las organizaciones, se comunican con el servidor por medio de una API. En concreto,
+como las organizaciones, se comunican con el servidor por medio de una \textbf{API}. En concreto,
 la arquitectura consta de los siguientes elementos:
 
 \newpage
 
 \begin{itemize}
-    \item \textbf{Cliente}: se trata de la página web que se comunica con la API para obtener los datos de la aplicación.
-    \item \textbf{Servidor}: se trata de la API que se comunica con los servicios y la base de datos de Firebase.
+    \item \textbf{Cliente}: se trata de la página web que se comunica con la \textbf{API} para obtener los datos de la aplicación.
+    \item \textbf{Servidor}: se trata de la \textbf{API} que se comunica con los servicios y la base de datos de Firebase.
     \item \textbf{Base de datos}: se trata de la base de datos en la nube de Firebase que almacena los datos de la aplicación.
     \item \textbf{Servicios}: se trata de los servicios de Firebase que se utilizan para la autenticación, el almacenamiento
     de archivos, el envío de notificaciones, etc.
@@ -51,7 +51,7 @@ aplicación más rápida y con mejor rendimiento.
 
 Para llevar a cabo el diseño de la aplicación se van a utilizar una serie de herramientas y tecnologías de las cuales
 se ha justificado su elección en el apartado~\ref{sec:eleccion-de-herramientas-y-tecnologias}. Vamos a ver en detalle
-cómo se ha planteado el diseño para la página web, la API y la base de datos:
+cómo se ha planteado el diseño para la página web, la \textbf{API} y la base de datos:
 
 \begin{enumerate}
     \item \textbf{Diseño de la página web}:
@@ -59,13 +59,13 @@ cómo se ha planteado el diseño para la página web, la API y la base de datos:
         \item En base a los requisitos del sistema, se definen los componentes y servicios que se van a utilizar en la
         aplicación.
         \item Para establecer las rutas de la aplicación se utiliza el enrutador de Angular.
-        \item Para la comunicación con la API se utilizan los servicios creados y un servicio propio de Angular llamado
+        \item Para la comunicación con la \textbf{API} se utilizan los servicios creados y un servicio propio de Angular llamado
         \textbf{HttpClient} que permite realizar peticiones HTTP al servidor.
     \end{itemize}
     \item \textbf{Diseño de la API}:
     \begin{itemize}
-        \item En base a los requisitos del sistema, se definen los endpoints que se van a utilizar en la API.
-        \item Se definen los modelos de datos que se van a utilizar en la API.
+        \item En base a los requisitos del sistema, se definen los endpoints que se van a utilizar en la \textbf{API}.
+        \item Se definen los modelos de datos que se van a utilizar en la \textbf{API}.
         \item Se implementan los \textit{endpoints} que van a ser utilizados por la aplicación y que van
         a interactuar con la base de datos.
     \end{itemize}

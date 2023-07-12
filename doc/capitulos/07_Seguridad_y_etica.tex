@@ -16,7 +16,7 @@ a los que se ha diseñado y que se cumplan los términos y condiciones de uso es
 
 Como se ha mencionado, la \textbf{seguridad} de los datos en un proyecto de este tipo es crucial para que los usuarios no
 comprometan su información personal. Por ello, se han tomado una serie de medidas para garantizar la seguridad
-de los mismos tanto en la API como en la página web y en la base de datos.
+de los mismos tanto en la \textbf{API} como en la página web y en la base de datos.
 
 \subsection{API}\label{subsec:api}
 
@@ -44,11 +44,11 @@ y se han implementado las siguientes medidas:
     generar tokens de acceso y tokens de actualización. Los tokens de acceso se utilizan para acceder a los recursos
     protegidos y los tokens de actualización se utilizan para obtener nuevos tokens de acceso cuando estos han expirado.
     \item \textbf{Validaciones de datos}: se han utilizado las validaciones de datos de \textit{FastAPI} para asegurar que los datos
-    que se envían a la API son correctos. Para ello, se han utilizado los tipos de datos de \textit{Pydantic} que permiten
+    que se envían a la \textbf{API} son correctos. Para ello, se han utilizado los tipos de datos de \textit{Pydantic} que permiten
     definir los tipos de datos de cada campo y las validaciones que deben cumplir. Por ejemplo, se ha definido que
     los números de teléfono deben tener el prefijo de España (+34) seguido de 9 dígitos y que los correos electrónicos deben tener el formato
     correcto. Además, se han definido los campos que son obligatorios y los que son opcionales para cada \textit{endpoint}.
-    \item \textbf{Auditoría}: por medio de \textbf{Render} se ha podido monitorizar el uso de la API y comprobar que los usuarios
+    \item \textbf{Auditoría}: por medio de \textbf{Render} se ha podido monitorizar el uso de la \textbf{API} y comprobar que los usuarios
     no hacen un uso indebido de la misma. Se puede controlar el número de peticiones que se hacen a cada \textit{endpoint},
     la forma en la que se hacen las peticiones y el tiempo de respuesta de cada una de ellas. Además, se puede controlar
     el número de usuarios que se registran en la aplicación y el número de usuarios que se autentican en la misma.
@@ -61,14 +61,14 @@ y se han implementado las siguientes medidas:
     \item \textbf{Sistema seguro de contraseñas}: para evitar que las contraseñas de los usuarios sean vulnerables, se ha
     impuesto una serie de restricciones a la hora de crear una contraseña. Las contraseñas deben tener una longitud mínima
     de 8 caracteres y deben contener al menos una letra mayúscula, una letra minúscula, un número y un carácter especial
-    \item \textbf{Vulnerabilidad en endpoints}: para evitar que un ataque de fuerza bruta pueda vulnerar la seguridad de la API,
+    \item \textbf{Vulnerabilidad en endpoints}: para evitar que un ataque de fuerza bruta pueda vulnerar la seguridad de la \textbf{API},
     los códigos de respuesta de cada \textit{endpoint} no dan información valiosa sobre el error que se ha producido. Por ejemplo,
     si se quisiera restaurar la contraseña de un usuario y se envía un correo electrónico que no está registrado en la
     aplicación, el código de respuesta sería 200 (OK) en lugar de 404 (Not Found). De esta forma, se evita que un atacante
     pueda saber si un correo electrónico está registrado en la aplicación o no.
 \end{itemize}
 
-Toda esta serie de medidas de seguridad permiten que la API sea en la medida de lo posible segura y que los usuarios
+Toda esta serie de medidas de seguridad permiten que la \textbf{API} sea en la medida de lo posible segura y que los usuarios
 puedan hacer uso de ella sin tener que preocuparse por la seguridad de sus datos, lo cual garantiza la permanencia
 de los mismos en el tiempo.
 
@@ -76,11 +76,11 @@ de los mismos en el tiempo.
 
 Para la página web también se han tomado medidas de seguridad para garantizar la seguridad de los datos de las organizaciones.
 En este caso, se ha utilizado el protocolo \textit{HTTPS} (Hyper Text Transfer Protocol Secure) que es la versión segura
-del protocolo \textit{HTTP}. Este protocolo permite que los datos que se envían entre el servidor y el cliente estén encriptados
-y que no puedan ser leídos por terceros. Para ello, se ha utilizado un certificado \textit{TSL (Transport Layer Security)} que
+del protocolo \textbf{\textit{HTTP}}. Este protocolo permite que los datos que se envían entre el servidor y el cliente estén encriptados
+y que no puedan ser leídos por terceros. Para ello, se ha utilizado un certificado \textbf{\textit{TSL (Transport Layer Security)}} que
 es un protocolo que permite la comunicación segura entre dos entidades. Es un archivo digital que se utiliza para verificar
 la identidad de un sitio web o servidor y para encriptar la información que se envía entre el servidor y el cliente.
-Cuando un usuario accede a un sitio web que utiliza \textit{HTTPS} (protocolo seguro basado en TLS), el navegador web
+Cuando un usuario accede a un sitio web que utiliza \textbf{\textit{HTTPS}} (protocolo seguro basado en TLS), el navegador web
 autentica el servidor web y luego utiliza la clave pública del servidor para encriptar la información que se envía al
 servidor. El servidor web desencripta la información utilizando su clave privada y luego procesa la información. De esta
 forma, se garantiza que los datos que se envían entre el servidor y el cliente están encriptados y que no pueden ser
@@ -136,7 +136,7 @@ se convierta en una aplicación segura y fiable para todos los usuarios.
 Para abordar el tema de la ética en el desarrollo de la aplicación, se ha tenido en cuenta el código ético de la ACM (Association
 for Computing Machinery)~\cite{acm-code-of-ethics}. Este código ético se basa en 7 principios generales que se deben tener en cuenta
 a la hora de desarrollar un software. A continuación, se explica cómo se han aplicado estos principios en el desarrollo
-de la aplicación web y API:
+de la aplicación web y \textbf{API}:
 
 \begin{itemize}
     \item \textbf{Contribuir al bienestar y a la calidad de vida de los usuarios}: La aplicación se ha desarrollado con el
@@ -180,7 +180,7 @@ son tratados. \\
 
 Teniendo en cuenta esta ley y las diferentes medidas de seguridad que se han tomado en la aplicación, se puede afirmar
 que se ha gestionado la información de los usuarios y de las organizaciones de forma correcta y que se ha cumplido con
-la LOPD en todo momento durante el desarrollo de la aplicación web y API.
+la LOPD en todo momento durante el desarrollo de la aplicación web y \textbf{API}.
 
 \subsection{Términos y condiciones}\label{subsec:terminos-y-condiciones}
 

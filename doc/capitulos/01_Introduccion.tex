@@ -2,7 +2,7 @@
 
 Este proyecto está publicado bajo la licencia GNU General Public License v3~\cite{gplv3}.
 Se puede acceder a través de GitHub por medio de estos enlaces: \href{https://github.com/Marodseg/confianza-animal-backend}{API}
-y \href{https://github.com/Marodseg/confianza-animal-frontend}{Página web}.
+y \href{https://github.com/Marodseg/confianza-animal-frontend}{página web}.
 
 
 \section{Motivación y contexto}\label{sec:motivacion-y-contexto}
@@ -12,15 +12,15 @@ abandono animal. Sin embargo, en la actualidad, las asociaciones que se dedican 
 cuentan con múltiples dificultades para gestionar toda la información de los animales
 que acogen y buscan dar en adopción. El elevado número de mascotas abandonadas a diario, hace que
 las organizaciones no puedan ofrecer una atención personalizada a cada una de ellas. Además, la falta de medios
-de comunicación y de difusión hace que muchas de las mascotas que buscan un nuevo hogar no
+de comunicación y difusión hace que muchas de las mascotas que buscan un nuevo hogar no
 puedan ser adoptadas. A todo esto hay que sumarle la falta de voluntarios que puedan contribuir en esta labor y
 la falta de recursos económicos que les permitan tener las herramientas necesarias para facilitar y agilizar
 todas las gestiones que conlleva mantener a un animal hasta que encuentre un nuevo hogar. \\
 
 Estos motivos han llevado a la creación de este proyecto que, de alguna forma, pretende ayudar a este sector
 por medio de la tecnología. Consiste en la creación de una \textbf{API} (\textit{Application Web Interface}) así como de una aplicación web que por medio de
-los servicios proporcionados por la API, permita facilitar a las organizaciones y protectoras la gestión de los
-animales que acogen, con información detallada de cada uno de ellos, como su edad, raza, estado de salud, enter otros.
+los servicios proporcionados por la \textbf{API}, permita facilitar a las organizaciones y protectoras la gestión de los
+animales que acogen, con información detallada de cada uno de ellos, como su edad, raza, estado de salud, entre otros.
 Además, la aplicación web permitirá a las organizaciones difundir toda la información necesaria para que sus animales
 puedan ser vistos por personas interesadas en su adopción llevando a cabo un seguimiento del proceso. \\
 
@@ -66,15 +66,15 @@ progresiva. Estos objetivos se han establecido en función del tiempo de la asig
 conocimientos que se disponen y de las principales necesidades de las asociaciones y protectoras de animales: \\
 
 \begin{enumerate}
-    \item El principal objetivo es crear una API para la gestión de animales en adopción. Dentro de este gran objetivo,
+    \item El principal objetivo es crear una \textbf{API} para la gestión de animales en adopción. Dentro de este gran objetivo,
     se puede hacer una subdivisión en los siguientes puntos a cumplir:
     \begin{itemize}
-        \item Garantizar la seguridad de la información que circula entre la web, API y base de datos.
+        \item Garantizar la seguridad de la información que circula entre la web, \textbf{API} y base de datos.
         \item Permitir a las organizaciones una gestión de la información de forma clara y sencilla.
         \item Permitir a los usuarios la adopción de un animal así como conocer el progreso y estado de las solicitudes.
         \item Permitir establecer un flujo de comunicación entre las organizaciones y los usuarios durante el proceso de adopción.
     \end{itemize}
-    \item Crear una página web enfocada exclusivamente a las organizaciones que permita comprobar el correcto funcionamiento de la API.
+    \item Crear una página web enfocada exclusivamente a las organizaciones que permita comprobar el correcto funcionamiento de la \textbf{API}.
     El diseño debe permitir una navegación clara y sencilla así como una gestión de la información rápida y eficiente.
     \item Aprender nuevos paradigmas de desarrollo de software y nuevas tecnologías.
     \item Identificar posibles mejoras y ampliaciones para el proyecto en futuros trabajos.
@@ -84,12 +84,12 @@ conocimientos que se disponen y de las principales necesidades de las asociacion
 \section{Metodología y herramientas}\label{sec:metodologia-y-herramientas-de-seguimiento}
 
 Una vez definidos los objetivos del problema a resolver, en este apartado se explica la metodología y herramientas
-utilizadas durante desarrollo del proyecto.
+utilizadas durante el desarrollo del proyecto.
 
 \subsection{Metodología}\label{subsec:metodologia}
 
 Para conseguir los objetivos propuestos, se ha seguido una metodología ágil en la que se ha diferenciado de forma
-clara entre la creación de la API, la creación de la web y la propia documentación del proyecto. \\
+clara entre la creación de la \textbf{API}, la creación de la web y la propia documentación del proyecto. \\
 
 La elección de la metodología ágil se debe a que permite adaptarse de forma rápida a cualquier cambio que pueda
 surgir durante el desarrollo del proyecto y que además se basa en un trabajo incremental y continuo. Esto permite
@@ -130,7 +130,7 @@ cambios en el código así como la colaboración de diferentes personas que trab
 proyecto. Además, Git funciona de forma local y permite trabajar de forma offline, dando la posibilidad de
 trabajar en cualquier momento y a cualquier hora. \\
 
-Para alojar los proyectos, tanto de la API como de la web, se ha utilizado \textbf{GitHub}. Esta tecnología que
+Para alojar los proyectos, tanto de la \textbf{API} como de la web, se ha utilizado \textbf{GitHub}. Esta tecnología que
 a diferencia de Git necesita de una conexión a internet para poder trabajar, permite el seguimiento y revisiones del
 código, colaboración con otros usuarios y múltiples herramientas integradas que facilitan el desarrollo de software de
 las cuales se han utilizado las siguientes:
@@ -205,7 +205,7 @@ desarrollado en el proyecto y que han tratado reflejar las necesidades de los us
     que han de ser cumplidos para que la historia de usuario se considere completada.
 \end{itemize}
 
-Algunas de estas tareas y sus historias de usuarios se pueden ver en la siguiente imagen:
+Algunas de estas tareas y sus historias de usuario se pueden ver en la siguiente imagen:
 
 \begin{figure}[H]
     \centering
@@ -251,12 +251,12 @@ forma se pueden detectar errores y permite corregirlos antes de que se produzca 
 
 Para llevar a cabo la integración continua se ha utilizado \textit{GitHub Actions}, un servicio que ofrece
 GitHub para automatizar tareas en el repositorio. En este caso se ha utilizado para ejecutar diferentes pruebas
-de calidad y testing de código así como el despliegue de la aplicación y la API:
+de calidad y testing de código así como el despliegue de la aplicación y la \textbf{API}:
 
 
 \begin{itemize}
     \item \textbf{Estilo de código}: se ha utilizado \textit{Black} para comprobar el estilo de código de la
-    API y \textit{Lint y Prettier} para la web. Estos servicios se ejecutan cada vez que se realiza un
+    \textbf{API} y \textit{Lint y Prettier} para la web. Estos servicios se ejecutan cada vez que se realiza un
     \textit{push} en cada repositorio y no permiten que se mezcle un código que no completa las pruebas con éxito.
 
     \newpage
@@ -279,13 +279,13 @@ de calidad y testing de código así como el despliegue de la aplicación y la A
 
     \newpage
 
-    \item \textbf{Testing}: se ha utilizado \textit{Pytest} para realizar las pruebas de la API y \textit{Karma} y
+    \item \textbf{Testing}: se ha utilizado \textit{Pytest} para realizar las pruebas de la \textbf{API} y \textit{Karma} y
     \textit{Jasmine} para las pruebas de la web. Estos servicios se ejecutan cada vez que se realiza un
     \textit{push} en cada repositorio y no permiten que se mezcle el código con el resto si alguna de las pruebas falla.
     \item \textbf{Documentación}: para garantizar la calidad en la generación de este documento se ha utilizado un
     servicio que revisa la ortografía de cada cambio que se propone en el documento.
     \item \textbf{Despliegues}: se ha utilizado \textit{Render} para el despliegue de la API y \textit{Firebase Hosting} para
-    el despliegue de la web. Estos servicios se ejecutan cada vez que se realiza un \textit{push} o una \textit{pull request} en cada repositorio
+    el despliegue de la web. Estos servicios se ejecutan cada vez que se realiza un \textit{push} en cada repositorio
     sobre la rama principal y permiten el despliegue en un entorno de producción. En ambos repositorios se realiza
     una comprobación previa de que el código cumple con todas las pruebas mencionadas anteriormente para garantizar
     que los despliegues se realizan con éxito.
