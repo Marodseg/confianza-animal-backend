@@ -27,7 +27,7 @@ In order to format all the files, run `black .` or a specific file with `black "
 
 ## Environment
 
-In order to create the environment, run `conda env create -f environment.yml`.
+In order to create the environment, run `conda env create -f conda_environment.yml`.
 
 After that, activate the environment with `conda activate confianza_animal`.
 
