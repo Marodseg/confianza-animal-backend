@@ -122,7 +122,7 @@ origins = [
     "http://localhost:8080",
     "http://localhost:4200",
     "https://confianza-animal.web.app",
-    "https://ca-frontend.web.app"
+    "https://ca-frontend.web.app",
 ]
 
 app.add_middleware(
